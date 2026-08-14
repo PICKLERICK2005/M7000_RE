@@ -1,0 +1,2 @@
+#!/bin/sh
+M7000_BLOCKED_COMMAND=flash_erase exec /sandbox-stubs/reboot "$@"

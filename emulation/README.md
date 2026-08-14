@@ -1,0 +1,38 @@
+# M7000 userspace sandbox
+
+This harness runs binaries from the exact `3.0.2 Build 241129 Rel.3n` ARM root filesystem under QEMU Linux user mode. Its immediate target is the real OpenWrt boot-service path that reaches `/misc/m7000_debug.sh`; it does not emulate the M7000 board or touch a physical router.
+
+## Safety model
+
+The rootfs is disposable. Synthetic writable directories are bound at `/misc`, `/cache`, `/tmp`, and `/traces`; `/dev` is a minimal empty directory. Destructive utilities are shadowed in `PATH` and important absolute paths are overlaid with logging stubs. A stub records the request in `/traces/destructive.log` and exits 125. Do not weaken these bindings to make a vendor script “work.”
+
+This is containment for known firmware behavior, not a hardened boundary against a deliberately hostile binary. Run it inside a disposable Linux VM/WSL distribution without sensitive mounts.
+
+## Host setup
+
+The scripts require a Linux host with `qemu-arm`, `proot`, `unsquashfs`, and Node.js. On Windows, use WSL 2. From the repository in Linux:
+
+```sh
+sudo emulation/setup/install-debian.sh
+emulation/setup/prepare-rootfs.sh firmware/work/inner/3.0.2/update.bin
+emulation/scripts/run-arm.sh /bin/busybox uname -a
+emulation/scripts/run-hook-test.sh all
+```
+
+`prepare-rootfs.sh` calls the repository’s firmware extractor and then `unsquashfs`, preserving Linux symlinks and modes that a Windows extraction cannot represent. It verifies the expected exact-image and rootfs hashes before proceeding.
+
+The representative BusyBox and `rpmServer` executables are ELF32 ARM little-endian EABI5, dynamically linked through `/lib/ld-musl-armhf.so.1`; BusyBox needs `libgcc_s.so.1` and musl `libc.so`. The exact BusyBox SHA-256 is `2fa3aeb712caaad7a7317d5e2b655bfc394eb2230abf653006b7f94761b32f3d`. These are static-analysis facts; successful execution is still a required stage-one observation.
+
+## Real hook path
+
+Tests execute `/etc/rc.d/S99execute_debug_shell boot` inside the guest namespace. That symlink reaches the vendor `etc/init.d/execute_debug_shell`, whose shebang delegates to the vendor `/etc/rc.common`. This is the normal late-boot service path—not a direct call to the fixture.
+
+The fixtures cover absence, empty content, explicit success, diagnostic-only commands, failure, and missing execute permission. Per-case stdout/stderr and QEMU syscall traces are written beneath `emulation/traces/`; generated traces are ignored, while `expected.md` records the hypotheses to test.
+
+## Current host limitation
+
+The initial Windows host did not have WSL or QEMU user mode installed. The attempted non-distribution WSL enablement was rejected by the host, so actual ARM execution is pending a host-level WSL installation/reboot. The harness and fixtures remain reproducible and ready to resume; do not mistake the expected-results document for observed output.
+
+## Next boundary
+
+After hook characterization, try `rpmServer` only with a synthetic `/tmp`, no network exposure, the same destructive stubs, and progressively logged substitutes for missing mobile/WLAN IPC. Live read-only RPC probing remains queued after this sandbox reaches its useful limit.

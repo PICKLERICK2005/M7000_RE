@@ -1,0 +1,3 @@
+#!/bin/sh
+printf '%s command=%s argv=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown-time)" "${M7000_BLOCKED_COMMAND:-$(basename "$0")}" "$*" >>/traces/destructive.log
+exit 125

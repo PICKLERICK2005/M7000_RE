@@ -1,0 +1,2 @@
+#!/bin/sh
+M7000_BLOCKED_COMMAND=nandwrite exec /sandbox-stubs/reboot "$@"

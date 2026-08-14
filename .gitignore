@@ -38,3 +38,5 @@ AGENTS.md
 
 # Generated analysis
 analysis/work/
+emulation/work/
+emulation/traces/*/
