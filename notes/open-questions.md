@@ -2,7 +2,8 @@
 
 ## Open questions
 
-- What exact firmware build is currently installed?
+- What modem/baseband and ISP profile versions are currently installed?
+- What does the stock UI's `Debug Log` control retrieve or enable?
 - Does USB-C expose data interfaces, and if so which ones?
 - Which chipset/subsystem is under the second shield?
 - What do `CP_*` and `AP_*` test points map to electrically?
