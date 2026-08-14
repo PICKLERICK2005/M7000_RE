@@ -1,0 +1,38 @@
+{
+  "baseline": "M7000(EU) v3.2 / 3.0.2 Build 241129 Rel.3n",
+  "binary": {
+    "path": "usr/bin/rpmServer",
+    "sha256": "ab031c2237b5014fc8f3966b079e8e52ad21f82d579c34d3e99f48d5bed0eb10",
+    "ipc_socket": "/tmp/tp_rpm_server.sock"
+  },
+  "observed_static_modules": [
+    "lan", "log", "reboot", "restoreDefaults", "status", "storageShare",
+    "webServer", "wan", "message", "flowstat", "simLock", "time", "wlan",
+    "connectedDevices", "macFilters", "power_save", "voice", "wps", "update"
+  ],
+  "known_actions": {
+    "status:0": "composite status read",
+    "log:2": "stage ordinary downloadable log archive",
+    "log:4": "change mdLogState/start or stop collectors",
+    "log:5": "read mdLogState"
+  },
+  "status_native_evidence": {
+    "GetAllStatus_import": "0x13bdc",
+    "GetAllStatus_callsite": "0x177c4",
+    "provider": "usr/lib/libmobile.so",
+    "note": "Additional network, WLAN, battery and message data are assembled in rpmServer; field-to-call binding is incomplete."
+  },
+  "capability_keys": [
+    "disable5G", "disableWPS", "support11AC", "supportBackup", "supportCloudUpdate",
+    "supportDisplayPasswordSetting", "supportDownloadLimit", "supportDualIPVersion",
+    "supportFreeDuration", "supportGDPR", "supportISPUpdate", "supportnatforwarding",
+    "supportOLED", "supportSdcard", "supportUploadLimit", "supportUsageLimit",
+    "supportUSSD", "supportWISP"
+  ],
+  "negative_evidence": {
+    "not_in_static_module_table": [
+      "apBridge", "alg", "dmz", "portTriggering", "upnp", "virtualServer"
+    ],
+    "qualification": "String/table absence is strong evidence for this binary, not proof that no other process can implement a feature."
+  }
+}

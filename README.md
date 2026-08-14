@@ -30,9 +30,9 @@ The project scope currently covers:
 
 Initial hardware reconnaissance identified the Quectel EC200A-EL module, RF connections, test points, and pads labeled `CP_TXD`, `CP_RXD`, `AP_TXD`, `AP_RTS`, and `AP_CTS`.
 
-Stock administration-interface characterization and offline frontend/RPC analysis are complete. The recommended next milestone is acquisition and offline dissection of the exact official V3.20 firmware branch. USB enumeration remains pending. Active probing, soldering, shield removal, and firmware writes are intentionally deferred until the relevant interfaces and recovery options are understood.
+Stock administration-interface characterization, frontend/RPC analysis, and offline dissection of the exact running firmware are complete. The backend, persistent debug paths, modem boundary, and ISP update format are now mapped at a useful first-pass level. The recommended next milestone is narrowly scoped read-only RPC validation. USB enumeration remains pending. Active diagnostics, soldering, shield removal, and firmware writes are intentionally deferred until the relevant interfaces and recovery options are understood.
 
-Detailed findings are recorded in [Recon 001](docs/recon-001.md), [Soft Capture 001](captures/http/soft-capture-001/), and [Soft Capture 002](docs/soft-capture-002.md).
+Detailed findings are recorded in [Recon 001](docs/recon-001.md), [Soft Capture 001](captures/http/soft-capture-001/), [Soft Capture 002](docs/soft-capture-002.md), and [Firmware RE 002](docs/firmware-002.md).
 
 ## Repository contents
 
