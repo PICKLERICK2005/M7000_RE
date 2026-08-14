@@ -1,0 +1,23 @@
+{
+  "source_rpc": { "module": "status", "action": 0 },
+  "root_fields": ["result", "factoryDefault"],
+  "sections": {
+    "deviceInfo": ["model", "productRegion", "hardwareVer", "firmwareVer", "mac", "imei", "imsi", "simNumber"],
+    "battery": ["connected", "charging", "voltage"],
+    "wan": ["connectStatus", "ipv4", "dns1v4", "dns2v4", "ipv6", "dns1v6", "dns2v6", "networkType", "roaming", "signalStrength", "roamingEnabled", "totalStatistics", "dailyStatistics", "txSpeed", "rxSpeed", "enablePaymentDay", "dataLimit", "simStatus", "registerStatus", "band", "rsrp", "rsrq", "rssi", "snr"],
+    "wlan": ["enable", "channel", "ssid", "region", "expectRegion", "mode", "bandType", "wispConnectStatus", "connectedSSID", "connectedSecurity", "connectedSignal"],
+    "connectedDevices": ["number"],
+    "message": ["unreadMessages"],
+    "sdcard": ["status", "mode", "volume", "used"]
+  },
+  "retained_without_desktop_frontend_consumer": [
+    "wan.dns1v4",
+    "wan.dns2v4",
+    "wan.dns1v6",
+    "wan.dns2v6",
+    "wan.registerStatus",
+    "wlan.connectedSecurity",
+    "wlan.connectedSignal"
+  ],
+  "privacy": "Field names only; no device-specific values are stored in this artifact."
+}
