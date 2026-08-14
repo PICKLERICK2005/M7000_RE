@@ -31,4 +31,4 @@ Detailed evidence: [`analysis/debug-hook.md`](../analysis/debug-hook.md), [`anal
 
 ## Recommended next experiment
 
-The lowest-risk live step is a narrowly controlled **read-only RPC pass** limited to stock-equivalent status/capability queries. It can validate capability provenance and the composite status boundary without starting collectors or exposing USB/CP diagnostics. Debug Log, CATStudio, `/misc`, and USB diagnostics should remain untouched until their recovery and storage behavior is better bounded.
+The project has intentionally inserted a [userspace-emulation phase](emulation-001.md) before the lowest-risk live step. Once the sandbox reaches its useful limit, return to a narrowly controlled **read-only RPC pass** limited to stock-equivalent status/capability queries. Debug Log, CATStudio, live `/misc`, and USB diagnostics remain untouched.
