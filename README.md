@@ -1,6 +1,6 @@
 # M7000RE
 
-M7000RE is an open reverse-engineering project for the TP-Link M7000(EU) V3.20 mobile LTE router. It documents the device's hardware, firmware, diagnostic interfaces, and recovery paths through cautious, evidence-driven research.
+This is an open reverse-engineering project for the TP-Link M7000(EU) V3.20 mobile LTE router. It is an attempt at documenting the device's hardware, firmware, diagnostic interfaces, and recovery paths. Basically poking at it and seeing what happens, with the main goal of modifying vendor-locked settings like modem configs and such.
 
 ## Target hardware
 
@@ -17,7 +17,7 @@ M7000RE is an open reverse-engineering project for the TP-Link M7000(EU) V3.20 m
 
 ## Research scope
 
-The project currently covers:
+The project scope currently covers:
 
 - PCB layout and hardware identification
 - USB, UART, and boot/debug interfaces
@@ -25,8 +25,6 @@ The project currently covers:
 - Boundaries between the application processor and cellular modem
 - Recovery and unbrick procedures
 - Safe, reversible experiments with benign configuration fields
-
-Research may identify where cellular identity information is sourced or validated. This repository does not provide operational instructions for changing cellular identity identifiers.
 
 ## Progress
 
@@ -49,12 +47,6 @@ Detailed findings are recorded in [Recon 001](docs/recon-001.md). A sanitized te
 | `notes/` | Open questions and working notes |
 
 Raw device dumps, private photographs, credentials, session data, and unique device identifiers are excluded from version control.
-
-## Safety and responsible use
-
-Work on embedded hardware can permanently damage a device. Confirm voltage levels before connecting an active interface, preserve and hash original data, retain recovery copies, and prefer read-only observation before modification.
-
-Do not publish serial numbers, IMEI/IMSI/ICCID values, MAC addresses, default credentials, session tokens, or other unique identifiers. Use this material only on hardware you own or are authorized to examine, and comply with applicable laws and network rules.
 
 ## Project status
 
