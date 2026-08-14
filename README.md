@@ -30,7 +30,7 @@ The project scope currently covers:
 
 Initial hardware reconnaissance identified the Quectel EC200A-EL module, RF connections, test points, and pads labeled `CP_TXD`, `CP_RXD`, `AP_TXD`, `AP_RTS`, and `AP_CTS`.
 
-Stock administration-interface characterization, frontend/RPC analysis, and offline dissection of the exact running firmware are complete. Work now focuses on a disposable [ARM userspace sandbox](emulation/README.md) for the real `/misc/m7000_debug.sh` boot path. Read-only live RPC validation remains queued after the sandbox reaches its useful limits. USB enumeration remains pending. Active diagnostics, soldering, shield removal, and firmware writes are intentionally deferred until the relevant interfaces and recovery options are understood.
+Stock administration-interface characterization, frontend/RPC analysis, and offline dissection of the exact running firmware are complete. The disposable [ARM userspace sandbox](emulation/README.md) now executes and characterizes the real `/misc/m7000_debug.sh` boot path, and partial `rpmServer` emulation has reached its local Unix socket. Read-only live RPC validation remains queued until this sandbox reaches its useful limits. USB enumeration remains pending. Active diagnostics, soldering, shield removal, and firmware writes are intentionally deferred.
 
 Detailed findings are recorded in [Recon 001](docs/recon-001.md), [Soft Capture 001](captures/http/soft-capture-001/), [Soft Capture 002](docs/soft-capture-002.md), [Firmware RE 002](docs/firmware-002.md), and [Userspace Emulation 001](docs/emulation-001.md).
 

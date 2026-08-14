@@ -4,9 +4,9 @@ This harness runs binaries from the exact `3.0.2 Build 241129 Rel.3n` ARM root f
 
 ## Safety model
 
-The rootfs is disposable. Synthetic writable directories are bound at `/misc`, `/cache`, `/tmp`, and `/traces`; `/dev` is a minimal empty directory. Destructive utilities are shadowed in `PATH` and important absolute paths are overlaid with logging stubs. A stub records the request in `/traces/destructive.log` and exits 125. Do not weaken these bindings to make a vendor script “work.”
+The rootfs is disposable. Synthetic writable directories are bound at `/misc`, `/cache`, `/tmp`, and `/traces`; `/dev` contains only a host-backed null device. Stubs are copied into disposable WSL storage rather than exposed from the repository. Destructive utilities are shadowed in `PATH`, and existing absolute command entries are replaced with logging stubs in the disposable rootfs after its original hash is verified. A stub records the request in `/traces/destructive.log` and exits 125. Do not weaken these controls to make a vendor script “work.”
 
-This is containment for known firmware behavior, not a hardened boundary against a deliberately hostile binary. Run it inside a disposable Linux VM/WSL distribution without sensitive mounts.
+This is containment for known firmware behavior, not a hardened boundary against a deliberately hostile binary. PRoot exposes an internal `/host-rootfs` view required by its QEMU loader; masking it prevents ARM execution. Run only reviewed fixtures here. Unknown scripts require a disposable VM or a separate mount namespace with Windows drives and sensitive files absent.
 
 ## Host setup
 
@@ -21,18 +21,22 @@ emulation/scripts/run-hook-test.sh all
 
 `prepare-rootfs.sh` calls the repository’s firmware extractor and then `unsquashfs`, preserving Linux symlinks and modes that a Windows extraction cannot represent. It verifies the expected exact-image and rootfs hashes before proceeding.
 
-The representative BusyBox and `rpmServer` executables are ELF32 ARM little-endian EABI5, dynamically linked through `/lib/ld-musl-armhf.so.1`; BusyBox needs `libgcc_s.so.1` and musl `libc.so`. The exact BusyBox SHA-256 is `2fa3aeb712caaad7a7317d5e2b655bfc394eb2230abf653006b7f94761b32f3d`. These are static-analysis facts; successful execution is still a required stage-one observation.
+The representative BusyBox and `rpmServer` executables are ELF32 ARM little-endian EABI5, dynamically linked through `/lib/ld-musl-armhf.so.1`; BusyBox needs `libgcc_s.so.1` and musl `libc.so`. The exact BusyBox SHA-256 is `2fa3aeb712caaad7a7317d5e2b655bfc394eb2230abf653006b7f94761b32f3d`. Successful ARM execution and loader resolution are confirmed.
 
 ## Real hook path
 
 Tests execute `/etc/rc.d/S99execute_debug_shell boot` inside the guest namespace. That symlink reaches the vendor `etc/init.d/execute_debug_shell`, whose shebang delegates to the vendor `/etc/rc.common`. This is the normal late-boot service path—not a direct call to the fixture.
 
-The fixtures cover absence, empty content, explicit success, diagnostic-only commands, failure, and missing execute permission. Per-case stdout/stderr and QEMU syscall traces are written beneath `emulation/traces/`; generated traces are ignored, while `expected.md` records the hypotheses to test.
+The fixtures cover absence, empty content, explicit success, diagnostic-only commands, failure, synchronous blocking, and missing execute permission. Per-case stdout/stderr and QEMU syscall traces are written beneath `emulation/traces/`; generated traces are ignored, while `debug-hook-summary.md` records stable observations.
 
-## Current host limitation
+Set `M7000_SYSCALL_TRACE=0` for a quiet service smoke test. Hook tests intentionally leave tracing enabled.
 
-The initial Windows host did not have WSL or QEMU user mode installed. The attempted non-distribution WSL enablement was rejected by the host, so actual ARM execution is pending a host-level WSL installation/reboot. The harness and fixtures remain reproducible and ready to resume; do not mistake the expected-results document for observed output.
+Long-running services must use `scripts/run-service-smoke.sh`, which creates a separate process group and force-reaps it after the requested interval. This avoids leaving PRoot/QEMU descendants behind when a daemon ignores `SIGTERM`.
+
+## Current status
+
+WSL 2 and QEMU 10.2.1 now execute the exact firmware rootfs. The complete hook matrix is characterized, destructive-command interception is verified, and `rpmServer` reaches its real local datagram socket. See the tracked summaries under `emulation/traces/`; raw generated traces remain ignored.
 
 ## Next boundary
 
-After hook characterization, try `rpmServer` only with a synthetic `/tmp`, no network exposure, the same destructive stubs, and progressively logged substitutes for missing mobile/WLAN IPC. Live read-only RPC probing remains queued after this sandbox reaches its useful limit.
+Continue `rpmServer` work only with synthetic runtime paths, the same destructive stubs, and progressively logged substitutes for missing mobile/WLAN IPC. Live read-only RPC probing remains queued after this sandbox reaches its useful limit.

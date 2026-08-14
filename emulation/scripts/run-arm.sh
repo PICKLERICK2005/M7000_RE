@@ -12,23 +12,19 @@ for tool in proot qemu-arm; do command -v "$tool" >/dev/null || { echo "missing 
 test -x "$rootfs/bin/busybox" || { echo "prepare rootfs first: $rootfs" >&2; exit 2; }
 
 mkdir -p "$work/overlays/misc" "$work/overlays/cache" "$work/overlays/tmp" "$work/overlays/dev" "$trace_dir"
+touch "$work/overlays/dev/null"
+test -x "$work/stubs/reboot" || { echo "prepare rootfs/stubs first: $work" >&2; exit 2; }
 
-stub_binds=
-for name in reboot poweroff halt flash_erase ubiformat ubiupdatevol nandwrite mkfs mkfs.ext2 mkfs.ext3 mkfs.ext4 mkfs.ubifs mkfs.vfat jffs2reset firstboot mtd; do
-  stub="$repo/emulation/stubs/$name"
-  [ -f "$stub" ] || continue
-  for target in "/sbin/$name" "/usr/sbin/$name" "/bin/$name" "/usr/bin/$name"; do
-    [ -e "$rootfs$target" ] && stub_binds="$stub_binds -b $stub:$target"
-  done
-done
+trace_env=
+[ "${M7000_SYSCALL_TRACE:-1}" = "0" ] || trace_env=QEMU_STRACE=1
 
-# Word splitting is intentional for the generated, repository-controlled bind list.
+# Word splitting is intentional for the optional single environment entry.
 # shellcheck disable=SC2086
-exec env -i QEMU_STRACE="${QEMU_STRACE:-1}" \
+exec env -i $trace_env PROOT_NO_SECCOMP="${PROOT_NO_SECCOMP:-1}" \
+  HOME=/ USER=root LOGNAME=root SHELL=/bin/sh \
+  PATH=/sandbox-stubs:/usr/sbin:/usr/bin:/sbin:/bin TERM=dumb \
   proot -0 -q "$(command -v qemu-arm)" -r "$rootfs" -w / \
   -b "$work/overlays/misc:/misc" -b "$work/overlays/cache:/cache" \
-  -b "$work/overlays/tmp:/tmp" -b "$work/overlays/dev:/dev" \
-  -b "$trace_dir:/traces" -b "$repo/emulation/stubs:/sandbox-stubs" \
-  $stub_binds \
-  /usr/bin/env -i HOME=/ USER=root LOGNAME=root SHELL=/bin/sh \
-  PATH=/sandbox-stubs:/usr/sbin:/usr/bin:/sbin:/bin TERM=dumb "$@"
+  -b "$work/overlays/tmp:/tmp" -b "$work/overlays/dev:/dev" -b /dev/null:/dev/null \
+  -b "$trace_dir:/traces" -b "$work/stubs:/sandbox-stubs" \
+  "$@"

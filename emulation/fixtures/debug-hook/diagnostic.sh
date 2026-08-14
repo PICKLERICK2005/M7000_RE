@@ -13,4 +13,9 @@ set -u
   ps
   echo '=== directories ==='
   ls -la / /misc /cache /tmp /dev
-} > /traces/hook-context.txt 2>&1
+  echo '=== writable synthetic paths ==='
+  printf 'synthetic fixture\n' > /misc/hook-write-test
+  printf 'synthetic fixture\n' > /cache/hook-write-test
+  printf 'synthetic fixture\n' > /tmp/hook-write-test
+  ls -l /misc/hook-write-test /cache/hook-write-test /tmp/hook-write-test
+} > /traces/hook-context.txt
