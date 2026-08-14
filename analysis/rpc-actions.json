@@ -1,0 +1,43 @@
+{
+  "source": "TP-Link M7000 stock frontend, firmware 3.0.2 Build 241129 Rel.3n",
+  "transport": {
+    "authenticator_endpoint": "cgi-bin/auth_cgi",
+    "general_endpoint": "cgi-bin/web_cgi",
+    "method": "POST",
+    "session_cookie_name": "tpweb_token",
+    "gdpr_encryption_enabled": true
+  },
+  "modules": {
+    "authenticator": { "load": 0, "login": 1, "getAttempt": 2, "logout": 3, "update": 4 },
+    "webServer": { "getLang": 0, "setLang": 1, "keepAlive": 2, "unsetDefault": 3, "getModuleList": 4, "getFeatureList": 5, "getWithoutAuthInfo": 6 },
+    "status": { "getStatus": 0 },
+    "wan": { "getConfig": 0, "saveConfig": 1, "addProfile": 2, "deleteProfile": 3, "wzdAddProfile": 7, "setNetworkSelectionMode": 8, "quaryAvailabelNetwork": 9, "getNetworkSelectionStatus": 10, "getDisconnectReason": 11, "cancelSearch": 14, "updateISP": 15 },
+    "simLock": { "getConfig": 0, "enablePin": 1, "disablePin": 2, "updatePin": 3, "unlockPin": 4, "unlockPuk": 5, "autoUnlock": 6 },
+    "message": { "getConfig": 0, "setConfig": 1, "readMsg": 2, "sendMsg": 3, "saveMsg": 4, "delMsg": 5, "markRead": 6, "getSendStatus": 7 },
+    "wlan": { "getConfig": 0, "setConfig": 1, "setNoneWlan": 2 },
+    "wps": { "get": 0, "set": 1, "start": 2, "cancel": 3 },
+    "power_save": { "getConfig": 0, "setConfig": 1 },
+    "flowstat": { "getConfig": 0, "setConfig": 1 },
+    "connectedDevices": { "getConfig": 0 },
+    "macFilters": { "getBlack": 0, "setBlack": 1 },
+    "lan": { "getConf": 0, "setConf": 1 },
+    "update": { "getConfig": 0, "checkNew": 1, "serverUpdate": 2, "pauseLoad": 3, "reqLoadPercentage": 4, "checkUploadResult": 5, "startUpgrade": 6, "clearCache": 7, "ignoredFW": 8, "remindMe": 9, "upgradeNow": 10, "cancleLocalUpdate": 11 },
+    "storageShare": { "getConf": 0, "setConf": 1 },
+    "reboot": { "reboot": 0, "powerOff": 1 },
+    "restoreDefaults": { "restore": 0 },
+    "time": { "getConf": 0, "saveConf": 1, "queryTime": 2 },
+    "log": { "getLog": 0, "clearLog": 1, "saveLog": 2, "refresh": 3, "setMdLog": 4, "getMdLog": 5 },
+    "apBridge": { "getConfig": 0, "setConfig": 1, "connectAp": 2, "scanAp": 3, "checkConnStatus": 4 },
+    "voice": { "getConfig": 0, "sendUssd": 1, "cancelUssd": 2, "getSendStatus": 3 },
+    "upnp": { "getConfig": 0, "setConfig": 1, "getUpnpDevList": 2 },
+    "dmz": { "getConfig": 0, "setConfig": 1 },
+    "alg": { "getConfig": 0, "setConfig": 1 },
+    "virtualServer": { "getConfig": 0, "setConfig": 1, "delVS": 2 },
+    "portTriggering": { "getConfig": 0, "setConfig": 1, "delPT": 2 }
+  },
+  "notes": [
+    "Names and numbers are recovered from the shipped frontend and retain its original spelling.",
+    "Generic frontend presence does not prove that every action is implemented by this device backend.",
+    "No unobserved state-changing action was invoked during this analysis."
+  ]
+}

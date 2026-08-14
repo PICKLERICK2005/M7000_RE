@@ -28,5 +28,5 @@
     "AP_RTS",
     "AP_CTS"
   ],
-  "next_step": "Read-only stock admin UI and frontend network characterization"
+  "next_step": "Acquire and dissect exact official V3.20 firmware offline"
 }
