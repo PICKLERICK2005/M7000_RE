@@ -7,6 +7,7 @@
     "hardware_revision": "3.20",
     "usb_connector": "USB-C",
     "cellular_module": "Quectel EC200A-EL",
+    "reported_firmware": "3.0.2 Build 241129 Rel.3n",
     "battery_mAh": 2100,
     "advertised_downlink_Mbps": 150,
     "advertised_uplink_Mbps": 50,
@@ -27,5 +28,5 @@
     "AP_RTS",
     "AP_CTS"
   ],
-  "next_step": "Non-invasive USB enumeration on Windows"
+  "next_step": "Read-only stock admin UI and frontend network characterization"
 }

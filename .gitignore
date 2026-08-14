@@ -5,6 +5,7 @@ firmware/dumps/*
 
 # Potentially sensitive captures
 captures/http/raw/
+captures/http/**/raw/
 captures/uart/raw/
 
 # Secrets / identifiers

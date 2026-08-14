@@ -40,19 +40,11 @@ Do not attach a generic 3.3 V UART transmitter to unknown pads. Characterize gro
 
 ## Next experiment
 
-### USB enumeration
+### Stock admin interface characterization
 
-1. Reassemble the router.
-2. Open Device Manager and USBTreeView.
-3. Record the baseline with the router disconnected.
-4. Connect USB-C with the router powered off.
-5. Record every newly enumerated device/interface.
-6. Power the router on while still connected.
-7. Record any changes.
-8. Save VID/PID, interface class/subclass/protocol, product/manufacturer strings, COM ports, and driver names.
-9. Do not send modem commands yet.
+Before USB or hardware diagnostics, record the running software versions and map the stock administration interface using only normal UI navigation. Capture the frontend's own network activity without manually invoking undocumented endpoints or changing settings.
 
-Store the sanitized result in `captures/usb/`.
+Store sanitized notes and endpoint metadata in `captures/http/soft-capture-001/`. Raw HAR files and session material must remain in its ignored `raw/` directory.
 
 ## Photo handling
 
