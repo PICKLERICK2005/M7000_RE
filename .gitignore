@@ -30,5 +30,8 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Local agent context
+AGENTS.md
+
 # Generated analysis
 analysis/work/
