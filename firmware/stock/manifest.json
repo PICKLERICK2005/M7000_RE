@@ -1,0 +1,34 @@
+{
+  "acquired_utc_date": "2026-08-15",
+  "source_page": "https://www.tp-link.com/ae/support/download/m7000/v3.20/",
+  "policy": "Original archives, nested vendor archives, update.bin files, and extracted trees are preserved locally under ignored paths and are not committed.",
+  "artifacts": [
+    {
+      "release": "3.0.1 Build 240902",
+      "source_url": "https://static.tp-link.com/upload/firmware/2024/202410/20241009/M7000(EU)_3.2_3.0.1%20Build_240902.zip",
+      "outer": { "filename": "M7000(EU)_3.2_3.0.1 Build_240902.zip", "size": 21572911, "sha256": "186f62b18c231e45faf20c33c894c608c31424efccb9518d4d685adb0bdc1692" },
+      "nested_user_zip": { "size": 20838897, "sha256": "359ebb64abc317c71a41fafa67b504b49161b393ecbc0eb3097dc0055a1f54a9" },
+      "update_bin": { "size": 25616384, "sha256": "778cc437eb71e3bc8b5a8e243e6015a148c5b26792f6f86b1579d4eb41707aa3" }
+    },
+    {
+      "release": "3.0.2 Build 241129 Rel.3n",
+      "source_url": "https://static.tp-link.com/upload/firmware/2025/202502/20250207/M7000(EU)_3.2_3.0.2%20Build%20241129.zip",
+      "outer": { "filename": "M7000(EU)_3.2_3.0.2 Build 241129.zip", "size": 21574573, "sha256": "05780e2285467d6221162f9fa73f48b866bc963611fbd682126a11083e613d45" },
+      "nested_user_zip": { "filename": "M7000(EU)_3.2_3.0.2_Build_241129_Rel.3n_User.zip", "size": 20840083, "sha256": "a0169994c738cb03be3eff89194925a077e0b42a927dd0d8a13e80d0e2ff267d" },
+      "update_bin": { "size": 25616384, "sha256": "a1be63a6bc8d9a6ed730b294187310b405bd686a5bf59c7e7b4ed9e8a7db56d7" }
+    },
+    {
+      "release": "3.0.4 Build 250814 Rel.1021n",
+      "source_url": "https://static.tp-link.com/upload/firmware/2025/202511/20251119/M7000(EU)_3.2_3.0.4_Build_250814_Rel.1021n_User_2.zip",
+      "outer": { "filename": "M7000(EU)_3.2_3.0.4_Build_250814_Rel.1021n_User_2.zip", "size": 21727238, "sha256": "6ca4fb64bb2f029d5d975ed1402b3c33de7bd9c7abe54331988f07f4fab75f67" },
+      "nested_user_zip": { "size": 21253407, "sha256": "c69d71e492e3030db4da1e85335fdf843cd972b7b16f2b0d3fb8a9464eab68de" },
+      "update_bin": { "size": 26025984, "sha256": "531c5c2acb3f3b3fa7cab1182b38fb223a14c28ff7080c7f2c3388e36acf56b5" }
+    },
+    {
+      "release": "ISP_upgrade_asr(EU)",
+      "source_url": "https://static.tp-link.com/upload/software/2026/202607/20260706/isp_asr_old.zip",
+      "outer": { "filename": "isp_asr_old.zip", "size": 29321, "sha256": "399f869748bae1922580527dbc02ba86157d0bf248e6cd74d666f57664cf0cc8" },
+      "payload": { "filename": "NetIspInfo", "size": 37895, "sha256": "2ac3152a690ebbf71a1856536a3f8cf65392e7cda2de7cba07358af68c2847b8", "format": "Base64-armored OpenSSL salted ciphertext" }
+    }
+  ]
+}
