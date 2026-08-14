@@ -1,0 +1,34 @@
+# Private/raw device data
+photos/private/
+firmware/dumps/*
+!firmware/dumps/.gitkeep
+
+# Potentially sensitive captures
+captures/http/raw/
+captures/uart/raw/
+
+# Secrets / identifiers
+*.pcap
+*.pcapng
+*.har
+*.bin.private
+*.dump
+*.nv
+*.qcn
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated analysis
+analysis/work/

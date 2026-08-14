@@ -1,0 +1,31 @@
+{
+  "project": "M7000RE",
+  "target": {
+    "vendor": "TP-Link",
+    "model": "M7000",
+    "region": "EU",
+    "hardware_revision": "3.20",
+    "usb_connector": "USB-C",
+    "cellular_module": "Quectel EC200A-EL",
+    "battery_mAh": 2100,
+    "advertised_downlink_Mbps": 150,
+    "advertised_uplink_Mbps": 50,
+    "market_provenance": "UAE retail / TDRA-labeled packaging"
+  },
+  "privacy": {
+    "serial_number": "REDACTED",
+    "imei": "REDACTED",
+    "mac": "REDACTED",
+    "wifi_password": "REDACTED",
+    "iccid": "DO_NOT_COMMIT",
+    "imsi": "DO_NOT_COMMIT"
+  },
+  "observed_debug_labels": [
+    "CP_TXD",
+    "CP_RXD",
+    "AP_TXD",
+    "AP_RTS",
+    "AP_CTS"
+  ],
+  "next_step": "Non-invasive USB enumeration on Windows"
+}
