@@ -11,8 +11,8 @@ run_case() {
   name=$1
   misc="$work/overlays/misc"
   trace="$repo/emulation/traces/$name"
-  rm -rf "$misc" "$trace"
-  mkdir -p "$misc" "$trace"
+  rm -rf "$misc" "$work/overlays/cache" "$work/overlays/tmp" "$work/overlays/dev" "$trace"
+  mkdir -p "$misc" "$work/overlays/cache" "$work/overlays/tmp" "$work/overlays/dev" "$trace"
 
   case "$name" in
     absent) ;;

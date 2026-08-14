@@ -35,18 +35,14 @@ Facts established without emulation:
 
 The exact BusyBox is ARM32 little-endian EABI5, dynamically linked with musl hard-float through `/lib/ld-musl-armhf.so.1`. This supports `qemu-arm` user-mode execution once a Linux host layer is available.
 
-## Execution status
+## Execution results
 
-Actual ARM execution is pending. The current Windows host has neither QEMU user mode nor WSL; an attempted `wsl --install --no-distribution` did not enable it and Windows reports that WSL is not installed. Shell syntax, dependency failure behavior, exact hashes and rootfs preparation logic were validated locally. Files beneath `emulation/traces/` are explicitly labeled expectations rather than observations.
+WSL 2, QEMU user mode, and PRoot now execute the exact firmware userspace. Representative BusyBox commands resolve the stock musl loader and run as ARMv7. The real `S99execute_debug_shell boot` path passed the full fixture matrix, establishing permission behavior, exit propagation, synchronous blocking, controlled environment, and write access to synthetic persistent/runtime paths. See [`emulation/traces/debug-hook-summary.md`](../emulation/traces/debug-hook-summary.md).
+
+An `rpmServer` startup smoke test also bound the real `/tmp/tp_rpm_server.sock` datagram socket and remained running until the harness reaped it. Missing log devices and live UCI/mobile state are now bounded partial-emulation targets. See [`emulation/traces/rpmserver-summary.md`](../emulation/traces/rpmserver-summary.md).
 
 ## Resume criteria
 
-After WSL/Linux becomes available:
-
-1. prepare the exact rootfs and verify its hashes;
-2. execute BusyBox `true`, `id`, and `env` as representative smoke tests;
-3. run the complete hook matrix;
-4. inspect syscall traces for interpreter resolution, permissions, blocking and path access;
-5. only then attempt `rpmServer` startup with no external network and stubbed mobile/WLAN IPC.
+The next sandbox step is narrow `rpmServer` protocol work against its local datagram socket, beginning with malformed input and already known read-only actions, plus logging stubs for absent mobile/WLAN IPC. No live-device request is involved.
 
 Full-system emulation is not currently justified: userspace execution addresses the hook question directly, and no verified board-machine model or bootable kernel/DTB pairing has yet been demonstrated.
