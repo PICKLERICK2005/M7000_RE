@@ -1,0 +1,31 @@
+{
+  "container": "Marvell_FBF",
+  "header_offset": 0,
+  "payload_alignment": 8192,
+  "architecture": "ARM little-endian, hard-float musl userland",
+  "running_release": {
+    "update_bin_size": 25616384,
+    "update_bin_sha256": "a1be63a6bc8d9a6ed730b294187310b405bd686a5bf59c7e7b4ed9e8a7db56d7",
+    "rootfs": {
+      "offset": 8192,
+      "size": 10806548,
+      "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8",
+      "format": "SquashFS 4.0",
+      "compression": "XZ",
+      "block_size": 65536,
+      "inodes": 1383
+    },
+    "other_observed_regions": [
+      { "offset": 10823832, "signature": "device-tree blob" },
+      { "offset": 10842980, "signature": "gzip stream" },
+      { "offset": 14712872, "signature": "device-tree blob" },
+      { "offset": 15116251, "signature": "ELF" }
+    ]
+  },
+  "rootfs_comparison": {
+    "3.0.1": { "size": 10805836, "sha256": "4579e69045105845be8272604c68c33f6be9da781a349ee8c841bfadd620f6c8", "inodes": 1383 },
+    "3.0.2": { "size": 10806548, "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8", "inodes": 1383 },
+    "3.0.4": { "size": 11220382, "sha256": "c2ff6649d7eff4bbb90c25fdc4920960dccf5588b4b524106eee631ba9c07793", "inodes": 1439 }
+  },
+  "caution": "Additional FBF descriptor names and boundaries remain provisional and are not asserted here. Signature hits after the rootfs are observations, not complete partition identification."
+}

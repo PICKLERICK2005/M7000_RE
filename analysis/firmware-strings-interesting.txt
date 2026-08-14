@@ -1,0 +1,68 @@
+# Sanitized, selected strings/paths from M7000(EU) V3.20 3.0.2 Build 241129 Rel.3n
+# This is a curated index, not a complete strings dump.
+
+Debug/log pipeline
+/usr/bin/start_mdlog
+/usr/bin/stop_mdlog
+/cache/exported_log/logread.txt
+/cache/exported_log/dmesg.txt
+/cache/exported_log/logcat.txt
+/cache/exported_log/network.txt
+/cache/exported_log/usb.txt
+/cache/savelog.tar.gz
+tplink_log.tar.gz
+mdLogState
+/cache/enable_diag
+/usr/mrvl_tel_diag.cfg
+/usr/mrvl_tel_diag_external_flash.cfg
+/misc/m7000_debug.sh
+
+Diagnostic implementation
+/dev/diagdev
+/dev/ttydiag0
+/tmp/diagcmd
+/tmp/nmea2diag
+DIAG_HANDSHAKE_REQUEST
+DIAG_HANDSHAKE_CONFIRM
+diagGetKmsgLog
+diagLogcat
+
+Modem boundary
+/dev/ttyS1
+/dev/ttymodem0
+/tmp/atcmd
+/tmp/atcmdni1
+/tmp/atcmdsrv_ok
+libmarvellril.so
+libril.so
+RIL_request
+GetModemConnState
+GetModemRegStat
+GetModemSigLevel
+GetModemPrefNetType
+SetModemMode
+ql_ril_sync_request
+ql_ril_async_request
+
+Storage/recovery/update
+swap_flash
+/cache/external_flash
+/sdcard/modem_dump/
+/misc/m7000_debug.sh
+/data/is_restore
+restoreDefaults
+factoryDefault
+NetIspInfo.ini
+isp_update_cgi
+update_cgi
+
+Shipped frontend gates/models
+supportWISP
+disableWPS
+disable5G
+supportnatforwarding
+supportSdcard
+storageShare
+apBridge
+virtualServer
+portTriggering

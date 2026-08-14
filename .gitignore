@@ -2,6 +2,8 @@
 photos/private/
 firmware/dumps/*
 !firmware/dumps/.gitkeep
+firmware/stock/originals/
+firmware/work/
 
 # Potentially sensitive captures
 captures/http/raw/
