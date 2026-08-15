@@ -40,3 +40,4 @@ AGENTS.md
 analysis/work/
 emulation/work/
 emulation/traces/*/
+!emulation/traces/*-summary.md

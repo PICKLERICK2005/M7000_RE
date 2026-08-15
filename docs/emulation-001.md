@@ -41,8 +41,10 @@ WSL 2, QEMU user mode, and PRoot now execute the exact firmware userspace. Repre
 
 An `rpmServer` startup smoke test also bound the real `/tmp/tp_rpm_server.sock` datagram socket and remained running until the harness reaped it. Missing log devices and live UCI/mobile state are now bounded partial-emulation targets. See [`emulation/traces/rpmserver-summary.md`](../emulation/traces/rpmserver-summary.md).
 
+Allowlisted local probes subsequently confirmed that this socket carries one raw JSON request and response per Unix datagram. Malformed input produces a structured error; known read-only `status:0` returns the composite model with offline defaults, and `log:5` reports `mdLogState` `2`. The status call also exposes dependencies on mobile, flow-state, and WLAN Unix IPC. See [`emulation/traces/rpc-probe-summary.md`](../emulation/traces/rpc-probe-summary.md).
+
 ## Resume criteria
 
-The next sandbox step is narrow `rpmServer` protocol work against its local datagram socket, beginning with malformed input and already known read-only actions, plus logging stubs for absent mobile/WLAN IPC. No live-device request is involved.
+The next sandbox step is offline recovery of the observed flow-state and WLAN response layouts, followed by logging stubs that do not invent backend state. No live-device request is involved.
 
 Full-system emulation is not currently justified: userspace execution addresses the hook question directly, and no verified board-machine model or bootable kernel/DTB pairing has yet been demonstrated.
