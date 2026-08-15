@@ -10,9 +10,26 @@ case "$work" in ""|/) echo "unsafe emulation work path: $work" >&2; exit 2;; esa
 rm -rf "$work/overlays/cache" "$work/overlays/tmp" "$work/overlays/dev" "$trace"
 mkdir -p "$work/overlays/cache" "$work/overlays/tmp" "$work/overlays/dev" "$trace"
 
-M7000_TRACE_DIR="$trace" M7000_SYSCALL_TRACE=1 \
-  setsid "$repo/emulation/scripts/run-arm.sh" /usr/bin/rpmServer \
-  >"$trace/console.log" 2>"$trace/syscalls.log" &
+guest_stack=0
+if [ "${M7000_IPC_MODE:-none}" != "none" ]; then
+  case "$M7000_IPC_MODE" in
+    zero) guest_stack=1 ;;
+    *) echo "invalid M7000_IPC_MODE: $M7000_IPC_MODE" >&2; exit 2 ;;
+  esac
+  M7000_EMU_WORK="$work" "$repo/emulation/setup/build-ipc-stub.sh"
+  cp "$work/build/status-zero.so" "$work/rootfs/usr/lib/status-zero.so"
+fi
+
+if [ "$guest_stack" = 1 ]; then
+  guest_command='LD_PRELOAD=/usr/lib/status-zero.so exec /usr/bin/rpmServer'
+  M7000_TRACE_DIR="$trace" M7000_SYSCALL_TRACE=1 \
+    setsid "$repo/emulation/scripts/run-arm.sh" /bin/sh -c "$guest_command" \
+    >"$trace/console.log" 2>"$trace/syscalls.log" &
+else
+  M7000_TRACE_DIR="$trace" M7000_SYSCALL_TRACE=1 \
+    setsid "$repo/emulation/scripts/run-arm.sh" /usr/bin/rpmServer \
+    >"$trace/console.log" 2>"$trace/syscalls.log" &
+fi
 pid=$!
 
 cleanup() {
