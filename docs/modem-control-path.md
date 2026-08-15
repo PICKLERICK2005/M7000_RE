@@ -44,11 +44,14 @@ stock web UI
 The AP and CP meet through more than one logical channel: an ACIPC/shared-memory
 transport underneath Linux CP services, SMD/serial AT channels for command
 traffic, and dedicated diagnostic paths. The asynchronous mobile event frame
-is three little-endian 32-bit words (correlation ID, event class/type, payload
+is three little-endian 32-bit words (correlation ID, event ID, payload
 length), followed by the payload at byte 12. Deserialization checks both the
 12-byte minimum and declared length; the receive path uses a 20 KiB buffer.
-Exact event enumerations, payload layouts, and lower-layer RPC IDs remain to be
-recovered. See [`analysis/mobile-ipc.json`](../analysis/mobile-ipc.json).
+The symbol-backed event enumeration is grouped into profile, backhaul/network
+scan, network configuration, modem-read, voice/USSD, SIM/PIN, and SMS families.
+Some payload layouts and lower-layer RPC IDs remain to be recovered. See
+[`analysis/mobile-ipc.json`](../analysis/mobile-ipc.json) and
+[`analysis/mobile-events.json`](../analysis/mobile-events.json).
 
 AP UCI owns UI policy and profiles such as APN selection, while CP NVM owns or
 consumes radio, calibration, lock, and low-level modem state. SIM-derived and

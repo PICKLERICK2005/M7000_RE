@@ -19,7 +19,7 @@
     "header_bytes": 12,
     "words": [
       {"offset": 0, "meaning": "request/correlation ID", "confidence": "high"},
-      {"offset": 4, "meaning": "event class/type", "confidence": "medium"},
+      {"offset": 4, "meaning": "event ID", "confidence": "high"},
       {"offset": 8, "meaning": "payload length", "confidence": "high"}
     ],
     "payload_offset": 12,
@@ -47,7 +47,7 @@
   },
   "limits": [
     "Numeric configuration record IDs are internal data-model keys, not web RPC module/action IDs.",
-    "The event-class enumeration and payload structures have not yet been exhaustively mapped.",
+    "The symbol-backed event-ID map is recorded in mobile-events.json; some payload structures remain unresolved.",
     "Static presence of setters does not establish web reachability, authorization, persistence, or safety.",
     "No event datagrams were sent to either the sandbox or the physical device during this analysis."
   ]
