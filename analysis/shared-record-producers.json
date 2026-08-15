@@ -31,9 +31,11 @@
       "record_id": 75,
       "meaning": "preferred network type",
       "reader": "CMobileClient::GetPrefNetType",
-      "writers": ["mobile status path at 0x4a25c-0x4a31c writes a normalized modem response temporarily", "event 0x33 handler at 0x4b038-0x4b0a0 persists the requested scalar after immediate modem-manager acceptance", "configuration writer at 0x42508-0x42574 persists it", "startup repair at 0x42edc-0x42f40 defaults invalid values to 3"],
+      "writers": ["mobile status path at 0x4a254-0x4a31c writes a normalized modem readback temporarily (commit 0x4a2b0)", "configuration writer at 0x42504-0x42574 is the single permanent writer (commit 0x4256c)"],
+      "permanent_writer_callers": ["ProcUserEventComm at 0x3b070 (event 0x33 path; persists only after the modem-manager operation returns 0)", "manager_comm_at at 0x36f84 (persists the staged value after the AT transaction succeeds)", "process_comm at 0x3b4bc", "mobile_status GetNetModePref at 0x42f34 (3GPP2-card repair; forces policy 3)"],
       "classification": "persistent preference with runtime normalization/refresh",
-      "lower_boundary": "Set event 0x33; direct-modem get event 0x46; AT*BAND networkMode/preferredMode; CP CI_DEV_NW_GSM/UMTS/LTE",
+      "lower_boundary": "Set event 0x33 (4-byte payload, value <= 3, gated on records 19 and 84); direct-modem get event 0x46 (no request payload, 4-byte response); AT*BAND NwMode/PreferMode; CP CI_DEV_NW_GSM/UMTS/LTE",
+      "detail": "modem-control-paths.json",
       "confidence": "high"
     },
     {
