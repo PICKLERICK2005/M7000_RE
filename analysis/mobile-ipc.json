@@ -43,7 +43,30 @@
     "method": "CMobileClient::GetAllStatus",
     "output_size_bytes": 5364,
     "composition": ["GetDataSwitch", "GetRoamSwitch", "GetConnState", "GetRegStat", "GetPrefNetType", "GetNetSelMode", "GetSelIspName", "GetProfileList"],
-    "important_correction": "GetAllStatus is a local aggregate over eight libmobile getters, not one monolithic request to the modem daemon. Other web status fields are added by rpmServer and other subsystems."
+    "important_correction": "GetAllStatus is a local aggregate over eight libmobile getters, not one monolithic request to the modem daemon. Other web status fields are added by rpmServer and other subsystems.",
+    "getters": [
+      {"method":"GetDataSwitch","output_offset":0,"record_ids":[73],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetRoamSwitch","output_offset":4,"record_ids":[74],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetConnState","output_offset":8,"record_ids":[79],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetRegStat","output_offset":52,"record_ids":[81],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetPrefNetType","output_offset":12,"record_ids":[75],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetNetSelMode","output_offset":16,"record_ids":[76],"path":"shared-state read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {"method":"GetSelIspName","output_offset":20,"record_ids":[446],"path":"shared-state string read","mobile_event_required_by_getter":false,"confidence":"high"},
+      {
+        "method":"GetProfileList",
+        "output_offset":56,
+        "record_ids":[47,48,51,52,61,62,63,64],
+        "dynamic_record_ranges":["user profile records: stored index values plus 53","ISP profile records: sequential IDs starting at 65"],
+        "path":"GetUsrProf plus GetIspProf; shared-state/configuration reads",
+        "mobile_event_required_by_getter":false,
+        "confidence":"high"
+      }
+    ],
+    "producer_status": {
+      "confirmed": "All eight aggregate getters read local data-management records and do not construct a CMobileEvent in their getter paths.",
+      "supported_inference": "The mobile daemon is the likely runtime producer for CP-derived connection and registration records because it owns the event server and initializes mobile_status, but the exact writer callsites are not yet mapped.",
+      "unknown": "Per-record producer callbacks, refresh timing, persistence semantics, and the CP event or AT source for each runtime record."
+    }
   },
   "limits": [
     "Numeric configuration record IDs are internal data-model keys, not web RPC module/action IDs.",
