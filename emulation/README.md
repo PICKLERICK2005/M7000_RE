@@ -4,7 +4,7 @@ This harness runs binaries from the exact `3.0.2 Build 241129 Rel.3n` ARM root f
 
 ## Safety model
 
-The rootfs is disposable. Synthetic writable directories are bound at `/misc`, `/cache`, `/tmp`, and `/traces`; `/dev` contains only a host-backed null device. Stubs are copied into disposable WSL storage rather than exposed from the repository. Destructive utilities are shadowed in `PATH`, and existing absolute command entries are replaced with logging stubs in the disposable rootfs after its original hash is verified. A stub records the request in `/traces/destructive.log` and exits 125. Do not weaken these controls to make a vendor script “work.”
+The rootfs is disposable. Synthetic writable directories are bound at `/misc`, `/cache`, `/tmp`, and `/traces`; `/dev` contains only a host-backed null device. All generated rootfs, overlay, socket, build, and log artifacts stay beneath the ignored repo-local `emulation/work/` area or tracked `emulation/` paths. Destructive utilities are shadowed in `PATH`, and existing absolute command entries are replaced with logging stubs in the disposable rootfs after its original hash is verified. A stub records the request in `/traces/destructive.log` and exits 125. Do not weaken these controls to make a vendor script “work.”
 
 This is containment for known firmware behavior, not a hardened boundary against a deliberately hostile binary. PRoot exposes an internal `/host-rootfs` view required by its QEMU loader; masking it prevents ARM execution. Run only reviewed fixtures here. Unknown scripts require a disposable VM or a separate mount namespace with Windows drives and sensitive files absent.
 
@@ -53,6 +53,17 @@ The standalone query-only AT stub can be checked without starting firmware code:
 ```sh
 emulation/scripts/test-atcmd-stub.sh
 ```
+
+On Windows, run `python emulation/scripts/test-atcmd-stub.py --local` with a
+native Python build that supports `AF_UNIX`. WSL cannot place a Unix socket on
+the repository's Windows-mounted filesystem; the test intentionally does not
+fall back to `/tmp` or any location outside the repository.
+
+`emulation/setup/build-ipc-stub.sh` also builds `mobile-containment.so`. That
+libc-free ARM interposer blocks IP sockets, external commands, deletion, WAN
+notifications, and WLAN-control calls while allowing only the repo-backed Unix
+socket paths needed by the planned smoke test. It does not make PRoot a hardened
+sandbox, and its presence alone does not authorize launching `mobile`.
 
 The queued narrowly scoped live read-only RPC plan remains the next live-device
 phase; it has not been abandoned.

@@ -17,3 +17,7 @@ cc=arm-linux-gnueabihf-gcc
 "$cc" -Os -nostdlib -fno-builtin -fno-stack-protector -fPIC -shared \
   -Wall -Wextra -Werror "$repo/emulation/stubs/status-zero.c" \
   -o "$work/build/status-zero.so"
+
+"$cc" -Os -nostdlib -fno-builtin -fno-stack-protector -fPIC -shared \
+  -Wall -Wextra -Werror "$repo/emulation/stubs/mobile-containment.c" \
+  -o "$work/build/mobile-containment.so"
