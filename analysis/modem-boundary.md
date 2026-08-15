@@ -30,6 +30,16 @@ matching SIM/PIN getter family. These correlations establish the available API
 models, while the exact field-to-call sites in stripped `rpmServer` remain an
 explicit gap.
 
+Producer-side disassembly of the sectionless `mobile` executable closes part of
+the next gap. Records `79` (connection) and `81` (registration) have temporary
+runtime writers; the latter sits in the `mobile_status_at.cpp` state machine.
+Records `73`, `74`, `76`, and `446` are written through the permanent
+configuration API, while preferred-network record `75` has both permanent and
+temporary normalization paths. `GetNetSelStat` reads record `84` locally, and
+`GetCallFailReason` derives its scalar from seven shared records instead of
+issuing a fresh modem operation. Full addresses and confidence boundaries are
+recorded in [`shared-record-producers.json`](shared-record-producers.json).
+
 Factory-state ownership is distinct but related: `etc/init.d/check_device_code` reads factory-burned identity and region files from persistent `/misc`, validates their shape, and seeds UCI product configuration when defaults are present. It also records that the device-code set includes MAC, IMEI, region, and optional device metadata. No device-specific value is present here.
 
 The binaries contain both read and write-oriented factory/RIL symbols. This document intentionally records only architectural ownership and read paths; operational identity-writing commands or tooling are out of scope.
