@@ -4,29 +4,71 @@
   "firmware": "3.0.2 Build 241129 Rel.3n",
   "states": {
     "A_disconnected": [],
-    "B_connected_powered_off": [],
+    "B_connected_powered_off": [
+      {
+        "order": 1,
+        "vid": "2ECC",
+        "pid": "3001",
+        "revision": "0000",
+        "product": "NEZHAS",
+        "device_class": "FF",
+        "device_subclass": "FF",
+        "device_protocol": "FF",
+        "observed_duration_seconds": 1.7,
+        "windows_driver": null,
+        "classification": "vendor-specific transient; function unknown"
+      },
+      {
+        "order": 2,
+        "vid": "2ECC",
+        "pid": "4E11",
+        "revision": "0321",
+        "product": "Openwrt",
+        "device_class": "FF",
+        "device_subclass": "42",
+        "device_protocol": "03",
+        "observed_duration_seconds": 2.8,
+        "windows_driver": null,
+        "usb_serial": "REDACTED",
+        "classification": "vendor-specific transient; function unknown"
+      }
+    ],
     "C_connected_powered_on": [
       {
         "vid": "3625",
         "pid": "0006",
         "revision": "0318",
+        "manufacturer": "Quectel",
         "product": "M7000",
-        "device_class": "USB composite",
-        "interface": "MI_00",
-        "interface_class": "E0",
-        "interface_subclass": "01",
-        "interface_protocol": "03",
+        "usb_descriptor_version": "2.1",
+        "connection_speed": "High-Speed 480 Mbit/s",
+        "advertised_device_capability": "SuperSpeed",
+        "device_class": "EF/02/01 IAD composite",
+        "configuration_count": 1,
+        "interface_count": 2,
+        "interfaces": [
+          {
+            "number": 0,
+            "class": "E0/01/03",
+            "role": "RNDIS communications control",
+            "endpoints": ["0x82 interrupt IN, 8 bytes"]
+          },
+          {
+            "number": 1,
+            "class": "0A/00/00",
+            "role": "RNDIS Ethernet data",
+            "endpoints": ["0x81 bulk IN, 512 bytes", "0x01 bulk OUT, 512 bytes"]
+          }
+        ],
         "function": "RNDIS-compatible network interface",
         "windows_service": "usbrndis6",
         "driver_inf": "wceisvista.inf",
         "mtu": 1500,
         "reported_link_speed_mbps": 426,
         "addressing": "DHCP on 192.168.0.0/24",
-        "usb_serial": "REDACTED",
-        "endpoint_layout": "UNKNOWN",
-        "usb_bus_speed": "UNKNOWN"
+        "usb_serial": "REDACTED"
       }
     ]
   },
-  "notes": "State B produced transient USB sounds and LED activity but no persistent device. State C exposed only the observed RNDIS function."
+  "notes": "State B briefly exposes two sequential vendor-specific identities before charging. State C exposes the stable two-interface RNDIS function. No USB payloads were sent."
 }
