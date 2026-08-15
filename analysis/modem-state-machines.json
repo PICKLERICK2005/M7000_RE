@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "scope": "Offline state-machine recovery from the exact 3.0.2 mobile daemon and shipped frontend.",
+  "backhaul": {
+    "routine": {"name": "BackHaulFsm", "elf_va_range": "0x464bc-0x47004", "file_offset_range": "mobile+0x364bc-mobile+0x37004"},
+    "states": {"0":"disabled","1":"disconnected","2":"connecting","3":"disconnecting","4":"connected"},
+    "confirmed_transitions": [
+      {"from":0,"to":1,"trigger":"enable/backhaul request accepted"},
+      {"from":1,"to":2,"trigger":"connect or automatic reconnect begins"},
+      {"from":2,"to":4,"trigger":"connect completion success"},
+      {"from":2,"to":1,"trigger":"connect failure/no service; reconnect policy may retry"},
+      {"from":4,"to":3,"trigger":"disconnect request or policy/precondition loss"},
+      {"from":3,"to":1,"trigger":"disconnect completion success"},
+      {"from":3,"to":2,"trigger":"disconnect completion followed by reconnect/profile-change path"},
+      {"from":"1/2/3/4","to":0,"trigger":"disable path completes"}
+    ],
+    "preconditions_and_disconnect_causes": [
+      "RF/modem disabled",
+      "mobile-data switch off",
+      "network-selection search active",
+      "flow-statistics limit overflow",
+      "roaming while roaming policy disallows data",
+      "not registered/no service",
+      "profile change",
+      "+CGEV packet detach/deactivation"
+    ],
+    "timing": "Delayed-connect, status-check, and automatic-retry timer paths are present; exact delays vary by callsite and are not exhaustively normalized here.",
+    "record_commit": "The object field at +0x2b8 is copied to temporary record 79 by mobile+0x3a0d8-mobile+0x3a138.",
+    "confidence": "high for states and principal transitions; medium for exhaustive trigger list"
+  },
+  "registration": {
+    "routine": {"name":"UpdateRegStat normalization callback","elf_va_range":"0x49ab0-0x49f24","file_offset_range":"mobile+0x39ab0-mobile+0x39f24"},
+    "inputs": ["three retained raw registration-domain values", "extended service-state value"],
+    "outputs": ["record 80 roaming", "record 81 consolidated registration", "record 83 service substate"],
+    "refresh": {"primary":"+CREG/+CGREG/+CEREG unsolicited indications","secondary":"solicited query/startup/fallback"},
+    "notable_collapse": "record 81 value 2 represents either searching or secondary-domain registration; consumers cannot distinguish those cases from record 81 alone",
+    "confidence": "high"
+  },
+  "network_selection": {
+    "mode_record": 76,
+    "status_record": 84,
+    "status_values": "See analysis/modem-state-enums.json",
+    "confirmed_workflow_edges": [
+      {"from":"idle","to":"searching","trigger":"manual available-network query"},
+      {"from":"searching","to":"search finished","trigger":"scan response with usable completion"},
+      {"from":"searching","to":"generic search failure","trigger":"scan failure"},
+      {"from":"searching","to":"search failed because SMS was being sent","trigger":"modem busy/SMS conflict"},
+      {"from":"searching","to":"canceling","trigger":"cancel request"},
+      {"from":"canceling","to":"canceled","trigger":"cancel completion"},
+      {"from":"idle/search finished","to":"registering","trigger":"manual operator selection"},
+      {"from":"registering","to":"registered","trigger":"successful selection result"},
+      {"from":"registering","to":"generic registration failure","trigger":"generic failure"},
+      {"from":"registering","to":"registration denied by network","trigger":"normalized result 6 or 13"},
+      {"from":"policy update","to":"saving","trigger":"automatic-selection/config save begins"},
+      {"from":"saving","to":"saved","trigger":"save completes"},
+      {"from":"canceling/canceled","to":"idle","trigger":"cleanup/reset"}
+    ],
+    "overlay_behavior": "Record 76 has permanent automatic/manual policy writers and a temporary writer used by the workflow. Record 84 is the operation status. These are distinct dimensions.",
+    "event_correlation": "The callsites occur in the recovered network scan/config processing paths associated with the 0x20-0x25 and 0x30-0x35 event families, but a complete one-to-one event/status table remains incomplete.",
+    "confidence": "high for enum and observed edges; medium for exhaustive event correlation"
+  },
+  "derived_call_failure": {
+    "routine": "CMobileClient::GetCallFailReason, libmobile ELF VA 0xbc2c-0xbe10",
+    "dependencies": [81,79,74,80,30,39,44],
+    "logic": "gate on registration==1 and connection==1; roaming-policy reason has precedence; flow-limit tuple (30==1,39==2,44==0) yields reason 2; default 0",
+    "confidence": "high"
+  }
+}
