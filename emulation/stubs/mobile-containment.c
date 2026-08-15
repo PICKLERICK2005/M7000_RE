@@ -38,6 +38,19 @@ static int text_equal(const char *a, const char *b) {
     return *a == *b;
 }
 
+static int text_starts(const char *text, const char *prefix) {
+    while (*prefix && *text == *prefix) { ++text; ++prefix; }
+    return *prefix == 0;
+}
+
+static int text_contains(const char *text, const char *needle) {
+    while (*text) {
+        if (text_starts(text, needle)) return 1;
+        ++text;
+    }
+    return 0;
+}
+
 static int tmp_path(const char *path) {
     return path[0] == '/' && path[1] == 't' && path[2] == 'm' &&
            path[3] == 'p' && path[4] == '/';
@@ -70,6 +83,31 @@ int unlink(const char *path) {
 int remove(const char *path) {
     (void)path;
     record("remove-denied");
+    return -1;
+}
+
+int open(const char *path, int flags, ...) {
+    unsigned mode = 0;
+    if (flags & 0100) {
+        __builtin_va_list args;
+        __builtin_va_start(args, flags);
+        mode = __builtin_va_arg(args, unsigned);
+        __builtin_va_end(args);
+    }
+    if (!path ||
+        (text_starts(path, "/dev/") && !text_equal(path, "/dev/null")) ||
+        text_starts(path, "/sys/") || text_starts(path, "/host-rootfs/") ||
+        (text_starts(path, "/proc/") &&
+         (text_contains(path, "/root/") || text_contains(path, "/fd/")))) {
+        record("device-path-open-denied");
+        return -1;
+    }
+    return (int)arm_syscall3(5, (long)path, flags, mode);
+}
+
+long syscall(long number, ...) {
+    (void)number;
+    record("raw-syscall-denied");
     return -1;
 }
 
