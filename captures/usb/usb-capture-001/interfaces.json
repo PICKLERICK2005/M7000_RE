@@ -1,0 +1,32 @@
+{
+  "capture": "USB Capture 001",
+  "target": "TP-Link M7000(EU) V3.20",
+  "firmware": "3.0.2 Build 241129 Rel.3n",
+  "states": {
+    "A_disconnected": [],
+    "B_connected_powered_off": [],
+    "C_connected_powered_on": [
+      {
+        "vid": "3625",
+        "pid": "0006",
+        "revision": "0318",
+        "product": "M7000",
+        "device_class": "USB composite",
+        "interface": "MI_00",
+        "interface_class": "E0",
+        "interface_subclass": "01",
+        "interface_protocol": "03",
+        "function": "RNDIS-compatible network interface",
+        "windows_service": "usbrndis6",
+        "driver_inf": "wceisvista.inf",
+        "mtu": 1500,
+        "reported_link_speed_mbps": 426,
+        "addressing": "DHCP on 192.168.0.0/24",
+        "usb_serial": "REDACTED",
+        "endpoint_layout": "UNKNOWN",
+        "usb_bus_speed": "UNKNOWN"
+      }
+    ]
+  },
+  "notes": "State B produced transient USB sounds and LED activity but no persistent device. State C exposed only the observed RNDIS function."
+}
