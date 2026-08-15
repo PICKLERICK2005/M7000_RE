@@ -40,6 +40,15 @@ temporary normalization paths. `GetNetSelStat` reads record `84` locally, and
 issuing a fresh modem operation. Full addresses and confidence boundaries are
 recorded in [`shared-record-producers.json`](shared-record-producers.json).
 
+The refresh chain is now bounded more closely. `mobile` explicitly enables
+registration and packet-domain indications (`CGREG`, `CREG`, `CEREG`, `CGEREP`)
+plus band indications during modem initialization. Those unsolicited messages,
+and solicited query responses used for initialization/direct reads/fallbacks,
+are parsed before status normalization and shared-record updates. Connection
+state is driven by the backhaul FSM and packet-domain detach/deactivation events.
+The stock web request is therefore a snapshot consumer, not the cause of a new
+modem refresh. See [`modem-refresh-path.json`](modem-refresh-path.json).
+
 Factory-state ownership is distinct but related: `etc/init.d/check_device_code` reads factory-burned identity and region files from persistent `/misc`, validates their shape, and seeds UCI product configuration when defaults are present. It also records that the device-code set includes MAC, IMEI, region, and optional device metadata. No device-specific value is present here.
 
 The binaries contain both read and write-oriented factory/RIL symbols. This document intentionally records only architectural ownership and read paths; operational identity-writing commands or tooling are out of scope.

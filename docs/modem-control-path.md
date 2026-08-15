@@ -78,6 +78,26 @@ record: `GetCallFailReason` derives its result from seven records (`81`, `79`,
 `74`, `30`, `39`, `44`, and `80`). Thus neither getter inherently forces a new
 AT transaction when the web UI calls it.
 
+## Refresh path
+
+The runtime model is primarily event-driven rather than web-request-driven.
+During modem setup, `mobile` enables `CGREG`, `CREG`, `CEREG`, `CGEREP`, and
+`BANDIND` indications. The AT manager parses these unsolicited messages and
+solicited forms of the corresponding queries; `mobile_status_at.cpp` normalizes
+registration/network state before temporary shared-record writes. Packet-domain
+detach/deactivation indications feed the backhaul FSM, which updates connection
+state and sends WAN connect/disconnect notifications. Consequently, calling a
+web getter reads the latest shared snapshot and does not itself refresh the
+modem.
+
+Solicited query vocabulary is also present for signal, operator, activation,
+band, registration, location, RF mode, runtime IP, and system information. This
+supports initialization, explicit direct-modem reads, and fallback/reconciliation
+paths. Timer infrastructure and a backhaul-check timer are confirmed, but their
+exact polling intervals and worst-case web-visible propagation latency remain
+unresolved. See
+[`analysis/modem-refresh-path.json`](../analysis/modem-refresh-path.json).
+
 ## Synthetic startup observation
 
 A fail-closed QEMU userspace run of the exact 3.0.2 `mobile` daemon confirmed
