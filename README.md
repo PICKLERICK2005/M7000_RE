@@ -30,9 +30,9 @@ The project scope currently covers:
 
 Initial hardware reconnaissance identified the Quectel EC200A-EL module, RF connections, test points, and pads labeled `CP_TXD`, `CP_RXD`, `AP_TXD`, `AP_RTS`, and `AP_CTS`.
 
-Stock administration-interface characterization, frontend/RPC analysis, offline dissection of the exact running firmware, userspace hook emulation, narrowly scoped live getter validation, and passive USB enumeration are complete. Normal powered-on USB operation exposes one two-interface RNDIS function. Connecting USB while powered off briefly exposes two sequential vendor-specific identities before charging; their roles remain unclassified. No serial, modem, or storage interface appeared. Active diagnostics, soldering, shield removal, special USB modes, and firmware writes remain intentionally deferred.
+Stock administration-interface characterization, frontend/RPC analysis, offline dissection of the exact running firmware, userspace hook emulation, narrowly scoped live getter validation, and passive USB enumeration are complete. Normal powered-on USB operation exposes one two-interface RNDIS function. Connecting USB while powered off briefly exposes a likely ROM/primary-loader identity followed by a confirmed U-Boot USB gadget before charging. No serial, modem, or storage interface appeared. Active diagnostics, soldering, shield removal, special USB modes, and firmware writes remain intentionally deferred.
 
-Detailed findings are recorded in [Recon 001](docs/recon-001.md), [Soft Capture 001](captures/http/soft-capture-001/), [Soft Capture 002](docs/soft-capture-002.md), [Firmware RE 002](docs/firmware-002.md), [Userspace Emulation 001](docs/emulation-001.md), [Live RPC 001](docs/live-rpc-001.md), and [USB Capture 001](docs/usb-001.md).
+Detailed findings are recorded in [Recon 001](docs/recon-001.md), [Soft Capture 001](captures/http/soft-capture-001/), [Soft Capture 002](docs/soft-capture-002.md), [Firmware RE 002](docs/firmware-002.md), [Userspace Emulation 001](docs/emulation-001.md), [Live RPC 001](docs/live-rpc-001.md), [USB Capture 001](docs/usb-001.md), and [Early-Boot USB](docs/usb-early-boot.md).
 
 ## Repository contents
 

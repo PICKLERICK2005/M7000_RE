@@ -1,0 +1,17 @@
+{
+  "baseline": "M7000(EU) v3.2 / 3.0.2 Build 241129 Rel.3n",
+  "time_origin": "first USB arrival observed by 100 ms Windows PnP watcher",
+  "timeline": [
+    { "t_seconds": 0.0, "event": "arrival", "vid": "2ECC", "pid": "3001", "product": "NEZHAS", "owner": "pre-U-Boot ASR stage; exact owner unresolved" },
+    { "t_seconds": 1.74, "event": "removal", "vid": "2ECC", "pid": "3001" },
+    { "t_seconds": 3.21, "event": "arrival", "vid": "2ECC", "pid": "4E11", "product": "Openwrt", "owner": "U-Boot OSLO USB gadget" },
+    { "t_seconds": 5.99, "event": "removal", "vid": "2ECC", "pid": "4E11" },
+    { "t_seconds": null, "event": "post-boot arrival", "vid": "3625", "pid": "0006", "product": "M7000", "owner": "Linux userspace /sbin/usb_init" }
+  ],
+  "ownership_confidence": {
+    "2ECC:3001": "medium: precedes U-Boot identity and is absent from all preserved update packages; BootROM versus omitted first stage unresolved",
+    "2ECC:4E11": "high: exact constant and descriptor strings occur in U-Boot OSLO with USB gadget/fastboot code",
+    "3625:0006": "high: exact values and strings are written by normal Linux usb_init"
+  },
+  "safe_next_experiment": "Five cold-connect descriptor-only captures with precise timing; standard USB descriptors only, no class or vendor requests"
+}
