@@ -21,6 +21,18 @@
     "status:0": "result 0 with composite model and offline/default provider values",
     "log:5": "result 0 with mdLogState 2; enum meaning not yet classified"
   },
+  "live_read_only_results": {
+    "status:0": "result 0; composite response shape documented without values",
+    "log:5": "result 0; mdLogState getter implemented",
+    "wps:0": "result 0; enable/status model implemented despite frontend gate",
+    "storageShare:0": "result 0; sharing configuration model implemented despite frontend gate",
+    "apBridge:0": "result 1 with structured error",
+    "upnp:0": "result 1 with structured error",
+    "dmz:0": "result 1 with structured error",
+    "alg:0": "result 1 with structured error",
+    "virtualServer:0": "result 1 with structured error",
+    "portTrigger:0": "result 1 with structured error"
+  },
   "observed_downstream_ipc": {
     "mobile": "/tmp/mp_clnt_* per-process datagram paths",
     "flowstat": "/tmp/flowstate.sock; requests FM, FD, FT, FR; daemon replies are fixed 32-byte datagrams",
