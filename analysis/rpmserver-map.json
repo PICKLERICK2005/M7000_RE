@@ -3,7 +3,8 @@
   "binary": {
     "path": "usr/bin/rpmServer",
     "sha256": "ab031c2237b5014fc8f3966b079e8e52ad21f82d579c34d3e99f48d5bed0eb10",
-    "ipc_socket": "/tmp/tp_rpm_server.sock"
+    "ipc_socket": "/tmp/tp_rpm_server.sock",
+    "wire_format": "one raw UTF-8 JSON object per AF_UNIX SOCK_DGRAM request and response"
   },
   "observed_static_modules": [
     "lan", "log", "reboot", "restoreDefaults", "status", "storageShare",
@@ -15,6 +16,15 @@
     "log:2": "stage ordinary downloadable log archive",
     "log:4": "change mdLogState/start or stop collectors",
     "log:5": "read mdLogState"
+  },
+  "emulated_read_only_results": {
+    "status:0": "result 0 with composite model and offline/default provider values",
+    "log:5": "result 0 with mdLogState 2; enum meaning not yet classified"
+  },
+  "observed_downstream_ipc": {
+    "mobile": "/tmp/mp_clnt_* per-process datagram paths",
+    "flowstat": "/tmp/flowstate.sock; requests FM, FD, FT, FR; daemon replies are fixed 32-byte datagrams",
+    "wlan": "/tmp/wlan_local.sock to /tmp/ha_wm.sock"
   },
   "status_native_evidence": {
     "GetAllStatus_import": "0x13bdc",

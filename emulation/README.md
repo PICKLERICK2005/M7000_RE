@@ -33,6 +33,8 @@ Set `M7000_SYSCALL_TRACE=0` for a quiet service smoke test. Hook tests intention
 
 Long-running services must use `scripts/run-service-smoke.sh`, which creates a separate process group and force-reaps it after the requested interval. This avoids leaving PRoot/QEMU descendants behind when a daemon ignores `SIGTERM`.
 
+`scripts/run-rpc-probes.sh` starts `rpmServer` and sends only four compiled-in local test cases: invalid JSON, an empty object, known read-only `status:0`, and known read-only `log:5`. The client has no arbitrary module/action or raw-payload option.
+
 ## Current status
 
 WSL 2 and QEMU 10.2.1 now execute the exact firmware rootfs. The complete hook matrix is characterized, destructive-command interception is verified, and `rpmServer` reaches its real local datagram socket. See the tracked summaries under `emulation/traces/`; raw generated traces remain ignored.
