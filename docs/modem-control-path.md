@@ -27,6 +27,15 @@ stock web UI
   getters: data switch, roaming switch, connection state, registration state,
   preferred network type, network-selection mode, selected ISP name, and
   profile list. It is a local aggregate, not one monolithic modem RPC.
+- The scalar/string components read records `73` (data switch), `74` (roaming
+  switch), `79` (connection state), `81` (registration), `75` (preferred
+  network type), `76` (network-selection mode), and `446` (selected ISP name).
+  The profile list combines metadata records `47`, `48`, `51`, `52`, and
+  `61`-`64`, dynamically selected user records (`stored index + 53`), and
+  sequential ISP profile records beginning at `65`.
+- None of these eight getter implementations constructs a `CMobileEvent`; they
+  are local shared-state/configuration reads. The writer and refresh source for
+  each CP-derived runtime record remain unresolved.
 - The event client uses Unix datagrams, `/tmp/mp_svr_file`, and per-process
   `/tmp/mp_clnt_*` paths (including `_resp`). The daemon also names
   `/tmp/mobile_msg_server.sock`, `/tmp/wm_lte_wifi.sock`, and
