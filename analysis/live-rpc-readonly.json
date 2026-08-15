@@ -1,0 +1,54 @@
+{
+  "capture": "Live RPC read-only validation",
+  "date": "2026-08-16",
+  "target": {"hardware": "M7000(EU) v3.2", "firmware": "3.0.2 Build 241129 Rel.3n", "region": "EU"},
+  "safeguards": {
+    "transport": "Stock authenticated web frontend over the WLAN management path",
+    "allowlist_only": true,
+    "setters_issued": false,
+    "unknown_actions_issued": false,
+    "browser_side_sanitization": "Only keys, scalar types, array lengths, result codes, rounded timings, and change paths crossed the browser-debug boundary.",
+    "retained_sensitive_values": false
+  },
+  "observations": [
+    {
+      "rpc": "status:0", "samples": 3, "result_codes": [0, 0, 0],
+      "rounded_duration_ms": [150, 190, 210], "spacing_seconds": 2,
+      "changed_field_paths": [[], []],
+      "schema": {
+        "battery":{"charging":"boolean","connected":"boolean","voltage":"number"},
+        "connectedDevices":{"number":"number"},
+        "deviceInfo":{"firmwareVer":"string","hardwareVer":"string","imei":"string","imsi":"string","mac":"string","model":"string","productId":"string","productRegion":"string","simNumber":"string"},
+        "factoryDefault":"boolean",
+        "loginMode":{"invalidPassword":"boolean","version":"string"},
+        "message":{"unreadMessages":"number"},
+        "result":"number",
+        "wan":{"band":"number","connectStatus":"number","dailyStatistics":"string","dataLimit":"number","dns1v4":"string","dns1v6":"string","dns2v4":"string","dns2v6":"string","enableDataLimit":"boolean","enablePaymentDay":"boolean","ipv4":"string","ipv6":"string","limitation":"string","networkType":"number","operatorName":"string","registerStatus":"number","roaming":"number","roamingEnabled":"boolean","rsrp":"number","rsrq":"number","rssi":"number","rxSpeed":"string","signalStrength":"number","simStatus":"number","snr":"number","totalStatistics":"string","txSpeed":"string"},
+        "wlan":{"bandType":"number","channel":"number","enable":"number","mode":"number","region":"string","ssid":"string"}
+      },
+      "note": "No field changed between the three sanitized samples. This is a short observation window, not a refresh-rate bound."
+    },
+    {
+      "rpc": "wan:0", "result_code": 0, "rounded_duration_ms": 130,
+      "schema": {
+        "cardType":"number","connectStatus":"number","dataSwitchStatus":"number","ispVersion":"string","isp_need_local_update":"boolean","networkPreferredMode":"number","networkSelectionMode":"number",
+        "profileSettings":{"activeProfile":"number","defaultProfile":"number","list":{"type":"array","observed_length":1,"item_schema":{"ipv4Apn":"string","ipv4ApnType":"number","ipv4AuthType":"number","ipv4Password":"string","ipv4Username":"string","ipv6Apn":"string","ipv6ApnType":"number","ipv6AuthType":"number","ipv6Password":"string","ipv6Username":"string","pdpType":"number","profileID":"number","profileName":"string"}},"maxProfileNum":"number"},
+        "result":"number","roamingEnabled":"boolean","selectedIspName":"string"
+      }
+    },
+    {"rpc":"simLock:0","result_code":0,"rounded_duration_ms":110,"schema":{"autoUnlock":"boolean","cardState":"number","pinRemainingTimes":"number","pinState":"number","pukRemainingTimes":"number","result":"number"}},
+    {"rpc":"wan:10","result_code":0,"rounded_duration_ms":100,"schema":{"networkSelectionStatus":"number","result":"number"}},
+    {"rpc":"wan:11","result_code":0,"rounded_duration_ms":110,"schema":{"callFailReason":"number","result":"number"}}
+  ],
+  "static_correlation": {
+    "wan:0": "Its data-switch, roaming, connection, preferred-network, network-selection, selected-ISP, and profile fields align with the eight libmobile getters aggregated by GetAllStatus. rpmServer also supplies fields outside that aggregate; exact per-field binding in the stripped caller remains incomplete.",
+    "simLock:0": "libmobile exports GetSimStatus, GetPinStatus, and GetSimStatusForWebStatus. The live schema is consistent with these narrower SIM/PIN models, but exact rpmServer field-to-call bindings remain unproven.",
+    "wan:10": "libmobile exports GetNetSelStat and CMobileClient::GetNetSelStat.",
+    "wan:11": "libmobile exports GetCallFailReason and CMobileClient::GetCallFailReason."
+  },
+  "limits": [
+    "No scalar device, subscriber, network, credential, or profile value was retained.",
+    "Successful result codes establish implemented authenticated getters, not update frequency or the ultimate producer of every shared record.",
+    "No setter safety or reachability conclusion follows from these getter observations."
+  ]
+}

@@ -21,6 +21,15 @@ Observed evidence:
 
 The composite `status:0` model therefore uses `libmobile` as one high-level backend abstraction, but that library itself combines shared data-management records and an asynchronous command/event path. `rpmServer` adds system, WLAN, IP, battery, storage, client, and message data. It is not justified to claim every status field—or even every modem field—originates in `GetAllStatus`.
 
+The sanitized live getter pass adds three narrower confirmations. `wan:10`
+returns a `networkSelectionStatus` scalar and corresponds structurally to the
+exported `GetNetSelStat` API. `wan:11` returns `callFailReason` and corresponds
+to exported `GetCallFailReason`. `simLock:0` returns card state, PIN state,
+remaining PIN/PUK attempts, and the auto-unlock flag; `libmobile` exports the
+matching SIM/PIN getter family. These correlations establish the available API
+models, while the exact field-to-call sites in stripped `rpmServer` remain an
+explicit gap.
+
 Factory-state ownership is distinct but related: `etc/init.d/check_device_code` reads factory-burned identity and region files from persistent `/misc`, validates their shape, and seeds UCI product configuration when defaults are present. It also records that the device-code set includes MAC, IMEI, region, and optional device metadata. No device-specific value is present here.
 
 The binaries contain both read and write-oriented factory/RIL symbols. This document intentionally records only architectural ownership and read paths; operational identity-writing commands or tooling are out of scope.

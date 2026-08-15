@@ -1,6 +1,6 @@
 # Live RPC 001: Fixed Read-Only Getter Pass
 
-Date: 2026-08-15
+Dates: 2026-08-15 and narrowly scoped modem follow-up on 2026-08-16
 
 ## Scope and safeguards
 
@@ -27,6 +27,10 @@ Canonical target:
 | Getter | Live result | Classification |
 | --- | --- | --- |
 | `status:0` | `result:0` | Implemented composite status provider |
+| `wan:0` | `result:0`; connection/profile/network-selection schema retained without values | Implemented modem/network configuration getter |
+| `simLock:0` | `result:0`; card/PIN/PUK state schema retained without values | Implemented SIM-lock state getter |
+| `wan:10` | `result:0`; field `networkSelectionStatus` | Implemented network-selection progress/status getter |
+| `wan:11` | `result:0`; field `callFailReason` | Implemented connection-failure reason getter |
 | `log:5` | `result:0`; fields `mdLogState`, `result` | Implemented Debug Log state getter |
 | `wps:0` | `result:0`; fields `enable`, `status`, `result` | Backend getter present despite the UI feature gate |
 | `storageShare:0` | `result:0`; fields `ftproot`, `login`, `mode`, `password`, `rwPermission`, `username`, `result` | Backend getter present despite the UI feature gate; no values retained |
@@ -65,6 +69,21 @@ the browser. The live response confirms that device identity, SIM identity,
 radio/network state, traffic state, WLAN state, battery state, message count, and
 client count are delivered through one backend abstraction.
 
+In the follow-up, three `status:0` samples spaced two seconds apart returned
+`result:0` in approximately 150-210 ms. The browser-side sanitizer reported no
+changed field paths across those two intervals. This only describes a short,
+apparently steady observation window; it does not establish backend refresh
+frequency.
+
+The follow-up also validated the stock frontend's modem-adjacent getters. The
+`wan:0` model includes connection/data/roaming state, preferred and selected
+network modes, ISP metadata, and a profile list. Values inside the profile list,
+including APN and credential fields, were reduced to types before crossing the
+debug boundary. `wan:10` and `wan:11` align with exported `libmobile` APIs
+`GetNetSelStat` and `GetCallFailReason`. The SIM-lock model aligns with the
+exported SIM/PIN getter family, although exact field-to-call binding in stripped
+`rpmServer` remains unresolved.
+
 Unlike the generic frontend mapping documented earlier, this particular live
 response did not contain an `sdcard` section or WISP connected-network fields.
 That is an observation about this response, not proof that those fields can never
@@ -81,3 +100,6 @@ the modules are absent from the recovered backend table.
 No further live action is implied by these results. Any setter, especially WPS,
 storage-sharing, or `log:4`, requires a separate controlled experiment and was
 outside this pass.
+
+The machine-readable, value-free record of this pass is
+[`analysis/live-rpc-readonly.json`](../analysis/live-rpc-readonly.json).
