@@ -98,6 +98,12 @@ exact polling intervals and worst-case web-visible propagation latency remain
 unresolved. See
 [`analysis/modem-refresh-path.json`](../analysis/modem-refresh-path.json).
 
+The canonical per-record view—including writer offsets, triggers, upstream
+sources, transformations, persistence, consumers, confidence, and explicit
+unknowns—is maintained in
+[`runtime-record-provenance.md`](runtime-record-provenance.md) and
+[`analysis/runtime-record-provenance.json`](../analysis/runtime-record-provenance.json).
+
 ## Synthetic startup observation
 
 A fail-closed QEMU userspace run of the exact 3.0.2 `mobile` daemon confirmed

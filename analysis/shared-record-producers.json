@@ -39,8 +39,8 @@
       "record_id": 76,
       "meaning": "network-selection mode",
       "reader": "CMobileClient::GetNetSelMode",
-      "writers": ["mobile status/config path at 0x4a320-0x4a35c writes a normalized boolean-like value permanently", "network-selection update at 0x33850-0x338a8 writes it permanently together with records 446-448"],
-      "classification": "persistent network-selection policy",
+      "writers": ["mobile status/config path at 0x4a320-0x4a35c writes a normalized boolean-like value permanently", "network-selection update at 0x33850-0x338a8 writes it permanently together with records 446-448", "workflow path at 0x42578-0x425e0 writes it temporarily"],
+      "classification": "persistent network-selection policy with temporary workflow overlay",
       "confidence": "high"
     },
     {
@@ -98,5 +98,6 @@
     "supported_inference": "The registration writer belongs to the AT-facing mobile_status_at state machine. SetupModemIndication enables CGREG, CREG, CEREG, CGEREP, and BANDIND indications, so CP/modem indications are normalized in mobile before web getters read them.",
     "unknown": "Exact periodic fallback-query intervals, propagation latency, and exhaustive profile-record writer mapping. See modem-refresh-path.json."
   },
+  "canonical_tuple_map": "runtime-record-provenance.json",
   "safety": "Static analysis only. No mobile event, AT command, live RPC, or device operation was performed."
 }
