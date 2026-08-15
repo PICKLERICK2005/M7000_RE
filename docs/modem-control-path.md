@@ -36,6 +36,10 @@ stock web UI
 - `/etc/telinit` starts `cp_load`, `nvmproxy`, `atcmdsrv`, and `rild` in the
   normal CP-enabled path.
 - `libmarvellril.so` contains RIL request handlers and `/tmp/atcmd` vocabulary.
+- Static client tracing identifies `/tmp/atcmd` as a separate Unix stream: an
+  ASCII command terminated by one carriage return, followed by line-oriented
+  responses whose confirmed final tokens include `OK`, `ERROR`, `+CME ERROR`,
+  and `+CMS ERROR`. See [`analysis/atcmd-ipc.json`](../analysis/atcmd-ipc.json).
 - CP `ARBI` contains matching ACIPC, NVM-client, diagnostic, SIM, and cellular
   control subsystems.
 
