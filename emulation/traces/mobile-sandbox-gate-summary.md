@@ -29,15 +29,17 @@ its modem-facing local interfaces are intercepted.
 
 Before a controlled startup smoke test, provide fail-closed substitutes for:
 
-1. `/tmp/atcmd`, after its datagram/request framing is recovered;
+1. `/tmp/atcmd`, using the recovered stream framing and query-only stub;
 2. network-manager calls that can alter or announce WAN state;
 3. CP reset and NVM-switch paths;
 4. writable data-management/UCI state in the disposable overlay.
 
-The AT substitute should accept only an explicit initialization-query allowlist,
-return deterministic synthetic responses, reject all other commands, and log
-the rejection. It must never forward traffic to a serial, SMD, ACIPC, MTD, or
-host network interface.
+The implemented AT substitute accepts only an explicit, argument-free query
+allowlist, returns deterministic synthetic responses, rejects all other
+commands, and logs rejected input without its arguments. It never forwards
+traffic to a serial, SMD, ACIPC, MTD, or host network interface. Its standalone
+self-test covers both an allowed query and rejected `CFUN` mutation; this does
+not yet authorize starting `mobile`.
 
 ## Decision
 

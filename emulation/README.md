@@ -48,5 +48,11 @@ made a bounded `mobile` daemon experiment plausible. Do not start the real
 daemon until `/tmp/atcmd`, network-manager notification, CP-reset/NVM-switch,
 and writable data-management boundaries are fail-closed. See
 [`traces/mobile-sandbox-gate-summary.md`](traces/mobile-sandbox-gate-summary.md).
+The standalone query-only AT stub can be checked without starting firmware code:
+
+```sh
+emulation/scripts/test-atcmd-stub.sh
+```
+
 The queued narrowly scoped live read-only RPC plan remains the next live-device
 phase; it has not been abandoned.

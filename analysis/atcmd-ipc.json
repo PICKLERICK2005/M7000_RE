@@ -1,0 +1,35 @@
+{
+  "scope": "Static analysis of usr/bin/mobile and bin/atcmdsrv from firmware 3.0.2 Build 241129 Rel.3n; no modem command was sent.",
+  "endpoint": "/tmp/atcmd",
+  "transport": {
+    "family": "AF_UNIX",
+    "type": "SOCK_STREAM",
+    "client_behavior": "mobile creates a stream socket and connects to a 110-byte sockaddr_un containing /tmp/atcmd"
+  },
+  "request": {
+    "encoding": "ASCII AT command",
+    "terminator_hex": "0d",
+    "length_prefix": false,
+    "evidence": "The send helper copies the caller's command, appends a literal carriage return, computes strlen, and requires write() to return that full length."
+  },
+  "response": {
+    "transport_behavior": "raw stream reads into a caller-provided buffer with one byte reserved for NUL termination",
+    "line_model": "line-oriented AT response",
+    "confirmed_final_tokens": ["OK", "ERROR", "+CME ERROR", "+CMS ERROR"],
+    "note": "The parser maps numeric CME/CMS final results to internal return codes. Exact handling of every unsolicited line remains unresolved."
+  },
+  "server_evidence": {
+    "atcmdsrv": "The shipped server advertises an AT command server and contains Unix listen/accept paths plus /tmp/%s socket construction.",
+    "mobile_event_socket_distinction": "/tmp/mobile_msg_server.sock is a separate AF_UNIX/SOCK_DGRAM endpoint and must not be confused with the /tmp/atcmd stream."
+  },
+  "stub": {
+    "path": "emulation/stubs/atcmd-query-stub.py",
+    "policy": "Exact argument-free query allowlist; deterministic synthetic values; ERROR for everything else; no forwarding or device access.",
+    "privacy": "Rejected commands are recorded only as a truncated verb, length, and SHA-256 digest so PINs, APNs, numbers, or message content cannot enter traces."
+  },
+  "limits": [
+    "The atcmdsrv-side per-client socket name selection has not been fully reconstructed.",
+    "Unsolicited result-code routing and concurrency behavior remain partially mapped.",
+    "A safe AT stub alone is insufficient authorization to launch mobile; network-manager, CP-reset/NVM-switch, and writable state boundaries remain gated."
+  ]
+}
