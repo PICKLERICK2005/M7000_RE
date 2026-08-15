@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "scope": "Canonical provenance tuples for status-critical and derived-failure libdata_management records in M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n.",
+  "offset_convention": {
+    "display": "mobile+0xOFFSET",
+    "definition": "Byte offset from the beginning of usr/bin/mobile. For executable code in the first PT_LOAD, ELF virtual address equals file offset plus 0x10000.",
+    "example": "ELF VA 0x49ef8 is mobile+0x39ef8. Addresses identify the write-wrapper callsite unless labelled routine_range."
+  },
+  "write_api": {
+    "wrapper_elf_va": "0x3cd24",
+    "wrapper_file_offset": "0x2cd24",
+    "temporary_mode_argument": 0,
+    "permanent_mode_argument": "nonzero"
+  },
+  "records": [
+    {
+      "record": 30,
+      "meaning": "call-failure input; exact semantic unresolved",
+      "writers": [{"location":"unknown","trigger":"unknown"}],
+      "trigger": "unknown",
+      "upstream_source": "unknown",
+      "transformation": "unknown",
+      "persistence": "unknown",
+      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "confidence": "high as a consumer input; low for semantic provenance"
+    },
+    {
+      "record": 39,
+      "meaning": "call-failure input; exact semantic unresolved",
+      "writers": [{"location":"unknown","trigger":"unknown"}],
+      "trigger": "unknown",
+      "upstream_source": "unknown",
+      "transformation": "unknown",
+      "persistence": "unknown",
+      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "confidence": "high as a consumer input; low for semantic provenance"
+    },
+    {
+      "record": 44,
+      "meaning": "call-failure input; exact semantic unresolved",
+      "writers": [{"location":"unknown","trigger":"unknown"}],
+      "trigger": "unknown",
+      "upstream_source": "unknown",
+      "transformation": "unknown",
+      "persistence": "unknown",
+      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "confidence": "high as a consumer input; low for semantic provenance"
+    },
+    {
+      "record": 73,
+      "meaning": "mobile data switch",
+      "writers": [{"location":"mobile+0x3238c","elf_va":"0x4238c","routine_range":"mobile+0x32330-mobile+0x3238c","mode":"permanent"}],
+      "trigger": "configuration/setter-driven",
+      "upstream_source": "web/mobile event policy input; not a modem indication",
+      "transformation": "boolean-like policy value -> MP switch scalar",
+      "persistence": "persistent configuration",
+      "consumers": ["CMobileClient::GetDataSwitch", "CMobileClient::GetAllStatus", "wan:0", "status:0", "backhaul FSM"],
+      "confidence": "high"
+    },
+    {
+      "record": 74,
+      "meaning": "data-roaming switch",
+      "writers": [{"location":"mobile+0x3243c","elf_va":"0x4243c","routine_range":"mobile+0x323e0-mobile+0x3243c","mode":"permanent"}],
+      "trigger": "configuration/setter-driven",
+      "upstream_source": "web/mobile event policy input; not a modem indication",
+      "transformation": "boolean-like policy value -> MP switch scalar",
+      "persistence": "persistent configuration",
+      "consumers": ["CMobileClient::GetRoamSwitch", "CMobileClient::GetAllStatus", "CMobileClient::GetCallFailReason", "wan:0", "status:0", "backhaul FSM"],
+      "confidence": "high"
+    },
+    {
+      "record": 75,
+      "meaning": "preferred network type",
+      "writers": [
+        {"location":"mobile+0x3a2b0","elf_va":"0x4a2b0","routine_range":"mobile+0x3a25c-mobile+0x3a31c","mode":"temporary","role":"runtime normalization/reconciliation"},
+        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32508-mobile+0x32574","mode":"permanent","role":"configuration setter"}
+      ],
+      "trigger": "configuration-driven plus modem/status reconciliation",
+      "upstream_source": "stored AP preference and direct-modem preferred-network response path",
+      "transformation": "modem/preference enum -> bounded TP-Link preferred-network enum; exact case table not yet named",
+      "persistence": "persistent preference with temporary normalized overlay",
+      "consumers": ["CMobileClient::GetPrefNetType", "CMobileClient::GetAllStatus", "wan:0", "network-mode policy"],
+      "confidence": "high for paths and storage; medium for enum labels"
+    },
+    {
+      "record": 76,
+      "meaning": "network-selection mode (automatic/manual)",
+      "writers": [
+        {"location":"mobile+0x238a8","elf_va":"0x338a8","routine_range":"mobile+0x23850-mobile+0x2397c","mode":"permanent","role":"network-selection update with records 446-448"},
+        {"location":"mobile+0x3a35c","elf_va":"0x4a35c","routine_range":"mobile+0x3a320-mobile+0x3a388","mode":"permanent","role":"nonzero-to-one normalization"},
+        {"location":"mobile+0x325e0","elf_va":"0x425e0","routine_range":"mobile+0x32578-mobile+0x325e8","mode":"temporary","role":"workflow/state update"}
+      ],
+      "trigger": "configuration and network-selection workflow",
+      "upstream_source": "AP selection policy plus modem selection workflow",
+      "transformation": "input scalar normalized to 0/1 for automatic/manual selection",
+      "persistence": "persistent configuration with temporary workflow overlay",
+      "consumers": ["CMobileClient::GetNetSelMode", "CMobileClient::GetAllStatus", "wan:0", "network-selection workflow"],
+      "confidence": "high"
+    },
+    {
+      "record": 78,
+      "meaning": "mobile status scalar adjacent to connection state; exact semantic unresolved",
+      "writers": [{"location":"mobile+0x3a170","elf_va":"0x4a170","routine_range":"mobile+0x3a13c-mobile+0x3a19c","mode":"temporary"}],
+      "trigger": "event/status callback",
+      "upstream_source": "callback argument; lower source unresolved",
+      "transformation": "direct scalar copy",
+      "persistence": "runtime only",
+      "consumers": ["internal mobile status logic; public getter binding not confirmed"],
+      "confidence": "high for writer; low for meaning"
+    },
+    {
+      "record": 79,
+      "meaning": "connection state",
+      "writers": [{"location":"mobile+0x3a10c","elf_va":"0x4a10c","routine_range":"mobile+0x3a0d8-mobile+0x3a138","mode":"temporary","object_source_offset":"0x2b8"}],
+      "trigger": "event/FSM-driven",
+      "upstream_source": "backhaul FSM, connect/disconnect completion, and +CGEV detach/deactivation handling",
+      "transformation": "internal backhaul state -> TP-Link MP_ConnStat enum by direct stored-state copy",
+      "persistence": "runtime only",
+      "consumers": ["CMobileClient::GetConnState", "CMobileClient::GetAllStatus", "CMobileClient::GetCallFailReason", "wan:0", "status:0", "backhaul FSM"],
+      "confidence": "high"
+    },
+    {
+      "record": 80,
+      "meaning": "roaming state used in derived status",
+      "writers": [
+        {"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 81 and 83"},
+        {"location":"mobile+0x39fdc","elf_va":"0x49fdc","routine_range":"mobile+0x39f90-mobile+0x3a0b4","mode":"temporary","role":"dedicated roaming-state update"}
+      ],
+      "trigger": "registration indication/response and roaming-status callback",
+      "upstream_source": "+CGREG/+CREG/+CEREG registration information and AT status parsing",
+      "transformation": "raw/home-roaming condition -> boolean-like TP-Link roaming state",
+      "persistence": "runtime only",
+      "consumers": ["CMobileClient::GetRoamStat (combined with record 81)", "CMobileClient::GetCallFailReason", "status:0 wan.roaming", "backhaul roaming policy"],
+      "confidence": "high"
+    },
+    {
+      "record": 81,
+      "meaning": "registration state",
+      "writers": [{"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 83"}],
+      "trigger": "indication-driven with solicited-query and startup support",
+      "upstream_source": "+CGREG/+CREG/+CEREG unsolicited results and AT+CGREG?/AT+CREG?/AT+CEREG? responses",
+      "transformation": "CS/PS/LTE registration enums -> consolidated TP-Link MP_RegStat; branch table confirmed, complete raw-to-public enum labels not yet named",
+      "persistence": "runtime only",
+      "consumers": ["CMobileClient::GetRegStat", "CMobileClient::GetAllStatus", "CMobileClient::GetRoamStat", "CMobileClient::GetCallFailReason", "status:0 wan.registerStatus", "backhaul FSM"],
+      "confidence": "high for provenance; medium for complete enum-label mapping"
+    },
+    {
+      "record": 82,
+      "meaning": "current network type",
+      "writers": [{"location":"mobile+0x39828","elf_va":"0x49828","routine_range":"mobile+0x397d0-mobile+0x39850","mode":"temporary","object_source_offset":"0x190"}],
+      "trigger": "AT status indication/response update",
+      "upstream_source": "AT network/system information parsed by mobile_status_at.cpp",
+      "transformation": "raw radio family -> TP-Link network type; confirmed categories include NONE, GSM, WCDMA, and LTE",
+      "persistence": "runtime only",
+      "consumers": ["CMobileClient::GetNetType", "status:0 wan.networkType", "internal status logic"],
+      "confidence": "high"
+    },
+    {
+      "record": 83,
+      "meaning": "derived service/registration substate; exact public label unresolved",
+      "writers": [
+        {"location":"mobile+0x39a50","elf_va":"0x49a50","routine_range":"mobile+0x399f0-mobile+0x39a78","mode":"temporary","role":"dedicated derived-state update"},
+        {"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 81"}
+      ],
+      "trigger": "registration/status state-machine update",
+      "upstream_source": "AT-derived registration/network state",
+      "transformation": "internal state-machine cases -> scalar values 0/1/2/3; semantic labels unresolved",
+      "persistence": "runtime only",
+      "consumers": ["internal mobile status/backhaul logic; no confirmed direct web getter"],
+      "confidence": "high for writer and value range; low for public meaning"
+    },
+    {
+      "record": 84,
+      "meaning": "network-selection operation status",
+      "writers": [{"location":"mobile+0x32658","elf_va":"0x42658","routine_range":"mobile+0x325ec-mobile+0x32658","mode":"temporary","object_source_offset":"0x2bc"}],
+      "trigger": "network-selection operation/FSM-driven",
+      "upstream_source": "manual/automatic selection workflow and modem selection result",
+      "transformation": "workflow status scalar -> MP_SelStat enum by direct copy",
+      "persistence": "runtime only",
+      "consumers": ["CMobileClient::GetNetSelStat", "wan:10 networkSelectionStatus", "network-selection workflow"],
+      "confidence": "high"
+    },
+    {
+      "record": 446,
+      "meaning": "selected ISP name",
+      "writers": [{"location":"mobile+0x238a8","elf_va":"0x338a8","routine_range":"mobile+0x23850-mobile+0x2397c","mode":"permanent","role":"batched network-selection update with records 447, 448, and 76"}],
+      "trigger": "network-selection configuration/result",
+      "upstream_source": "selected operator/ISP metadata in AP selection workflow",
+      "transformation": "bounded ISP-name string copy",
+      "persistence": "persistent configuration",
+      "consumers": ["CMobileClient::GetSelIspName", "CMobileClient::GetAllStatus", "wan:0 selectedIspName"],
+      "confidence": "high"
+    }
+  ],
+  "profile_record_family": {
+    "records": [47, 48, 51, 52, 61, 62, 63, 64],
+    "dynamic_records": ["user-profile record = stored index + 53", "ISP-profile records begin at 65"],
+    "meaning": "profile-list counts, active/default indices, and profile references",
+    "writers": "profile add/edit/delete/current-profile and ISP reload/update paths; exact per-record writer callsites are not yet exhaustively assigned",
+    "trigger": "configuration/profile operation and ISP-profile load",
+    "upstream_source": "AP profile configuration and /misc/NetIspInfo.ini",
+    "transformation": "stored metadata/indices -> PROF_LIST plus expanded user/ISP profile objects",
+    "persistence": "persistent configuration",
+    "consumers": ["CMobileClient::GetProfileList", "CMobileClient::GetAllStatus", "wan:0 profileSettings", "backhaul dial profile selection"],
+    "confidence": "high for read model and storage class; incomplete writer attribution"
+  },
+  "known_limits": [
+    "Unknown fields are deliberately retained as unknown rather than inferred from numeric proximity.",
+    "Consumers list confirmed native/web paths and important internal uses; it is not a proof that no additional inlined consumer exists.",
+    "The map distinguishes AP persistent policy from CP-derived runtime state; it does not imply that any setter is safe to exercise live."
+  ]
+}
