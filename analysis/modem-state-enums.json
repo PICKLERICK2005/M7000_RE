@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "scope": "Offline enum recovery for M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n. Values are firmware-derived unless explicitly marked as comparison only.",
   "offset_convention": "mobile+0xOFFSET is a file offset; add 0x10000 for the first executable PT_LOAD ELF VA.",
   "registration_raw": {
@@ -38,13 +38,13 @@
   },
   "service_substate_record_83": {
     "values": [
-      {"value": 0, "meaning": "no selected service-domain special case"},
-      {"value": 1, "meaning": "secondary service state 11"},
-      {"value": 2, "meaning": "secondary service state 1 or 5, or primary-registered fallback"},
-      {"value": 3, "meaning": "secondary service state 3"}
+      {"value": 0, "meaning": "no service"},
+      {"value": 1, "meaning": "limited service", "internal_source":"secondary service state 11"},
+      {"value": 2, "meaning": "available", "internal_source":"secondary service state 1 or 5, or primary-registered fallback"},
+      {"value": 3, "meaning": "limited area", "internal_source":"secondary service state 3"}
     ],
-    "note": "The input service-state enum extends beyond raw registration 0-5 (a jump table covers 1-11). Exact public labels for values 1-3 remain unknown.",
-    "confidence": "high for branch mapping; low for semantic labels"
+    "note": "The input service-state enum extends beyond raw registration 0-5 (a jump table covers 1-11). The shared-state daemon binds record 83 to mobile_status.net_status.srv_stat, whose shipped configuration supplies the labels.",
+    "confidence": "high"
   },
   "connection_record_79": {
     "values": [
@@ -83,9 +83,15 @@
       {"modem_value": "0x3081", "record_value": 3},
       {"modem_value": "other", "record_value": 3}
     ],
-    "warning": "The configured RPC/UI enum and modem-response enum are different numeric spaces. The modem command/mask represented by raw 0, 1, 2, 3, and 0x3081 is not yet named.",
-    "evidence": "networkMode.html plus mobile+0x3a25c-mobile+0x3a31c",
-    "confidence": "high for both numeric tables; medium for configured label 3 wording"
+    "modem_facing_interpretation": [
+      {"configured_value":1,"modem_network_mode":2,"meaning":"UMTS/WCDMA only"},
+      {"configured_value":2,"modem_network_mode":3,"meaning":"LTE only"},
+      {"configured_value":3,"modem_network_mode":"0x3081","preferred_mode":3,"meaning":"multi-RAT with LTE preferred"}
+    ],
+    "hidden_response_value": {"modem_value":1,"record_value":0,"meaning":"GSM/2G only; accepted by the native model but not offered by this product UI"},
+    "warning": "The configured RPC/UI enum and modem-response enum are different numeric spaces. 0x3081 is confirmed as the multi-RAT response/mask value normalized to LTE-preferred policy, but its individual RAT-mask bits are not recovered.",
+    "evidence": "networkMode.html; libmobile SetPrefNetType/GetModemPrefNetType; mobile events 0x33/0x46; mobile AT*BAND command/query strings; CP AT*BAND handler and CI_DEV_NW_GSM/UMTS/LTE assertions",
+    "confidence": "high except individual 0x3081 bit allocation"
   },
   "network_selection_mode_record_76": {
     "values": [{"value": 0, "meaning": "automatic"}, {"value": 1, "meaning": "manual"}],

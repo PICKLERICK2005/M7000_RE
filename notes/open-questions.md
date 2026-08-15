@@ -14,4 +14,6 @@
 - Which persistent fields survive factory reset?
 - Where are benign factory/configuration fields stored?
 - Where does the application layer obtain modem identity data?
+- Which CP structure or `.nvm` record, if any, persists the `AT*BAND` preferred-RAT policy? AP `mobile_config.net_config.pref_net` is the only confirmed durable owner.
+- What are the individual RAT bits in the confirmed multi-RAT modem mask `0x3081`, and what exact ACIPC message sits beneath the CP AT handler?
 - What recovery path exists before attempting any writes?

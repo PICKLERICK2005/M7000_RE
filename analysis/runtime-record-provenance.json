@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "scope": "Canonical provenance tuples for status-critical and derived-failure libdata_management records in M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n.",
   "offset_convention": {
     "display": "mobile+0xOFFSET",
@@ -19,39 +19,41 @@
   "records": [
     {
       "record": 30,
-      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
-      "writers": [{"location":"unknown","trigger":"unknown"}],
-      "trigger": "unknown",
-      "upstream_source": "unknown",
-      "transformation": "unknown",
-      "persistence": "unknown",
+      "meaning": "flow/data-limit enable switch (flowstat.property.limit_enabled)",
+      "writers": [{"location":"libflowstat.so enableLimit at ELF VA 0x1938","mode":"permanent","record_id":30}],
+      "trigger": "flow-limit configuration",
+      "upstream_source": "AP flow-statistics policy/UI",
+      "transformation": "boolean-like input -> decimal string -> permanent shared record 30/UCI option",
+      "persistence": "persistent configuration",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
       "derived_role": "GetCallFailReason returns flow-limit reason 2 when record 30 == 1, record 39 == 2, and record 44 == 0, after registration/connection and roaming-policy precedence checks.",
-      "confidence": "high for derived role; low for standalone semantic provenance"
+      "confidence": "high"
     },
     {
       "record": 39,
-      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
-      "writers": [{"location":"unknown","trigger":"unknown"}],
-      "trigger": "unknown",
-      "upstream_source": "unknown",
-      "transformation": "unknown",
-      "persistence": "unknown",
+      "meaning": "flow-limit threshold state (flowstat.property.limit_reached)",
+      "writers": [{"location":"libflowstat.so reachLimit at ELF VA 0x1dd8","mode":"permanent","record_id":39}],
+      "trigger": "periodic flow accounting / limit evaluation by flowstat",
+      "upstream_source": "accumulated ccinet1 RX/TX byte counts, configured limit, warning percentage, monthly mode, and free-duration policy",
+      "transformation": "judgeLimit computes 0 below warning, 1 warning threshold reached, or 2 hard limit reached; reachLimit persists the result",
+      "enum_semantics": {"0":"below warning threshold","1":"warning threshold reached","2":"hard data limit reached"},
+      "persistence": "persistent flow-statistics state",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
       "derived_role": "Middle member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
-      "confidence": "high for derived role; low for standalone semantic provenance"
+      "confidence": "high"
     },
     {
       "record": 44,
-      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
-      "writers": [{"location":"unknown","trigger":"unknown"}],
-      "trigger": "unknown",
-      "upstream_source": "unknown",
-      "transformation": "unknown",
-      "persistence": "unknown",
+      "meaning": "one-boot permission to dial despite the flow limit (flowstat_current_boot_up.property.allow_dial_once)",
+      "writers": [{"location":"libflowstat.so allowDialOnce at ELF VA 0x1c14","mode":"temporary","record_id":44}],
+      "trigger": "explicit AP override for the current boot",
+      "upstream_source": "local flow-limit override workflow; no modem/CP input",
+      "transformation": "boolean-like input -> decimal string -> temporary shared record 44",
+      "enum_semantics": {"0":"no override","1":"permit one-boot dialing despite limit"},
+      "persistence": "runtime/current boot only",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
       "derived_role": "Final member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
-      "confidence": "high for derived role; low for standalone semantic provenance"
+      "confidence": "high"
     },
     {
       "record": 73,
@@ -80,15 +82,18 @@
       "meaning": "preferred network type",
       "writers": [
         {"location":"mobile+0x3a2b0","elf_va":"0x4a2b0","routine_range":"mobile+0x3a25c-mobile+0x3a31c","mode":"temporary","role":"runtime normalization/reconciliation"},
-        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32508-mobile+0x32574","mode":"permanent","role":"configuration setter"}
+        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32508-mobile+0x32574","mode":"permanent","role":"configuration writer"},
+        {"location":"mobile+0x3b070","elf_va":"0x4b070","routine_range":"mobile+0x3b038-mobile+0x3b0a0","mode":"permanent","role":"event 0x33 accepted-request writer"},
+        {"location":"mobile+0x32f34","elf_va":"0x42f34","routine_range":"mobile+0x32edc-mobile+0x32f40","mode":"permanent","role":"startup invalid-value fallback to 3"}
       ],
       "trigger": "configuration-driven plus modem/status reconciliation",
       "upstream_source": "stored AP preference and direct-modem preferred-network response path",
-      "transformation": "modem response 1/2/3 maps to record 0/1/2; modem response 0, 0x3081, or any other value maps to record 3. Modem-facing labels for the raw values remain unknown.",
+      "transformation": "SetPrefNetType sends the configured scalar unchanged in synchronous mobile event 0x33. The daemon passes it to its modem manager and persists it only after immediate acceptance. The modem response from event 0x46 maps 1/2/3 to record 0/1/2; response 0, 0x3081, or any other value maps to record 3.",
       "enum_semantics": {
         "configured_rpc": {"1":"3G only","2":"4G only","3":"4G preferred / LTE preferred"},
-        "modem_response_to_record": {"1":0,"2":1,"3":2,"0":3,"0x3081":3,"other":3},
-        "warning": "Configured/RPC and modem-response values are different numeric spaces; the modem-facing RAT masks remain unnamed."
+        "modem_response_to_record": {"1":"0 (GSM/2G-only hidden AP value)","2":"1 (UMTS/3G only)","3":"2 (LTE/4G only)","0":"3 (multi-RAT/preferred fallback)","0x3081":"3 (multi-RAT/LTE-preferred mask)","other":"3 (fallback)"},
+        "modem_facing_policy": {"configured_1":"network mode 2 / UMTS","configured_2":"network mode 3 / LTE","configured_3":"multi-RAT network mask 0x3081 with LTE preferred"},
+        "warning": "Configured/RPC and modem-response values are different numeric spaces. The modem-facing mapping is strongly supported by the AP AT*BAND vocabulary, response normalizer, and CP CI_DEV_NW_GSM/UMTS/LTE handler; 0x3081's individual bit allocation is not recovered."
       },
       "configured_vs_effective": "The persistent writer stores the requested UI/RPC policy. The AT-facing callback temporarily reconciles a modem response into the record's 0-3 normalized space; this does not prove a user configuration change.",
       "persistence": "persistent preference with temporary normalized overlay",
@@ -114,14 +119,15 @@
     },
     {
       "record": 78,
-      "meaning": "mobile status scalar adjacent to connection state; exact semantic unresolved",
+      "meaning": "signal level (mobile_status.net_status.sig_lvl)",
       "writers": [{"location":"mobile+0x3a170","elf_va":"0x4a170","routine_range":"mobile+0x3a13c-mobile+0x3a19c","mode":"temporary"}],
       "trigger": "event/status callback",
-      "upstream_source": "callback argument; lower source unresolved",
-      "transformation": "direct scalar copy",
+      "upstream_source": "AT signal-quality/status callback; raw RSSI-to-level threshold routine remains to be named",
+      "transformation": "normalized signal-level scalar copied directly to record 78",
+      "enum_semantics": {"0":"none or unknown","1":"poor","2":"moderate","3":"good","4":"great"},
       "persistence": "runtime only",
-      "consumers": ["internal mobile status logic; public getter binding not confirmed"],
-      "confidence": "high for writer; low for meaning"
+      "consumers": ["signal-strength getter/status model", "OLED/status presentation", "internal mobile status logic"],
+      "confidence": "high for identity, writer, and configured labels; medium for exact raw RSSI thresholds"
     },
     {
       "record": 79,
@@ -186,19 +192,19 @@
     },
     {
       "record": 83,
-      "meaning": "derived service/registration substate; exact public label unresolved",
+      "meaning": "service status (mobile_status.net_status.srv_stat)",
       "writers": [
         {"location":"mobile+0x39a50","elf_va":"0x49a50","routine_range":"mobile+0x399f0-mobile+0x39a78","mode":"temporary","role":"dedicated derived-state update"},
         {"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 81"}
       ],
       "trigger": "registration/status state-machine update",
       "upstream_source": "AT-derived registration/network state",
-      "transformation": "internal state-machine cases -> scalar values 0/1/2/3; semantic labels unresolved",
-      "enum_semantics": {"0":"no selected service-domain special case","1":"secondary service state 11","2":"secondary state 1/5 or primary-registered fallback","3":"secondary service state 3"},
-      "state_machine_role": "Retains service-domain detail that record 81 partly collapses; exact public labels remain unknown.",
+      "transformation": "internal service/registration states -> MP service-status values 0/1/2/3",
+      "enum_semantics": {"0":"no service","1":"limited service","2":"available","3":"limited area"},
+      "state_machine_role": "Retains service availability detail that record 81 partly collapses; mapping branches include secondary state 11 -> limited service, secondary 1/5 or primary-registered fallback -> available, and secondary state 3 -> limited area.",
       "persistence": "runtime only",
-      "consumers": ["internal mobile status/backhaul logic; no confirmed direct web getter"],
-      "confidence": "high for writer and value range; low for public meaning"
+      "consumers": ["internal mobile status/backhaul logic", "service-status presentation"],
+      "confidence": "high"
     },
     {
       "record": 84,
