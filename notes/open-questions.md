@@ -4,7 +4,7 @@
 
 - What modem/baseband and ISP profile versions are currently installed?
 - What does the stock UI's `Debug Log` control retrieve or enable?
-- What causes the brief USB activity while the powered-off router transitions to charging, given that no device remains enumerated?
+- What are the exact firmware paths and safe recovery significance of transient `2ECC:3001` (`NEZHAS`) and `2ECC:4E11` (`Openwrt`)?
 - Are normal-operation USB functions beyond the observed RNDIS interface disabled, unrouted, or absent?
 - Which chipset/subsystem is under the second shield?
 - What do `CP_*` and `AP_*` test points map to electrically?

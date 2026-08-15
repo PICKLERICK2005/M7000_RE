@@ -42,5 +42,9 @@
       "additional vendor-specific interface"
     ]
   },
-  "next_step": "Characterize the normal RNDIS path narrowly or begin passive UART electrical mapping"
+  "usb_powered_off_transition": [
+    "2ECC:3001 NEZHAS, FF/FF/FF, transient",
+    "2ECC:4E11 Openwrt, FF/42/03, transient"
+  ],
+  "next_step": "Research transient USB identities and firmware code paths offline before any driver or payload experiment"
 }

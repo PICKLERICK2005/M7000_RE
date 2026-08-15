@@ -7,11 +7,16 @@
 | Product descriptor | `M7000` |
 | VID:PID | `3625:0006` |
 | Device revision | `0318` |
+| Manufacturer string | `Quectel` |
+| USB descriptor / connection | USB 2.1 / High-Speed 480 Mbit/s |
+| Advertised capability | SuperSpeed; not negotiated in this capture |
+| Power descriptor | Bus-powered, 2 mA requested |
 | Parent class | USB composite device |
 | Parent driver | Microsoft `usbccgp`, `usb.inf` |
-| Observed child interfaces | One: `MI_00` |
+| Configurations / interfaces | One / two |
 | Child description | `RNDIS` |
-| Interface class/subclass/protocol | `E0/01/03` |
+| Interface 0 | RNDIS control `E0/01/03`; interrupt IN `0x82`, 8 bytes |
+| Interface 1 | CDC data `0A/00/00`; bulk IN `0x81` and OUT `0x01`, 512 bytes |
 | Windows device name | Remote NDIS based Internet Sharing Device |
 | Interface driver | Microsoft `usbrndis6`, `wceisvista.inf` |
 | Network media / MTU | 802.3 / 1500 |
@@ -22,9 +27,18 @@ The reported 426 Mbps value is the Windows RNDIS link rate, not a measured USB
 bus speed or throughput result.
 
 The device exposed a USB serial string. It is device-unique and is intentionally
-omitted. The Windows property pass did not expose configuration count, raw USB
-bus speed, or endpoint descriptors, and no descriptor utility was already
-installed. Those properties are recorded as unknown rather than inferred.
+omitted.
+
+## Powered-off connection transients
+
+| Order | VID:PID | Product | Class/subclass/protocol | Duration | Windows binding |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `2ECC:3001` | `NEZHAS` | `FF/FF/FF` | approximately 1.7 s | None |
+| 2 | `2ECC:4E11` | `Openwrt` | `FF/42/03` | approximately 2.8 s | None |
+
+Both disappeared automatically as the powered-off router settled into charging
+mode. The second exposed a serial-like string; it remains private. Full
+configuration and endpoint descriptors were not retained for either transient.
 
 ## Negative observations
 
@@ -36,6 +50,5 @@ No present interface was classified by Windows as:
 - firmware/download device
 - additional vendor-specific child
 
-This is evidence for normal stock powered-on operation only. It does not rule out
-interfaces that require another firmware state or special mode; no such mode was
-entered during this capture.
+This negative list applies to the stable powered-on configuration. Windows did
+not classify the State B transients as COM, modem, storage, or firmware devices.
