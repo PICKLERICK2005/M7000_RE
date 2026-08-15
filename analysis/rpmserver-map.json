@@ -22,7 +22,11 @@
     "log:5": "result 0 with mdLogState 2; enum meaning not yet classified"
   },
   "live_read_only_results": {
-    "status:0": "result 0; composite response shape documented without values",
+    "status:0": "three result-0 samples; composite response shape documented without values; no sanitized field-path changes over two 2-second intervals",
+    "wan:0": "result 0; connection, profile, preferred/selected-network and ISP model documented without values",
+    "wan:10": "result 0; networkSelectionStatus getter implemented",
+    "wan:11": "result 0; callFailReason getter implemented",
+    "simLock:0": "result 0; card/PIN/PUK state and attempt-count model implemented",
     "log:5": "result 0; mdLogState getter implemented",
     "wps:0": "result 0; enable/status model implemented despite frontend gate",
     "storageShare:0": "result 0; sharing configuration model implemented despite frontend gate",
@@ -53,6 +57,11 @@
     "GetAllStatus_callsite": "0x177c4",
     "provider": "usr/lib/libmobile.so",
     "note": "Additional network, WLAN, battery and message data are assembled in rpmServer; field-to-call binding is incomplete."
+  },
+  "narrow_mobile_getter_evidence": {
+    "wan:10": "libmobile exports GetNetSelStat and CMobileClient::GetNetSelStat",
+    "wan:11": "libmobile exports GetCallFailReason and CMobileClient::GetCallFailReason",
+    "simLock:0": "libmobile exports GetSimStatus, GetPinStatus, and GetSimStatusForWebStatus; exact stripped-rpmServer field binding remains incomplete"
   },
   "capability_keys": [
     "disable5G", "disableWPS", "support11AC", "supportBackup", "supportCloudUpdate",
