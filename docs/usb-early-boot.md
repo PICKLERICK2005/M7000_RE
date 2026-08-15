@@ -21,16 +21,44 @@ electrical power-on edge.
 | Relative time | USB state | Evidence |
 | --- | --- | --- |
 | `t=0` | `2ECC:3001`, revision `0000`, product `NEZHAS`, vendor class `FF/FF/FF` | Arrival captured by Windows PnP |
-| `t=+1.74 s` | `NEZHAS` disconnects | Removal timestamp |
-| `t=+3.21 s` | `2ECC:4E11`, revision `0321`, product `Openwrt`, vendor class `FF/42/03` | Arrival after an approximately 1.47 s gap |
-| `t=+5.99 s` | `Openwrt` disconnects | Present for approximately 2.79 s |
-| after `t=+5.99 s` | No USB device remains; router settles into charging mode | Windows inventory and operator LED observation |
+| `t=+1.81-2.33 s` | `NEZHAS` disconnects | Five-cycle mean lifetime: 2.001 s |
+| `t=+3.20-3.81 s` | `2ECC:4E11`, revision `0321`, product `Openwrt`, vendor class `FF/42/03` | Appears after a 1.356-1.702 s gap |
+| `t=+5.74-6.25 s` | `Openwrt` disconnects | Five-cycle mean lifetime: 2.624 s |
+| after final disconnect | No USB device remains; router settles into charging mode | Windows inventory and operator LED observation |
 | normal power-on from charging | Router visibly completes normal boot; later `3625:0006` appears | Repeated 150 s PnP capture |
 | stable operation | `Quectel` / `M7000`, USB 2.1 at High-Speed, two-interface RNDIS function | USBTreeView descriptor report |
 
 The stable device contains one configuration with RNDIS control interface
 `E0/01/03` and CDC data interface `0A/00/00`. Its endpoints are interrupt IN
 `0x82`, bulk IN `0x81`, and bulk OUT `0x01`.
+
+### Five-cycle repeatability capture
+
+Five cold connects reproduced the same ordered sequence without exception. The
+figures below are measured from Windows PnP arrival/removal timestamps; polling
+and host enumeration latency mean they should not be interpreted as electrical
+edge timing.
+
+| Cycle | `NEZHAS` present | Inter-stage gap | `Openwrt` present |
+| --- | ---: | ---: | ---: |
+| 1 | 1.825 s | 1.371 s | 2.542 s |
+| 2 | 2.326 s | 1.484 s | 2.341 s |
+| 3 | 2.203 s | 1.356 s | 2.674 s |
+| 4 | 1.835 s | 1.702 s | 2.710 s |
+| 5 | 1.815 s | 1.487 s | 2.855 s |
+| **Mean** | **2.001 s** | **1.480 s** | **2.624 s** |
+| **Range** | **1.815-2.326 s** | **1.356-1.702 s** | **2.341-2.855 s** |
+
+Standard descriptor reads captured both transient configurations:
+
+- `NEZHAS`: USB 2.0 High-Speed; device and sole interface `FF/FF/FF`; one
+  32-byte configuration; bulk IN `0x81` and bulk OUT `0x02`, 512-byte packets;
+  self-powered; 10 mA requested.
+- `Openwrt`: USB 2.0 High-Speed; device class `00/00/00`, sole interface
+  `FF/42/03`; one 32-byte configuration; bulk IN `0x81` and bulk OUT `0x02`,
+  512-byte packets; bus-powered; 256 mA requested.
+
+Serial-like descriptor values remain intentionally omitted.
 
 Repeating the transition from charging to normal power-on did not reproduce
 either `2ECC` identity. This is consistent with the device already residing in
@@ -177,8 +205,8 @@ mode was activated.
 
 Confirmed:
 
-- the powered-off USB connection produces two deterministic-looking sequential
-  vendor identities before charging
+- five powered-off cold connects produced the same two sequential vendor
+  identities before charging
 - U-Boot contains the exact `2ECC:4E11` value and matching `Openwrt` descriptor
 - Linux userspace configures the exact stable `3625:0006` RNDIS identity
 - the FBF includes U-Boot, Linux, rootfs, and CP/RF components but no identified
@@ -196,7 +224,6 @@ Working hypothesis:
 
 Unresolved:
 
-- full device/configuration/endpoint descriptors for both transient identities
 - whether `2ECC:3001` is ROM or flash-resident first stage
 - whether U-Boot's automatic gadget window accepts fastboot or only enumeration
 - the exact GPIO/flag conditions for persistent factory and recovery modes
@@ -204,13 +231,10 @@ Unresolved:
 
 ## Safest highest-value next experiment
 
-Perform five powered-off USB cold-connect captures with a read-only host utility
-that timestamps hub arrivals and immediately requests only standard USB device,
-configuration, string, and BOS descriptors. Record electrical/visual power-on
-with a synchronized video or logic-level trigger. Do not claim an interface,
-install a device-specific driver, or send class/vendor requests.
-
-This would establish timing variance and retain the missing interface/endpoint
-layout for `NEZHAS` and `Openwrt`. Descriptor differences could distinguish a
-minimal ROM downloader from the known U-Boot gadget without interacting with
-either protocol.
+The five-cycle descriptor-only experiment is complete. The remaining ambiguity
+is the first stage's exact owner. The safest next measurement is a passive USB
+bus capture synchronized to the VBUS edge and, separately, the power-button/LED
+edge. Request only standard descriptors and send no class/vendor payloads. This
+would replace host-PnP timing with bus-level timing and show whether the first
+identity is active immediately after VBUS, strengthening or weakening the
+BootROM hypothesis without interacting with its protocol.

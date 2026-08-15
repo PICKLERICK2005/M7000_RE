@@ -1,17 +1,27 @@
 {
   "baseline": "M7000(EU) v3.2 / 3.0.2 Build 241129 Rel.3n",
   "time_origin": "first USB arrival observed by 100 ms Windows PnP watcher",
-  "timeline": [
-    { "t_seconds": 0.0, "event": "arrival", "vid": "2ECC", "pid": "3001", "product": "NEZHAS", "owner": "pre-U-Boot ASR stage; exact owner unresolved" },
-    { "t_seconds": 1.74, "event": "removal", "vid": "2ECC", "pid": "3001" },
-    { "t_seconds": 3.21, "event": "arrival", "vid": "2ECC", "pid": "4E11", "product": "Openwrt", "owner": "U-Boot OSLO USB gadget" },
-    { "t_seconds": 5.99, "event": "removal", "vid": "2ECC", "pid": "4E11" },
-    { "t_seconds": null, "event": "post-boot arrival", "vid": "3625", "pid": "0006", "product": "M7000", "owner": "Linux userspace /sbin/usb_init" }
+  "cold_connect_cycles": [
+    { "cycle": 1, "nezhas_seconds": 1.8249331, "handoff_gap_seconds": 1.3711996, "openwrt_seconds": 2.5423721 },
+    { "cycle": 2, "nezhas_seconds": 2.3260650, "handoff_gap_seconds": 1.4837389, "openwrt_seconds": 2.3406108 },
+    { "cycle": 3, "nezhas_seconds": 2.2028830, "handoff_gap_seconds": 1.3556061, "openwrt_seconds": 2.6739956 },
+    { "cycle": 4, "nezhas_seconds": 1.8350664, "handoff_gap_seconds": 1.7021995, "openwrt_seconds": 2.7104172 },
+    { "cycle": 5, "nezhas_seconds": 1.8149001, "handoff_gap_seconds": 1.4865607, "openwrt_seconds": 2.8547379 }
+  ],
+  "timing_summary_seconds": {
+    "nezhas": { "mean": 2.00076952, "min": 1.8149001, "max": 2.3260650 },
+    "handoff_gap": { "mean": 1.47986096, "min": 1.3556061, "max": 1.7021995 },
+    "openwrt": { "mean": 2.62442672, "min": 2.3406108, "max": 2.8547379 }
+  },
+  "personalities": [
+    { "vid": "2ECC", "pid": "3001", "product": "NEZHAS", "owner": "pre-U-Boot ASR stage; exact owner unresolved", "interface": "FF/FF/FF", "endpoints": ["0x81 bulk IN, 512 bytes", "0x02 bulk OUT, 512 bytes"] },
+    { "vid": "2ECC", "pid": "4E11", "product": "Openwrt", "owner": "U-Boot OSLO USB gadget", "interface": "FF/42/03", "endpoints": ["0x81 bulk IN, 512 bytes", "0x02 bulk OUT, 512 bytes"] },
+    { "vid": "3625", "pid": "0006", "product": "M7000", "owner": "Linux userspace /sbin/usb_init" }
   ],
   "ownership_confidence": {
     "2ECC:3001": "medium: precedes U-Boot identity and is absent from all preserved update packages; BootROM versus omitted first stage unresolved",
     "2ECC:4E11": "high: exact constant and descriptor strings occur in U-Boot OSLO with USB gadget/fastboot code",
     "3625:0006": "high: exact values and strings are written by normal Linux usb_init"
   },
-  "safe_next_experiment": "Five cold-connect descriptor-only captures with precise timing; standard USB descriptors only, no class or vendor requests"
+  "safe_next_experiment": "Passive bus-level capture synchronized to VBUS and power/LED edges; standard descriptors only, no class or vendor payloads"
 }
