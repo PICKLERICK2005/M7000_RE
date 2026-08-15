@@ -43,8 +43,10 @@ An `rpmServer` startup smoke test also bound the real `/tmp/tp_rpm_server.sock` 
 
 Allowlisted local probes subsequently confirmed that this socket carries one raw JSON request and response per Unix datagram. Malformed input produces a structured error; known read-only `status:0` returns the composite model with offline defaults, and `log:5` reports `mdLogState` `2`. The status call also exposes dependencies on mobile, flow-state, and WLAN Unix IPC. See [`emulation/traces/rpc-probe-summary.md`](../emulation/traces/rpc-probe-summary.md).
 
+Offline disassembly recovered the flow and WLAN reply layouts needed by `status:0`. A minimal provider shim then produced a clean synthetic zero-state response through the real `rpmServer`, without downstream socket or device access. See [`emulation/traces/synthetic-status-summary.md`](../emulation/traces/synthetic-status-summary.md).
+
 ## Resume criteria
 
-The next sandbox step is offline recovery of the observed flow-state and WLAN response layouts, followed by logging stubs that do not invent backend state. No live-device request is involved.
+The userspace sandbox has reached its useful limit for the present objective. The next phase is the previously queued narrowly scoped live read-only RPC probing; the physical-device restrictions and sanitization rules remain in force.
 
 Full-system emulation is not currently justified: userspace execution addresses the hook question directly, and no verified board-machine model or bootable kernel/DTB pairing has yet been demonstrated.

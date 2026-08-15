@@ -35,10 +35,12 @@ Long-running services must use `scripts/run-service-smoke.sh`, which creates a s
 
 `scripts/run-rpc-probes.sh` starts `rpmServer` and sends only four compiled-in local test cases: invalid JSON, an empty object, known read-only `status:0`, and known read-only `log:5`. The client has no arbitrary module/action or raw-payload option.
 
+Set `M7000_IPC_MODE=zero` to build and preload the minimal synthetic flow/WLAN providers used for the validated zero-state `status:0` round-trip. The wire-level responder is retained as a protocol reference; PRoot does not reliably deliver pathname datagrams between separate emulated processes.
+
 ## Current status
 
-WSL 2 and QEMU 10.2.1 now execute the exact firmware rootfs. The complete hook matrix is characterized, destructive-command interception is verified, and `rpmServer` reaches its real local datagram socket. See the tracked summaries under `emulation/traces/`; raw generated traces remain ignored.
+WSL 2 and QEMU 10.2.1 now execute the exact firmware rootfs. The complete hook matrix is characterized, destructive-command interception is verified, and a synthetic zero-state `status:0` round-trip succeeds through the real `rpmServer`. See the tracked summaries under `emulation/traces/`; raw generated traces remain ignored.
 
 ## Next boundary
 
-Continue `rpmServer` work only with synthetic runtime paths, the same destructive stubs, and progressively logged substitutes for missing mobile/WLAN IPC. Live read-only RPC probing remains queued after this sandbox reaches its useful limit.
+The sandbox has reached its useful limit for this phase. Preserve it for isolated backend experiments and return to the queued narrowly scoped live read-only RPC plan.

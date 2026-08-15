@@ -26,6 +26,16 @@
     "flowstat": "/tmp/flowstate.sock; requests FM, FD, FT, FR; daemon replies are fixed 32-byte datagrams",
     "wlan": "/tmp/wlan_local.sock to /tmp/ha_wm.sock"
   },
+  "recovered_status_provider_protocols": {
+    "flowstat": "two-byte FM/FD/FT/FR request; fixed 32-byte command:ASCII-number reply",
+    "wlan_header": "four little-endian uint32 fields followed by payload",
+    "wlan_status_reads": {
+      "0": "switch; 4-byte payload",
+      "3": "station count; 4-byte payload",
+      "4": "configuration; 0x198-byte payload"
+    },
+    "synthetic_status_result": "real rpmServer returned result 0 with deterministic zero providers"
+  },
   "status_native_evidence": {
     "GetAllStatus_import": "0x13bdc",
     "GetAllStatus_callsite": "0x177c4",
