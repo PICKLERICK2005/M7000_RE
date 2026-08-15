@@ -34,8 +34,14 @@ stock web UI
   `61`-`64`, dynamically selected user records (`stored index + 53`), and
   sequential ISP profile records beginning at `65`.
 - None of these eight getter implementations constructs a `CMobileEvent`; they
-  are local shared-state/configuration reads. The writer and refresh source for
-  each CP-derived runtime record remain unresolved.
+  are local shared-state/configuration reads. Offline disassembly now separates
+  their producers: data and roaming switches (`73`, `74`), network-selection
+  mode (`76`), and selected ISP (`446`) use persistent writes; connection state
+  (`79`) uses a temporary runtime write; and registration state (`81`) is
+  updated temporarily by the AT-facing status state machine. Preferred network
+  type (`75`) has both a persistent setter and a temporary normalization path.
+  Exact refresh latency and callback entry points remain unresolved. See
+  [`analysis/shared-record-producers.json`](../analysis/shared-record-producers.json).
 - The event client uses Unix datagrams, `/tmp/mp_svr_file`, and per-process
   `/tmp/mp_clnt_*` paths (including `_resp`). The daemon also names
   `/tmp/mobile_msg_server.sock`, `/tmp/wm_lte_wifi.sock`, and
@@ -65,6 +71,12 @@ scan, network configuration, modem-read, voice/USSD, SIM/PIN, and SMS families.
 Some payload layouts and lower-layer RPC IDs remain to be recovered. See
 [`analysis/mobile-ipc.json`](../analysis/mobile-ipc.json) and
 [`analysis/mobile-events.json`](../analysis/mobile-events.json).
+
+The narrow live getters are local projections too. `wan:10` reads shared record
+`84` through `GetNetSelStat`. `wan:11` does not read a single failure-reason
+record: `GetCallFailReason` derives its result from seven records (`81`, `79`,
+`74`, `30`, `39`, `44`, and `80`). Thus neither getter inherently forces a new
+AT transaction when the web UI calls it.
 
 ## Synthetic startup observation
 

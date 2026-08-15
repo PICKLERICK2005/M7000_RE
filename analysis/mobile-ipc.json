@@ -63,9 +63,9 @@
       }
     ],
     "producer_status": {
-      "confirmed": "All eight aggregate getters read local data-management records and do not construct a CMobileEvent in their getter paths.",
-      "supported_inference": "The mobile daemon is the likely runtime producer for CP-derived connection and registration records because it owns the event server and initializes mobile_status, but the exact writer callsites are not yet mapped.",
-      "unknown": "Per-record producer callbacks, refresh timing, persistence semantics, and the CP event or AT source for each runtime record."
+      "confirmed": "All eight aggregate getters read local data-management records and do not construct a CMobileEvent in their getter paths. Offline mobile-daemon disassembly maps temporary writers for connection record 79 and registration record 81, persistent writers for policy records 73, 74, 76, and 446, and both persistent and temporary/normalized writes for preferred-network record 75.",
+      "supported_inference": "The record-81 writer is part of the AT-facing mobile_status_at state machine, supporting CP/modem indication -> mobile normalization -> temporary shared record -> libmobile getter.",
+      "unknown": "Exact timer or unsolicited-AT callback entry for every writer, refresh latency, and exhaustive profile-record writer mapping. See shared-record-producers.json."
     }
   },
   "limits": [

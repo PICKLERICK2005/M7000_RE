@@ -1,0 +1,102 @@
+{
+  "scope": "Offline static mapping of shared/configuration records consumed by the sanitized live RPC models in exact firmware 3.0.2 Build 241129 Rel.3n.",
+  "binary": {
+    "path": "usr/bin/mobile",
+    "format_note": "ELF32 ARM executable with program headers and dynamic metadata but no section headers",
+    "config_helper": {
+      "read_wrapper": "0x3ccb0",
+      "write_wrapper": "0x3cd24",
+      "commit_wrapper": "0x3cef0",
+      "write_mode": "The write-wrapper argument selects set_config_data_list_temp (0) or set_config_data_list_permanent (nonzero)."
+    }
+  },
+  "get_all_status_records": [
+    {
+      "record_id": 73,
+      "meaning": "data switch",
+      "reader": "CMobileClient::GetDataSwitch",
+      "writers": ["mobile setter path at 0x42330-0x4238c writes record 73 permanently"],
+      "classification": "persistent policy/configuration",
+      "confidence": "high"
+    },
+    {
+      "record_id": 74,
+      "meaning": "roaming switch",
+      "reader": "CMobileClient::GetRoamSwitch",
+      "writers": ["mobile setter path at 0x423e0-0x4243c writes record 74 permanently"],
+      "classification": "persistent policy/configuration",
+      "confidence": "high"
+    },
+    {
+      "record_id": 75,
+      "meaning": "preferred network type",
+      "reader": "CMobileClient::GetPrefNetType",
+      "writers": ["mobile status path at 0x4a288-0x4a2b0 writes a normalized runtime value temporarily", "mobile setter path at 0x42508-0x4256c writes it permanently"],
+      "classification": "persistent preference with runtime normalization/refresh",
+      "confidence": "high"
+    },
+    {
+      "record_id": 76,
+      "meaning": "network-selection mode",
+      "reader": "CMobileClient::GetNetSelMode",
+      "writers": ["mobile status/config path at 0x4a320-0x4a35c writes a normalized boolean-like value permanently", "network-selection update at 0x33850-0x338a8 writes it permanently together with records 446-448"],
+      "classification": "persistent network-selection policy",
+      "confidence": "high"
+    },
+    {
+      "record_id": 79,
+      "meaning": "connection state",
+      "reader": "CMobileClient::GetConnState",
+      "writers": ["mobile status routine at 0x4a0d8-0x4a10c copies object state offset 0x2b8 into record 79 temporarily"],
+      "classification": "runtime shared state",
+      "confidence": "high"
+    },
+    {
+      "record_id": 81,
+      "meaning": "registration state",
+      "reader": "CMobileClient::GetRegStat",
+      "writers": ["AT/status state-machine routine ending at 0x49ef8 writes records 81, 80, and 83 together temporarily"],
+      "classification": "AT-derived runtime shared state",
+      "confidence": "high",
+      "source_evidence": ["UpdateNetType", "UpdateRegStat", "UpdateRoamStat", "UpdateBandInfo", "src/base/mobile_status_at.cpp"]
+    },
+    {
+      "record_id": 446,
+      "meaning": "selected ISP name",
+      "reader": "CMobileClient::GetSelIspName",
+      "writers": ["network-selection/configuration routine at 0x33850-0x338a8 writes record 446 as a string permanently alongside records 447, 448, and 76"],
+      "classification": "persistent selection metadata",
+      "confidence": "high"
+    },
+    {
+      "record_ids": [47, 48, 51, 52, 61, 62, 63, 64],
+      "meaning": "profile-list metadata and indices",
+      "reader": "CMobileClient::GetProfileList",
+      "classification": "persistent profile/configuration records",
+      "confidence": "high for reads; exact writer callsites not yet exhaustively enumerated"
+    }
+  ],
+  "narrow_live_getters": [
+    {
+      "rpc": "wan:10",
+      "native_getter": "CMobileClient::GetNetSelStat",
+      "record_ids": [84],
+      "classification": "local shared-state read; no direct modem event in getter",
+      "confidence": "high"
+    },
+    {
+      "rpc": "wan:11",
+      "native_getter": "CMobileClient::GetCallFailReason",
+      "record_ids": [81, 79, 74, 30, 39, 44, 80],
+      "classification": "derived locally from registration, connection, roaming-policy, and related status records; no direct modem event in getter",
+      "confidence": "high",
+      "note": "callFailReason is not one stored scalar record; the getter derives its result from seven records."
+    }
+  ],
+  "refresh_model": {
+    "confirmed": "Runtime connection and registration records are written by mobile status routines with temporary data-management writes; persistent policy fields use permanent writes.",
+    "supported_inference": "The registration writer belongs to the AT-facing status state machine, so CP/modem indications are normalized in mobile before web getters read them.",
+    "unknown": "Exact timer or unsolicited-AT callback entry for every writer, refresh latency, and every profile-record writer remain unresolved."
+  },
+  "safety": "Static analysis only. No mobile event, AT command, live RPC, or device operation was performed."
+}
