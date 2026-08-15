@@ -6,7 +6,10 @@ stock web UI
   -> /tmp/tp_rpm_server.sock
   -> rpmServer
   -> libmobile.so
-  -> mobile daemon (/tmp/mobile_msg_server.sock and related sockets)
+     -> libdata_management.so numbered shared-state records (many getters)
+     -> asynchronous mobile event client
+  -> mobile daemon (/tmp/mp_svr_file, per-process /tmp/mp_clnt_* paths,
+     /tmp/mobile_msg_server.sock, and related sockets)
   -> libmarvellril.so / rild / atcmdsrv
   -> /dev/smd0, /dev/ttyS1 and ACIPC-backed services
   -> CP/RTOS NVM, SIM, network and diagnostic handlers
@@ -17,8 +20,18 @@ stock web UI
 
 - `rpmServer` imports `GetAllStatus` and narrower SIM, signal, registration,
   operator, connection, and RF-band getters from `libmobile.so`.
-- The mobile daemon names `/tmp/mobile_msg_server.sock`,
-  `/tmp/wm_lte_wifi.sock`, `/tmp/ha_wm.sock`, and `/tmp/mp_clnt_*` paths.
+- Many getters read typed, numbered records through `libdata_management.so`.
+  For example, `GetSimIMSI` requests record `24`; this is an internal data-model
+  key, not a web RPC action.
+- `GetAllStatus` zeroes a 5,364-byte result and composes it from exactly eight
+  getters: data switch, roaming switch, connection state, registration state,
+  preferred network type, network-selection mode, selected ISP name, and
+  profile list. It is a local aggregate, not one monolithic modem RPC.
+- The event client uses Unix datagrams, `/tmp/mp_svr_file`, and per-process
+  `/tmp/mp_clnt_*` paths (including `_resp`). The daemon also names
+  `/tmp/mobile_msg_server.sock`, `/tmp/wm_lte_wifi.sock`, and
+  `/tmp/ha_wm.sock`; the relationship between the first two mobile IPC names
+  remains unresolved.
 - `/etc/config/at_channel` maps channels to `/dev/ttyS1` and `/dev/smd0`.
 - `/etc/telinit` starts `cp_load`, `nvmproxy`, `atcmdsrv`, and `rild` in the
   normal CP-enabled path.
@@ -30,11 +43,15 @@ stock web UI
 
 The AP and CP meet through more than one logical channel: an ACIPC/shared-memory
 transport underneath Linux CP services, SMD/serial AT channels for command
-traffic, and dedicated diagnostic paths. The exact packet framing and RPC IDs
-remain to be recovered from `mobile`, `libmobile.so`, `libmarvellril.so`,
-`atcmdsrv`, and the CP handlers.
+traffic, and dedicated diagnostic paths. The asynchronous mobile event frame
+is three little-endian 32-bit words (correlation ID, event class/type, payload
+length), followed by the payload at byte 12. Deserialization checks both the
+12-byte minimum and declared length; the receive path uses a 20 KiB buffer.
+Exact event enumerations, payload layouts, and lower-layer RPC IDs remain to be
+recovered. See [`analysis/mobile-ipc.json`](../analysis/mobile-ipc.json).
 
 AP UCI owns UI policy and profiles such as APN selection, while CP NVM owns or
 consumes radio, calibration, lock, and low-level modem state. SIM-derived and
-runtime network fields remain dynamically sourced.
-
+runtime network fields remain dynamically sourced. Static setter symbols remain
+code-presence evidence only; they do not establish web reachability, safety, or
+persistence.
