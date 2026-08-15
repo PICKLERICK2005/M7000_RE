@@ -65,5 +65,14 @@ notifications, and WLAN-control calls while allowing only the repo-backed Unix
 socket paths needed by the planned smoke test. It does not make PRoot a hardened
 sandbox, and its presence alone does not authorize launching `mobile`.
 
+The authorized synthetic startup uses `scripts/preflight-mobile.sh` followed by
+`scripts/run-mobile-smoke.sh`. The runner creates private ephemeral tmpfs mounts
+at repo-local `emulation/work/` mountpoints because DrvFS cannot host pathname
+Unix sockets or case-distinct firmware files. It validates and re-extracts the
+known SquashFS on every run, applies destructive stubs, runs for a fixed cutoff,
+and reaps the complete process group. Stable observations are recorded in
+[`traces/mobile-startup-summary.md`](traces/mobile-startup-summary.md); raw traces
+remain ignored.
+
 The queued narrowly scoped live read-only RPC plan remains the next live-device
 phase; it has not been abandoned.

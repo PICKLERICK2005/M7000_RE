@@ -57,6 +57,21 @@ Some payload layouts and lower-layer RPC IDs remain to be recovered. See
 [`analysis/mobile-ipc.json`](../analysis/mobile-ipc.json) and
 [`analysis/mobile-events.json`](../analysis/mobile-events.json).
 
+## Synthetic startup observation
+
+A fail-closed QEMU userspace run of the exact 3.0.2 `mobile` daemon confirmed
+that startup initializes disposable SMS files and reads the `mobile_config` and
+`mobile_status` UCI/data-management models before bringing up its asynchronous
+Unix-datagram server. Four worker threads and `/tmp/mp_svr_file` were observed.
+No AT request, mobile event datagram, reset/NVM switch, or WAN/WLAN notification
+occurred before the controlled cutoff. See
+[`mobile-startup-summary.md`](../emulation/traces/mobile-startup-summary.md).
+
+This runtime ordering supports—but does not extend—the static architecture:
+`mobile -> libdata_management/UCI -> event IPC -> AT/ACIPC -> CP`. Internal
+record IDs are library-call arguments and were not visible at syscall level;
+the existing static record map remains the evidence for those IDs.
+
 AP UCI owns UI policy and profiles such as APN selection, while CP NVM owns or
 consumes radio, calibration, lock, and low-level modem state. SIM-derived and
 runtime network fields remain dynamically sourced. Static setter symbols remain

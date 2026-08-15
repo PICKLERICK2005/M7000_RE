@@ -13,6 +13,7 @@ from pathlib import Path
 
 def transact(path: Path, commands: tuple[bytes, ...]) -> tuple[bytes, ...]:
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    client.settimeout(2)
     client.connect(str(path))
     try:
         replies = []
@@ -43,7 +44,7 @@ def main() -> None:
         assert spec and spec.loader
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        thread = threading.Thread(target=module.serve, args=(path, log, True))
+        thread = threading.Thread(target=module.serve, args=(path, log, True), daemon=True)
         thread.start()
         for _ in range(50):
             if path.exists():

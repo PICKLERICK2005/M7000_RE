@@ -14,15 +14,28 @@ command -v unsquashfs >/dev/null
 mkdir -p "$work/components"
 node "$repo/tools/m7000-fw.mjs" extract "$image" "$work/components"
 
+rootfs_component="$work/components/rootfs.squashfs"
+if [ ! -f "$rootfs_component" ]; then
+  rootfs_component="$work/components/00-SYSJ.bin"
+fi
+[ -f "$rootfs_component" ] || {
+  echo "extractor did not emit the expected rootfs component" >&2
+  exit 1
+}
+
 actual_image=$(sha256sum "$image" | awk '{print $1}')
-actual_rootfs=$(sha256sum "$work/components/rootfs.squashfs" | awk '{print $1}')
+actual_rootfs=$(sha256sum "$rootfs_component" | awk '{print $1}')
 [ "$actual_image" = "$expected_image" ] || { echo "wrong update.bin hash: $actual_image" >&2; exit 1; }
 [ "$actual_rootfs" = "$expected_rootfs" ] || { echo "wrong rootfs hash: $actual_rootfs" >&2; exit 1; }
 
 rm -rf "$work/rootfs.new"
-# The stock image contains /dev/console.  Device nodes are unnecessary and
-# intentionally excluded from this userspace-only sandbox.
-unsquashfs -no-progress -d "$work/rootfs.new" -ex dev/console ';' "$work/components/rootfs.squashfs"
+# Device nodes and kernel/network-filter payloads are unnecessary for this
+# userspace-only sandbox. The latter contain seven case-distinct filename pairs
+# which cannot coexist on a Windows-hosted repository filesystem. Excluding
+# their complete directories is fail-closed and prevents loading host-facing
+# kernel or iptables components; no mobile dependency resolves beneath them.
+unsquashfs -no-progress -d "$work/rootfs.new" \
+  -ex dev/console lib/modules usr/lib/iptables ';' "$rootfs_component"
 rm -rf "$work/rootfs"
 mv "$work/rootfs.new" "$work/rootfs"
 
@@ -43,7 +56,10 @@ done
 
 rm -rf "$work/stubs"
 mkdir -p "$work/stubs"
-cp "$repo"/emulation/stubs/* "$work/stubs/"
+for stub in "$repo"/emulation/stubs/*; do
+  [ -f "$stub" ] || continue
+  cp "$stub" "$work/stubs/"
+done
 chmod 755 "$work"/stubs/*
 
 test -x "$work/rootfs/bin/busybox"
