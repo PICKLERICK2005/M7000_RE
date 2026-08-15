@@ -33,12 +33,13 @@ omitted.
 
 | Order | VID:PID | Product | Class/subclass/protocol | Duration | Windows binding |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `2ECC:3001` | `NEZHAS` | `FF/FF/FF` | approximately 1.7 s | None |
-| 2 | `2ECC:4E11` | `Openwrt` | `FF/42/03` | approximately 2.8 s | None |
+| 1 | `2ECC:3001` | `NEZHAS` | `FF/FF/FF` | mean 2.001 s (1.815-2.326 s) | None |
+| 2 | `2ECC:4E11` | `Openwrt` | `FF/42/03` | mean 2.624 s (2.341-2.855 s) | None |
 
 Both disappeared automatically as the powered-off router settled into charging
-mode. The second exposed a serial-like string; it remains private. Full
-configuration and endpoint descriptors were not retained for either transient.
+mode. The inter-stage gap averaged 1.480 s across five cold connects. Both have
+one vendor-specific interface with bulk IN `0x81` and bulk OUT `0x02`, using
+512-byte packets at High-Speed. Serial-like strings remain private.
 
 ## Negative observations
 

@@ -14,7 +14,13 @@
         "device_class": "FF",
         "device_subclass": "FF",
         "device_protocol": "FF",
-        "observed_duration_seconds": 1.7,
+        "observed_duration_seconds_mean": 2.00076952,
+        "observed_duration_seconds_range": [1.8149001, 2.3260650],
+        "connection_speed": "High-Speed 480 Mbit/s",
+        "configuration_count": 1,
+        "interface_count": 1,
+        "endpoints": ["0x81 bulk IN, 512 bytes", "0x02 bulk OUT, 512 bytes"],
+        "power": "self-powered; 10 mA requested",
         "windows_driver": null,
         "classification": "vendor-specific transient; function unknown"
       },
@@ -27,7 +33,13 @@
         "device_class": "FF",
         "device_subclass": "42",
         "device_protocol": "03",
-        "observed_duration_seconds": 2.8,
+        "observed_duration_seconds_mean": 2.62442672,
+        "observed_duration_seconds_range": [2.3406108, 2.8547379],
+        "connection_speed": "High-Speed 480 Mbit/s",
+        "configuration_count": 1,
+        "interface_count": 1,
+        "endpoints": ["0x81 bulk IN, 512 bytes", "0x02 bulk OUT, 512 bytes"],
+        "power": "bus-powered; 256 mA requested",
         "windows_driver": null,
         "usb_serial": "REDACTED",
         "classification": "vendor-specific transient; function unknown"
@@ -70,5 +82,5 @@
       }
     ]
   },
-  "notes": "State B briefly exposes two sequential vendor-specific identities before charging. State C exposes the stable two-interface RNDIS function. No USB payloads were sent."
+  "notes": "State B reproducibly exposed the same two sequential vendor-specific identities across five cold connects; their inter-stage gap averaged 1.47986096 seconds. State C exposes the stable two-interface RNDIS function. Only passive enumeration and standard descriptor reads were performed; no USB payloads were sent."
 }
