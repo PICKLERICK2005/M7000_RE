@@ -1,0 +1,54 @@
+{
+  "scope": "Static analysis of the exact 3.0.2 Build 241129 Rel.3n ARM userspace; no live-device traffic was generated.",
+  "components": {
+    "rpmServer": "Consumes the public libmobile API while serving the web-facing JSON RPC socket.",
+    "libmobile.so": "Provides typed getters/setters, reads shared records through libdata_management, and implements an asynchronous Unix-datagram event client.",
+    "mobile": "Owns the server side of the mobile event channel and updates shared modem state.",
+    "libdata_management.so": "Numbered shared/configuration record abstraction used by many libmobile getters; storage and synchronization internals remain unresolved.",
+    "libmarvellril.so": "RIL/AT-facing modem control implementation below the mobile daemon."
+  },
+  "sockets": {
+    "server_marker": "/tmp/mp_svr_file",
+    "client_prefix": "/tmp/mp_clnt_",
+    "client_response_suffix": "_resp",
+    "transport": "AF_UNIX datagram (confirmed by socket/bind/sendto/recvfrom call paths)",
+    "note": "The mobile daemon also contains /tmp/mobile_msg_server.sock; the exact relationship between that name and /tmp/mp_svr_file remains unresolved."
+  },
+  "event_frame": {
+    "byte_order": "little-endian",
+    "header_bytes": 12,
+    "words": [
+      {"offset": 0, "meaning": "request/correlation ID", "confidence": "high"},
+      {"offset": 4, "meaning": "event class/type", "confidence": "medium"},
+      {"offset": 8, "meaning": "payload length", "confidence": "high"}
+    ],
+    "payload_offset": 12,
+    "maximum_receive_datagram": 20480,
+    "evidence": [
+      "CMobileEvent::Serialize writes object fields +0x50, +0x54 and +0x5c as three 32-bit words, then copies +0x5c bytes from the buffer at +0x58.",
+      "CMobileEvent::Unserialize rejects inputs shorter than 12 bytes and validates total length against 12 plus the third word.",
+      "CreateEvent generates a nonzero value at +0x50; request-list lookup and response completion match that field."
+    ]
+  },
+  "read_path": {
+    "pattern": "Many getters instantiate CCfgHelper with a count and numbered record IDs, call GetConfig, and copy typed CCfgItem values into the public result structure.",
+    "example": {
+      "method": "CMobileClient::GetSimIMSI",
+      "record_ids": [24],
+      "record_count": 1,
+      "result": "Copies a presence/status byte and a bounded 16-byte value into MP_SimIMSI; device-specific contents were neither extracted nor recorded."
+    }
+  },
+  "composite_status": {
+    "method": "CMobileClient::GetAllStatus",
+    "output_size_bytes": 5364,
+    "composition": ["GetDataSwitch", "GetRoamSwitch", "GetConnState", "GetRegStat", "GetPrefNetType", "GetNetSelMode", "GetSelIspName", "GetProfileList"],
+    "important_correction": "GetAllStatus is a local aggregate over eight libmobile getters, not one monolithic request to the modem daemon. Other web status fields are added by rpmServer and other subsystems."
+  },
+  "limits": [
+    "Numeric configuration record IDs are internal data-model keys, not web RPC module/action IDs.",
+    "The event-class enumeration and payload structures have not yet been exhaustively mapped.",
+    "Static presence of setters does not establish web reachability, authorization, persistence, or safety.",
+    "No event datagrams were sent to either the sandbox or the physical device during this analysis."
+  ]
+}
