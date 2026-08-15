@@ -89,10 +89,29 @@ libmobile setter puts that configured scalar unchanged in synchronous event
 `0x33`; `mobile` hands it to the modem manager and persists it only if the
 request is immediately accepted. The modem read path is event `0x46` and maps
 response `1/2/3 -> record 0/1/2`, while `0`, `0x3081`, and other values become
-record `3`. Correlation with the shipped `AT*BAND` vocabulary and CP-side
-`CI_DEV_NW_GSM/UMTS/LTE` handler identifies response `1` as GSM (hidden record
-0), `2` as UMTS, `3` as LTE, and `0x3081` as the multi-RAT mask used for
-LTE-preferred policy. The individual bits within `0x3081` remain unresolved.
+record `3`. Correlation with the CP-side `CI_DEV_NW_GSM/UMTS/LTE` assertion
+identifies response `1` as GSM (hidden record 0), `2` as UMTS and `3` as LTE.
+That readback space is *not* the `AT*BAND` `NwMode` space: the values actually
+sent are `0`, `1`, `5` and `11` (default `99`), and the values the response
+parser recognises are `0`, `4`, `5`, `8`, `11` and `15`. `0x3081` occurs only
+in the readback normalizer, only as an equality comparison, and nowhere in the
+CP image; its bit structure is unresolved and no evidence supports calling it a
+mask. See [`modem-control-path.md`](modem-control-path.md) and
+[`analysis/modem-control-paths.json`](../analysis/modem-control-paths.json).
+
+Record 75 has exactly one permanent writer (commit ELF VA `0x4256c`) and one
+temporary normalizer (commit `0x4a2b0`). Persistence happens only after the
+modem-manager operation returns success, so a rejected request never becomes
+durable policy.
+
+Every numeric record ID in this document resolves through the `usr/bin/tp_data`
+name table at file offset `0x1d40` (450 entries, 64-byte stride), indexed in
+[`analysis/tp-data-record-map.json`](../analysis/tp-data-record-map.json). That
+table independently reproduces every record ID asserted here, and it also names
+records `200`-`207` as the raw RF metrics (`rat`, `rssi`, `rsrp`, `rsrq`, `snr`,
+`ecio`, `band`, `channel`) that sit alongside the normalized level in record 78.
+The record-78 writer copies its input verbatim, so the normalization is upstream
+of it and still unlocated.
 
 The dense tables and transition graph are in
 [`modem-state-enums.json`](../analysis/modem-state-enums.json) and

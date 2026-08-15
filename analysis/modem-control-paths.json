@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "scope": "Canonical AP->CP configuration/control paths for M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n. Recovered statically from usr/lib/libmobile.so, usr/bin/mobile, usr/bin/tp_data and the CP image 05-ARBI.bin. No event, AT command, RPC or modem operation was executed against the device or a sandbox.",
+  "offset_convention": {
+    "libmobile": "Addresses are ELF virtual addresses; the single executable PT_LOAD has vaddr 0x0, so VA == file offset.",
+    "mobile": "Addresses are ELF virtual addresses. The executable PT_LOAD is vaddr 0x10000 at file offset 0, so file_offset = VA - 0x10000.",
+    "cp": "05-ARBI.bin addresses are raw file offsets. The image load base is not established, so CP offsets are not virtual addresses."
+  },
+  "record_id_space": {
+    "meaning": "libdata_management numeric record IDs are indices into the tp_data name table.",
+    "table": "usr/bin/tp_data, file offset 0x1d40, 450 entries, fixed 0x40-byte stride, one NUL-terminated `package.section.option` string per entry.",
+    "formula": "record_id = (table_entry_offset - 0x1d40) / 0x40",
+    "verification": "Independently reproduces every previously asserted mapping: 24=sim imsi, 30/39/44 flowstat, 73-76 mobile_config, 78-84 mobile_status.net_status, 446 net_isp_name. Also confirmed against the immediate record IDs used by CMobileClient::GetPrefNetType (0x4b), GetNetSelStat (0x54), GetNetSelMode (0x4c) and GetSigLevel (0x4e).",
+    "index_artifact": "tp-data-record-map.json",
+    "confidence": "CONFIRMED"
+  },
+  "event_transport": {
+    "frame": "See mobile-ipc.json: 12-byte little-endian header (correlation ID, event ID, payload length) followed by the payload.",
+    "client_object_layout": {
+      "note": "Field offsets in the libmobile CMobileEvent request object, recovered identically across every setter and direct-modem getter examined.",
+      "0x48": "completion callback pointer",
+      "0x4c": "caller-supplied int parameter passed through to the callback",
+      "0x50": "correlation ID (generated non-zero at create time)",
+      "0x54": "event ID",
+      "0x58": "payload buffer pointer",
+      "0x5c": "payload length in bytes"
+    },
+    "allocation": "libmobile+0x6514 allocates the request payload and returns the buffer at +0x58; libmobile+0x61a8 performs the transaction; libmobile+0x61fc releases the request.",
+    "synchronous_completion": "When the transaction helper returns 1 the caller reads the response: it requires the response length at +0x5c to be exactly 4 and copies the single 32-bit word at +0x58 into the caller's output. A return of -1 is a transport failure; any other value is treated as accepted-without-inline-response.",
+    "confidence": "CONFIRMED"
+  },
+  "preflight_gate": {
+    "description": "A shared pre-flight check performed by the two network-touching setters only. It batch-reads two records through CCfgHelper and refuses the request before any event is constructed.",
+    "records_read": [19, 84],
+    "rules": [
+      {"record": 19, "name": "sms.sms_send_result.result", "blocking_value": 4, "mp_ret": 14, "log": "(no dedicated message; MP_Ret 0xe returned)"},
+      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 3, "mp_ret": 15, "log": "Now searching network, operation blocked."},
+      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 11, "mp_ret": 16, "log": "Now canceling cops, operation blocked."},
+      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 1, "mp_ret": 17, "log": "Now registering, operation blocked."}
+    ],
+    "applies_to": ["SetPrefNetType (event 0x33)", "SetNetSel (event 0x34)"],
+    "does_not_apply_to": ["SetDataSwitch (event 0x31)", "SetRoamSwitch (event 0x32)"],
+    "derived_enum_net_sel_stat": {
+      "1": "registering",
+      "3": "searching network",
+      "11": "canceling COPS",
+      "note": "These three values are proven by the block messages. Other values of record 84 are not named by this evidence."
+    },
+    "confidence": "CONFIRMED"
+  },
+  "paths": [
+    {
+      "name": "preferred_rat",
+      "policy_record": 75,
+      "policy_record_name": "mobile_config.net_config.pref_net",
+      "frontend_enum": {"1": "3G only", "2": "4G only", "3": "4G/LTE preferred", "0": "not offered by the stock UI"},
+      "rpc_action": "wan configured preferred-network policy (networkMode.html)",
+      "libmobile_api": {
+        "setter": "CMobileClient::SetPrefNetType(MP_PrefNet, MP_Ret*, int, callback) at libmobile 0xa114",
+        "reader": "CMobileClient::GetPrefNetType at libmobile 0xc3d4 (reads record 75 locally)",
+        "direct_modem_reader": "CMobileClient::GetModemPrefNetType at libmobile 0xd8b0"
+      },
+      "mobile_event": "0x33",
+      "readback_event": "0x46",
+      "event_payload": {
+        "request": {
+          "size_bytes": 4,
+          "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested MP_PrefNet policy value"}],
+          "endianness": "little-endian (native ARM store of the scalar into the payload buffer)"
+        },
+        "response": {
+          "size_bytes": 4,
+          "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "MP_Ret result code"}],
+          "strict_length_check": "A response whose length is not exactly 4 is rejected as 'Received corrupted data from mobile.'"
+        },
+        "validation_before_send": [
+          "MP_PrefNet must be <= 3 (unsigned compare); anything greater is rejected client-side as 'Input argument is not valid.' with return 0.",
+          "The MP_Ret output pointer must be non-NULL.",
+          "The shared pre-flight gate on records 19 and 84 must pass."
+        ],
+        "hidden_value_0": {
+          "accepted_by_setter": true,
+          "evidence": "The only range check is `cmp r1,#3` with the error branch taken on unsigned-greater. Value 0 therefore passes validation and is placed in the 4-byte payload unchanged.",
+          "classification": "SUPPORTED INFERENCE that value 0 is reachable through the client API; the stock frontend does not offer it. Nothing here establishes that the daemon, the modem manager or the CP accept or safely apply it.",
+          "safety": "Not exercised. Static acceptance by a parser is not evidence that the mode is safe to use."
+        }
+      },
+      "readback_payload": {
+        "request": {"size_bytes": 0, "note": "GetModemPrefNetType allocates no request payload; only the 12-byte header is sent."},
+        "response": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "raw modem preferred-mode value"}]}
+      },
+      "mobile_handler": {
+        "event_handler": "ProcUserEventComm, src/comm/process_comm.cpp, mobile VA 0x3b038-0x3b0a0",
+        "sequence": [
+          "Read the 4-byte request payload into the requested value.",
+          "Stage the requested value in the status object at +0x194.",
+          "Invoke the modem-manager operation through virtual slot +0x24 with (value, correlation ID).",
+          "If and only if that call returns 0, persist record 75 permanently via the setter at mobile VA 0x42504.",
+          "Complete the request and report the staged result."
+        ],
+        "second_persistence_point": "src/comm/manager_comm_at.cpp, mobile VA 0x36f74-0x36f90, persists the staged +0x194 value into record 75 after the AT transaction completes successfully.",
+        "confidence": "CONFIRMED"
+      },
+      "modem_representation": {
+        "command_family": "AT*BAND",
+        "builders": [
+          {
+            "id": "builder-A",
+            "address": "mobile VA 0x33220",
+            "template": "AT*BAND=<NwMode>",
+            "construction": "Copies the literal \"AT*BAND=\" inline, then appends a decimal literal chosen by a jump table on the function's second argument.",
+            "at_command_id_passed_to_sender": "0x33",
+            "mapping": {"0": "0", "1": "1", "2": "5", "3": "11", "default": "99"},
+            "argument_source": "the function's second argument",
+            "live_path_assessment": "SUPPORTED INFERENCE that this is the live setter: its (this, value, correlation-ID) signature matches exactly how the event handler invokes virtual slot +0x24."
+          },
+          {
+            "id": "builder-B",
+            "address": "mobile VA 0x3336c",
+            "template": "AT*BAND=%d,,,,,%d",
+            "construction": "snprintf into a 0x200-byte stack buffer.",
+            "at_command_id_passed_to_sender": "0x32",
+            "mapping_first_field": {"0": 0, "1": 1, "2": 5, "3": 14, "default": "no command is emitted; the function returns 1"},
+            "mapping_second_field": {"0": "when the second argument is not 1", "1": "when the second argument is 1"},
+            "argument_source": "first field from the staged status-object value at +0x194; second field from the function's second argument",
+            "anomaly": {
+              "description": "Between loading the format-string address into r1 and calling snprintf, the function executes `cmp r1,#0x200` followed by `bhi` to a `udf #0` trap. Byte-exact decoding confirms r1 holds the format-string address at that point, so the compare is against a pointer and the trap branch would always be taken.",
+              "verified": "Instruction encodings e59f1094 / e08f1001 / e3510c02 / 8a00001b at mobile VA 0x333d4-0x333e0, and the identical sequence at 0x33430-0x3343c. Both sprintf (PLT 0x1233c) and snprintf (PLT 0x120cc) are imported separately; the call target resolves to snprintf through GOT slot 0x68dcc.",
+              "status": "UNKNOWN. Either this builder is unreachable at runtime or the sequence is misdecoded in a way not yet identified. The jump-table value mapping above is unaffected and is decoded unambiguously.",
+              "importance": "This is why builder-A, not builder-B, is treated as the probable live setter."
+            }
+          }
+        ],
+        "at_sender": "mobile VA 0x3f6a4, invoked as (context, command buffer, AT command ID, correlation cookie).",
+        "query": "AT*BAND? at mobile VA 0x33b54 / 0x33cbc",
+        "response_syntax": "*BAND: <NwMode>, <f2>, <f3>, <f4>, <f5>, <PreferMode>",
+        "response_parser": {
+          "addresses": ["mobile VA 0x34b84", "mobile VA 0x38a98"],
+          "sscanf_format": "*BAND: %d, %*d, %*d, %*d, %*d, %d",
+          "fields_consumed": "field 1 (NwMode) and field 6 (PreferMode) only; fields 2-5 are parsed and discarded",
+          "failure": "A return value other than 2 logs 'The modem configuration info parse error.'",
+          "nwmode_to_policy_space": {
+            "0": 0,
+            "4": 1,
+            "5": 2,
+            "8": 3,
+            "11": 3,
+            "15": 3,
+            "other": -1,
+            "note": "Decoded from a 16-entry jump table over field 1. The compiler reuses registers it can prove hold 0 and 2, which is why the 0 and 5 cases have no explicit immediate load.",
+            "consumer": "The result is compared against the staged value at +0x194; a difference triggers a virtual notification. It is therefore in the same numeric space as record 75, not a separate one."
+          }
+        },
+        "set_vs_get_value_sets": {
+          "sent_by_builder_A": [0, 1, 5, 11, 99],
+          "recognised_by_parser": [0, 4, 5, 8, 11, 15],
+          "round_trip": {
+            "policy 0": "sends NwMode 0, parser maps 0 -> 0. consistent",
+            "policy 1": "sends NwMode 1, parser does not recognise 1 (maps to -1). NOT round-trip consistent",
+            "policy 2": "sends NwMode 5, parser maps 5 -> 2. consistent",
+            "policy 3": "sends NwMode 11, parser maps 11 -> 3. consistent"
+          },
+          "assessment": "SUPPORTED INFERENCE: NwMode is an enumeration of RAT combinations rather than a plain per-RAT bitmask. A single-bit mask reading is contradicted by 5 mapping to LTE-only and by 4 and 5 mapping to different policies. The set and get value sets overlap but are not identical, so the two directions must be kept distinct.",
+          "unknown": "The authoritative NwMode enumeration is a CP/modem property and was not recovered from the CP image."
+        }
+      },
+      "cp_handler": {
+        "log": "'AT*BAND, NwMode=%d, PreferMode=%d' at 05-ARBI.bin offset 0xb03cc",
+        "adjacent_assertion": "'pSig->preferredMode == pSig->networkMode' at offset 0xb03a0 (the equality fast path)",
+        "preferred_mode_assertion": "'pSig->preferredMode == CI_DEV_NW_GSM || pSig->preferredMode == CI_DEV_NW_UMTS || pSig->preferredMode == CI_DEV_NW_LTE' at offset 0x6d4104",
+        "rat_vocabulary": ["NMODE_GSM", "NMODE_UMTS", "NMODE_LTE", "SM_RAT_MODE_NULL", "SM_RAT_MODE_LTE", "GSM_RAT"],
+        "cp_function": "L1CSetRat, evidenced by the assertion '\"invalid RAT mode using the function L1CSetRat\"' at offset 0x105cbc",
+        "confidence": "CONFIRMED for presence and vocabulary; the CP load base is unresolved, so no CP call graph was reconstructed."
+      },
+      "readback_normalizer": {
+        "address": "mobile VA 0x4a254-0x4a31c",
+        "input": "a pointer to a 32-bit raw modem preferred-mode value",
+        "mapping": {"0": 3, "1": 0, "2": 1, "3": 2, "0x3081": 3, "other": 3},
+        "output": "record 75 written with mode=temporary (commit at mobile VA 0x4a2b0)",
+        "numeric_space_identification": {
+          "claim": "The raw values 1, 2 and 3 correspond to CI_DEV_NW_GSM, CI_DEV_NW_UMTS and CI_DEV_NW_LTE.",
+          "basis": "The CP asserts exactly those three symbols for pSig->preferredMode, and the normalizer maps raw 1/2/3 onto the GSM-only, 3G-only and 4G-only policies in that order.",
+          "classification": "SUPPORTED INFERENCE",
+          "consequence": "This is the CI preferred-mode space and is distinct from the AT*BAND NwMode space consumed by the response parser."
+        }
+      },
+      "value_0x3081": {
+        "where": "A single movw immediate at mobile VA 0x4a2f0, inside the readback normalizer, compared against the raw modem preferred-mode value.",
+        "effect": "Normalizes to policy value 3 (4G/LTE preferred), the same result as raw 0 and as the default branch.",
+        "cp_presence": "NEGATIVE EVIDENCE. 0x3081 does not occur in 05-ARBI.bin as an ARM or Thumb-2 movw immediate or as a literal word. The only apparent hit is a Thumb movw inside a consecutive run (0x307e, 0x307f, 0x3080, 0x3081, 0x3082, ...) that is an assertion line-number table, not a RAT constant.",
+        "bit_structure": "UNKNOWN. No mask test, shift, or bitwise operation is applied to it anywhere; it is only ever compared for equality. No CP-side constant, comparison chain or mask corroborates a bitfield reading.",
+        "strongest_supported_interpretation": "A distinguished non-single-RAT value in the CI preferred-mode space that the AP treats as 'no single preferred RAT' and normalizes to LTE-preferred. Describing it as a RAT bitmask is not supported by any recovered evidence.",
+        "explicitly_retracted": "It is not an AT*BAND NwMode value. The NwMode values actually sent are 0, 1, 5 and 11 (builder A) or 0, 1, 5 and 14 (builder B)."
+      },
+      "persistence_owner": {
+        "confirmed": "AP record 75 (mobile_config.net_config.pref_net), written permanently only by mobile VA 0x42504 (commit at 0x4256c, mode=permanent).",
+        "permanent_writer_callers": [
+          {"address": "mobile VA 0x3b070", "context": "ProcUserEventComm, after the modem-manager operation returns 0"},
+          {"address": "mobile VA 0x36f84", "context": "manager_comm_at.cpp, after the AT transaction completes"},
+          {"address": "mobile VA 0x3b4bc", "context": "a second process_comm.cpp path, not further characterised"},
+          {"address": "mobile VA 0x42f34", "context": "src/base/mobile_status.cpp GetNetModePref: when the stored preference is not 2 or 3, logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3"}
+        ],
+        "cp_nvm": {
+          "result": "NEGATIVE EVIDENCE / UNPROVEN",
+          "statement": "No CP .nvm record is shown to store the preferred RAT. The CP contains a full NVM client and 132 distinct .nvm file names, none of which is named for RAT or network-mode selection.",
+          "nearest_candidates": ["SystemControl.nvm", "LTE_Cfg.nvm", "comBasicCfg.nvm", "ipcfg.nvm", "atStubCfg.nvm"],
+          "caution": "None of these is tied to preferred RAT by any recovered reference. Do not assign CP persistence on the basis that the CP implements RAT control."
+        }
+      },
+      "runtime_feedback": "CP registration/service state returns through the CI/MM/SAC machinery and is normalized by mobile into records 81 (registration), 83 (service status) and 82 (current network type).",
+      "effective_record": 75,
+      "mutation_status": "NOT EXECUTED. No event was sent, no AT command was issued, and no RAT, band or policy was changed.",
+      "confidence": "CONFIRMED for the AP event, payload, validation, gating, persistence and normalization; SUPPORTED INFERENCE for which AT*BAND builder is live and for the CI preferred-mode identification; UNKNOWN for the CP NwMode enumeration, the 0x3081 bit structure and CP persistence."
+    },
+    {
+      "name": "network_selection",
+      "policy_record": 76,
+      "policy_record_name": "mobile_config.net_config.net_sel_mode",
+      "workflow_record": 84,
+      "workflow_record_name": "mobile_status.net_status.net_sel_stat",
+      "frontend_enum": {"0": "automatic", "1": "manual"},
+      "libmobile_api": {
+        "setter": "CMobileClient::SetNetSel(MP_NetSel, MP_Ret*, int, callback) at libmobile 0xa4d4",
+        "readers": ["GetNetSelMode at libmobile 0xc9d0 (record 76)", "GetNetSelStat at libmobile 0xb9a8 (record 84)"],
+        "scan": "GetAvailableNet (event 0x23), AbortScanNet (event 0x24)",
+        "direct_modem_reader": "GetModemNetSel at libmobile 0xdbd0 (event 0x44)"
+      },
+      "mobile_event": "0x34",
+      "event_payload": {
+        "request": {
+          "size_bytes": 56,
+          "note": "MP_NetSel is passed by value and copied into a 0x38-byte payload buffer. The internal field layout was not decomposed.",
+          "confidence": "CONFIRMED for the size; UNKNOWN for the field layout"
+        },
+        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
+        "validation_before_send": [
+          "The first word of MP_NetSel is range-checked against 1.",
+          "The MP_Ret output pointer must be non-NULL.",
+          "The same records-19/84 pre-flight gate as the preferred-RAT setter."
+        ]
+      },
+      "record_76_writers": [
+        {"commit": "mobile VA 0x338a8", "mode": "permanent", "context": "src/comm/manager_comm_at.cpp, i.e. persisted from the AT layer after the selection transaction"},
+        {"commit": "mobile VA 0x425e0", "mode": "temporary", "context": "runtime overlay"},
+        {"commit": "mobile VA 0x4a35c", "mode": "permanent", "context": "status handler at mobile VA 0x4a320, which maps any non-zero raw input to 1"}
+      ],
+      "record_84_writer": {"commit": "mobile VA 0x42658", "mode": "temporary", "also_stores": "status object +0x2bc"},
+      "modem_representation": "AT+COPS family. 'AT+COPS=?' (scan) and 'AT+COPS=2' are present in mobile, and a '+COPS:%d,%*d,\"%d\"' response parser sits adjacent to the *BAND parser in the same AT response dispatcher.",
+      "unknowns": [
+        "The MP_NetSel 56-byte field layout.",
+        "The full record 84 enumeration beyond values 1, 3 and 11.",
+        "The exact scan-result, timeout, cancel and restore transitions."
+      ],
+      "mutation_status": "NOT EXECUTED",
+      "confidence": "CONFIRMED for the event ID, payload size, gating and record writers; UNKNOWN for the payload layout and the complete workflow FSM."
+    },
+    {
+      "name": "data_switch",
+      "policy_record": 73,
+      "policy_record_name": "mobile_config.mobile_switch.data_switch",
+      "effective_record": 79,
+      "effective_record_name": "mobile_status.net_status.conn_stat",
+      "libmobile_api": {"setter": "CMobileClient::SetDataSwitch at libmobile 0xccf8", "reader": "GetDataSwitch at libmobile 0xc8dc"},
+      "mobile_event": "0x31",
+      "event_payload": {
+        "request": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested switch value"}]},
+        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
+        "validation_before_send": ["value range-checked against 1", "MP_Ret pointer non-NULL"],
+        "preflight_gate": "NONE. Unlike the RAT and network-selection setters, this setter performs no records-19/84 check."
+      },
+      "record_73_writer": {"commit": "mobile VA 0x4238c", "mode": "permanent"},
+      "record_79_writers": [
+        {"commit": "mobile VA 0x374c0", "mode": "temporary", "context": "AT layer"},
+        {"commit": "mobile VA 0x4a10c", "mode": "temporary", "context": "status handler"}
+      ],
+      "backhaul_fsm": "BackHaulFsm, see modem-state-machines.json.",
+      "flow_limit_interaction": "See the flow_limit_gate block below; the gate is evaluated by CMobileClient::GetCallFailReason and by an internal mobile decision routine, not by this setter.",
+      "unknowns": [
+        "The attach/activation command actually issued below the backhaul FSM.",
+        "Retry and failure-propagation behaviour."
+      ],
+      "mutation_status": "NOT EXECUTED",
+      "confidence": "CONFIRMED for the event ID, payload, absence of gating and record writers; UNKNOWN for the lower attach/activate command sequence."
+    },
+    {
+      "name": "roaming_switch",
+      "policy_record": 74,
+      "policy_record_name": "mobile_config.mobile_switch.roam_switch",
+      "libmobile_api": {"setter": "CMobileClient::SetRoamSwitch at libmobile 0xcef8", "reader": "GetRoamSwitch at libmobile 0xc7e8"},
+      "mobile_event": "0x32",
+      "event_payload": {
+        "request": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested switch value"}]},
+        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
+        "validation_before_send": ["value range-checked against 1", "MP_Ret pointer non-NULL"],
+        "preflight_gate": "NONE"
+      },
+      "record_74_writer": {"commit": "mobile VA 0x4243c", "mode": "permanent"},
+      "mutation_status": "NOT EXECUTED",
+      "confidence": "CONFIRMED"
+    }
+  ],
+  "flow_limit_gate": {
+    "records": {"30": "flowstat.property.limit_enabled", "39": "flowstat.property.limit_reached", "44": "flowstat_current_boot_up.property.allow_dial_once"},
+    "condition": "record 30 == 1 AND record 39 == 2 AND record 44 == 0 yields call-fail reason 2 (wan:11 = 2), after the registration/connection gate and the roaming-policy precedence check.",
+    "evaluators": ["CMobileClient::GetCallFailReason at libmobile 0xbc2c", "internal mobile decision routine at mobile VA 0x42068-0x42118"],
+    "ownership": "All three records are written by libflowstat.so, not by mobile and not by the modem. See runtime-record-provenance.json.",
+    "note": "mobile itself writes only records 40 and 41 (flowstat_current_boot_up tx_speed/rx_speed), both temporary. It never writes 30, 39 or 44.",
+    "confidence": "CONFIRMED"
+  },
+  "signal_and_service": {
+    "record_78": {
+      "name": "mobile_status.net_status.sig_lvl",
+      "writer": {"commit": "mobile VA 0x4a170", "mode": "temporary"},
+      "transformation": "The handler at mobile VA 0x4a13c copies the incoming 32-bit value straight into record 78 with no threshold logic, arithmetic or table lookup of any kind.",
+      "consequence": "Any RSSI/RSRP/CSQ-to-level normalization happens upstream of this handler and has not been located. The threshold table is therefore still UNKNOWN, and no standard CSQ-to-bars mapping should be assumed.",
+      "related_raw_records": {
+        "200": "mobile_status.rf_info.rat",
+        "201": "mobile_status.rf_info.rssi",
+        "202": "mobile_status.rf_info.rsrp",
+        "203": "mobile_status.rf_info.rsrq",
+        "204": "mobile_status.rf_info.snr",
+        "205": "mobile_status.rf_info.ecio",
+        "206": "mobile_status.rf_info.band",
+        "207": "mobile_status.rf_info.channel"
+      },
+      "raw_writer": "Records 200-205 are written together, all temporary, by the handler at mobile VA 0x4a1a0 (commit at 0x4a224); records 206-207 by the handler at mobile VA 0x4a464 (commit at 0x4a4c8).",
+      "significance": "The firmware keeps the raw per-RAT metrics and the normalized level in separate records, so record 78 is a derived level and the raw inputs remain individually available.",
+      "confidence": "CONFIRMED for the writer, the absence of in-handler normalization, and the raw record set; UNKNOWN for the normalization thresholds."
+    },
+    "record_83": {
+      "name": "mobile_status.net_status.srv_stat",
+      "writers": [
+        {"commit": "mobile VA 0x49a50", "mode": "temporary", "context": "dedicated handler at mobile VA 0x499f4"},
+        {"commit": "mobile VA 0x49ef8", "mode": "temporary", "context": "batched update together with records 80 and 81"}
+      ],
+      "handler_shape": "The dedicated handler switches on an input restricted to 0-3 via a four-entry jump table, stages the result at status-object +0x17c, and writes record 83.",
+      "enum": {"0": "no service", "1": "limited service", "2": "available", "3": "limited area"},
+      "enum_basis": "Carried forward from the previously validated branch analysis and the tp_data binding of record 83 to srv_stat. The 0-3 value range is independently confirmed here by the jump table.",
+      "unknowns": [
+        "Whether 'limited area' is an emergency-service concept or a TP-Link abstraction.",
+        "Downstream RPC/frontend label strings for these four values.",
+        "The precise relationship to record 81 registration and to SIM state."
+      ],
+      "confidence": "CONFIRMED for writers and value range; SUPPORTED INFERENCE for the four labels."
+    }
+  },
+  "ap_cp_boundary": {
+    "established": [
+      "mobile builds textual AT commands into a 0x200-byte buffer and hands them to an AT sender at mobile VA 0x3f6a4 together with a numeric AT command ID and a correlation cookie.",
+      "Responses arrive as text and are parsed with sscanf against literal formats such as '*BAND: %d, %*d, %*d, %*d, %*d, %d' and '+COPS:%d,%*d,\"%d\"' inside a single large AT response dispatcher in src/comm/manager_comm_at.cpp.",
+      "The AT text therefore remains textual on the AP side all the way from the builder to the parser; conversion to any binary form happens at or below the /tmp/atcmd boundary described in atcmd-ipc.json."
+    ],
+    "not_established": [
+      "Whether the AT text stays textual across the AP/CP link or is converted to an ACIPC binary message.",
+      "The specific ACIPC message ID beneath AT*BAND.",
+      "The CP image load base, which blocks CP call-graph reconstruction."
+    ],
+    "targeting_guidance": "For future modem-control analysis the productive AP-side layers are, in order: the libmobile event API (typed, validated, gated), the mobile AT builder/parser layer (textual, well-symbolized through log strings and source file names), and only then the RIL/ACIPC transport. The CP image is useful for vocabulary and assertions but not yet for control flow.",
+    "confidence": "CONFIRMED for the AP-side textual path; UNKNOWN for the transport encoding below /tmp/atcmd."
+  },
+  "safety": {
+    "execution": "Nothing in this file was executed. No mobile event was sent, no AT command issued, no RPC invoked, no NVM read or written, no diagnostic mode enabled, and the physical router was not touched.",
+    "hidden_modes": "Static discovery that a parser accepts a value is recorded as such. It is not evidence that the value is exposed, supported, or safe to apply."
+  }
+}

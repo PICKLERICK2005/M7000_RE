@@ -70,10 +70,14 @@
     "configured_record": 75,
     "set_event": "0x33",
     "get_event": "0x46",
-    "modem_transport": "AT*BAND networkMode/preferredMode operation over the AP AT/RIL boundary",
-    "conversion": {"ui_1_3g_only":"CI_DEV_NW_UMTS / response 2","ui_2_4g_only":"CI_DEV_NW_LTE / response 3","ui_3_lte_preferred":"multi-RAT mask 0x3081, preferred CI_DEV_NW_LTE (3)"},
+    "modem_transport": "AT*BAND NwMode/PreferMode operation over the AP AT boundary at /tmp/atcmd",
+    "conversion_sent": {"ui_0_gsm_only_hidden":"AT*BAND=0","ui_1_3g_only":"AT*BAND=1","ui_2_4g_only":"AT*BAND=5","ui_3_lte_preferred":"AT*BAND=11","out_of_range":"AT*BAND=99"},
+    "conversion_readback": {"ci_pref_1":"policy 0 (GSM)","ci_pref_2":"policy 1 (UMTS)","ci_pref_3":"policy 2 (LTE)","ci_pref_0":"policy 3","ci_pref_0x3081":"policy 3","other":"policy 3"},
+    "staging": "The event handler stages the requested value at status-object +0x194 before invoking the modem-manager operation; the AT builder reads either that staged value or the value passed through the virtual call.",
+    "persistence_rule": "Record 75 is persisted only after the modem-manager operation returns 0, and again from the AT layer once the transaction completes successfully. A request that the modem rejects does not become durable policy.",
     "cp_runtime": "CP AT*BAND handler -> CI/MM/SAC RAT and service-manager state -> L1CSetRat and registration/service indications",
     "persistence": "AP mobile_config.net_config.pref_net is confirmed persistent; a specific CP .nvm owner is not established",
-    "confidence": "high for AP event/AT/CP enum chain; medium for exact internal CP call edge; unknown for CP persistence"
+    "detail": "modem-control-paths.json",
+    "confidence": "high for the AP event/payload/gating/persistence chain and for both numeric conversion tables; supported inference for which AT*BAND builder is live; unknown for the authoritative CP NwMode enumeration, the internal CP call edge, and CP persistence"
   }
 }

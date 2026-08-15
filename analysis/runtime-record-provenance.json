@@ -82,18 +82,25 @@
       "meaning": "preferred network type",
       "writers": [
         {"location":"mobile+0x3a2b0","elf_va":"0x4a2b0","routine_range":"mobile+0x3a25c-mobile+0x3a31c","mode":"temporary","role":"runtime normalization/reconciliation"},
-        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32508-mobile+0x32574","mode":"permanent","role":"configuration writer"},
-        {"location":"mobile+0x3b070","elf_va":"0x4b070","routine_range":"mobile+0x3b038-mobile+0x3b0a0","mode":"permanent","role":"event 0x33 accepted-request writer"},
-        {"location":"mobile+0x32f34","elf_va":"0x42f34","routine_range":"mobile+0x32edc-mobile+0x32f40","mode":"permanent","role":"startup invalid-value fallback to 3"}
+        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32504-mobile+0x32574","mode":"permanent","role":"the only permanent record-75 writer; all persistence goes through it"}
       ],
+      "permanent_writer_callers": [
+        {"elf_va":"0x3b070","file_offset":"mobile+0x2b070","context":"ProcUserEventComm, src/comm/process_comm.cpp. Persists only after the modem-manager operation invoked through virtual slot +0x24 returns 0."},
+        {"elf_va":"0x36f84","file_offset":"mobile+0x26f84","context":"src/comm/manager_comm_at.cpp. Persists the staged +0x194 value after the AT transaction completes successfully."},
+        {"elf_va":"0x3b4bc","file_offset":"mobile+0x2b4bc","context":"a second src/comm/process_comm.cpp path; not further characterised."},
+        {"elf_va":"0x42f34","file_offset":"mobile+0x32f34","context":"src/base/mobile_status.cpp GetNetModePref. When the stored preference is not 2 or 3 it logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3. This is a 3GPP2/CDMA-card repair path, not a generic startup validity check."}
+      ],
+      "writer_correction": "A complete scan of mobile for the CCfgHelper write-then-commit pattern finds exactly two record-75 writers: the permanent one at commit 0x4256c and the temporary normalizer at commit 0x4a2b0. Addresses 0x4b070 and 0x42f34 are not record writes. 0x42f34 is a call into the permanent writer, and the address 0x3b070 is an ELF VA rather than a file offset.",
       "trigger": "configuration-driven plus modem/status reconciliation",
       "upstream_source": "stored AP preference and direct-modem preferred-network response path",
       "transformation": "SetPrefNetType sends the configured scalar unchanged in synchronous mobile event 0x33. The daemon passes it to its modem manager and persists it only after immediate acceptance. The modem response from event 0x46 maps 1/2/3 to record 0/1/2; response 0, 0x3081, or any other value maps to record 3.",
       "enum_semantics": {
         "configured_rpc": {"1":"3G only","2":"4G only","3":"4G preferred / LTE preferred"},
         "modem_response_to_record": {"1":"0 (GSM/2G-only hidden AP value)","2":"1 (UMTS/3G only)","3":"2 (LTE/4G only)","0":"3 (multi-RAT/preferred fallback)","0x3081":"3 (multi-RAT/LTE-preferred mask)","other":"3 (fallback)"},
-        "modem_facing_policy": {"configured_1":"network mode 2 / UMTS","configured_2":"network mode 3 / LTE","configured_3":"multi-RAT network mask 0x3081 with LTE preferred"},
-        "warning": "Configured/RPC and modem-response values are different numeric spaces. The modem-facing mapping is strongly supported by the AP AT*BAND vocabulary, response normalizer, and CP CI_DEV_NW_GSM/UMTS/LTE handler; 0x3081's individual bit allocation is not recovered."
+        "modem_facing_policy": {"configured_0":"AT*BAND NwMode 0","configured_1":"AT*BAND NwMode 1","configured_2":"AT*BAND NwMode 5","configured_3":"AT*BAND NwMode 11","out_of_range":"AT*BAND NwMode 99"},
+        "modem_facing_policy_source": "jump table in the AT*BAND builder at mobile ELF VA 0x33220, which appends the literal decimal strings \"0\", \"1\", \"5\", \"11\" and \"99\" to \"AT*BAND=\".",
+        "readback_space_note": "The 0x3081 value belongs to the CI preferred-mode readback space consumed by the temporary normalizer, not to the AT*BAND NwMode space. The two must not be merged.",
+        "warning": "Configured/RPC, AT*BAND NwMode send, AT*BAND NwMode parse, and CI preferred-mode readback are four distinct numeric spaces. An earlier draft mapped configured 1/2/3 to modem values 2/3/0x3081; that is superseded by the builder disassembly recorded here. 0x3081's individual bit allocation is not recovered and no CP constant corroborates a bitfield reading."
       },
       "configured_vs_effective": "The persistent writer stores the requested UI/RPC policy. The AT-facing callback temporarily reconciles a modem response into the record's 0-3 normalized space; this does not prove a user configuration change.",
       "persistence": "persistent preference with temporary normalized overlay",
@@ -122,12 +129,17 @@
       "meaning": "signal level (mobile_status.net_status.sig_lvl)",
       "writers": [{"location":"mobile+0x3a170","elf_va":"0x4a170","routine_range":"mobile+0x3a13c-mobile+0x3a19c","mode":"temporary"}],
       "trigger": "event/status callback",
-      "upstream_source": "AT signal-quality/status callback; raw RSSI-to-level threshold routine remains to be named",
+      "upstream_source": "AT signal-quality/status callback; the raw-metric-to-level threshold routine is still unlocated",
       "transformation": "normalized signal-level scalar copied directly to record 78",
+      "handler_detail": "The writing handler at ELF VA 0x4a13c performs a straight 32-bit copy into record 78 with no threshold logic, arithmetic or table lookup, so the normalization happens strictly upstream of it and has not been located.",
+      "related_raw_records": {"200":"mobile_status.rf_info.rat","201":"rssi","202":"rsrp","203":"rsrq","204":"snr","205":"ecio","206":"band","207":"channel"},
+      "related_raw_writers": "Records 200-205 are written together, all temporary, by the handler at ELF VA 0x4a1a0 (commit 0x4a224); records 206-207 by the handler at ELF VA 0x4a464 (commit 0x4a4c8).",
+      "open": "Whether record 78 is bars, percentage or another normalized level, and the exact per-RAT thresholds, remain UNKNOWN. The firmware keeps raw RSSI/RSRP/RSRQ/SNR/EcIo separately from record 78, so no standard CSQ-to-bars mapping should be assumed.",
       "enum_semantics": {"0":"none or unknown","1":"poor","2":"moderate","3":"good","4":"great"},
       "persistence": "runtime only",
       "consumers": ["signal-strength getter/status model", "OLED/status presentation", "internal mobile status logic"],
-      "confidence": "high for identity, writer, and configured labels; medium for exact raw RSSI thresholds"
+      "enum_semantics_status": "The 0-4 labels come from the shipped configuration/frontend vocabulary, not from a recovered firmware threshold table. They are a SUPPORTED INFERENCE about presentation, not a proven normalization output range.",
+      "confidence": "high for identity and writer; high that the writing handler applies no normalization; supported inference for the 0-4 labels; unknown for the threshold table and the raw metric actually used per RAT"
     },
     {
       "record": 79,

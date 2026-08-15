@@ -83,15 +83,45 @@
       {"modem_value": "0x3081", "record_value": 3},
       {"modem_value": "other", "record_value": 3}
     ],
-    "modem_facing_interpretation": [
-      {"configured_value":1,"modem_network_mode":2,"meaning":"UMTS/WCDMA only"},
-      {"configured_value":2,"modem_network_mode":3,"meaning":"LTE only"},
-      {"configured_value":3,"modem_network_mode":"0x3081","preferred_mode":3,"meaning":"multi-RAT with LTE preferred"}
+    "at_band_nwmode_sent": [
+      {"configured_value": 0, "nwmode_argument": 0},
+      {"configured_value": 1, "nwmode_argument": 1},
+      {"configured_value": 2, "nwmode_argument": 5},
+      {"configured_value": 3, "nwmode_argument": 11},
+      {"configured_value": "out of range", "nwmode_argument": 99}
+    ],
+    "at_band_nwmode_parsed": [
+      {"nwmode_response": 0, "policy_value": 0},
+      {"nwmode_response": 4, "policy_value": 1},
+      {"nwmode_response": 5, "policy_value": 2},
+      {"nwmode_response": 8, "policy_value": 3},
+      {"nwmode_response": 11, "policy_value": 3},
+      {"nwmode_response": 15, "policy_value": 3},
+      {"nwmode_response": "other", "policy_value": -1}
     ],
     "hidden_response_value": {"modem_value":1,"record_value":0,"meaning":"GSM/2G only; accepted by the native model but not offered by this product UI"},
-    "warning": "The configured RPC/UI enum and modem-response enum are different numeric spaces. 0x3081 is confirmed as the multi-RAT response/mask value normalized to LTE-preferred policy, but its individual RAT-mask bits are not recovered.",
-    "evidence": "networkMode.html; libmobile SetPrefNetType/GetModemPrefNetType; mobile events 0x33/0x46; mobile AT*BAND command/query strings; CP AT*BAND handler and CI_DEV_NW_GSM/UMTS/LTE assertions",
-    "confidence": "high except individual 0x3081 bit allocation"
+    "hidden_setter_value": {"configured_value":0,"acceptance":"CMobileClient::SetPrefNetType range-checks only value <= 3, so 0 passes client validation and is placed in the event payload unchanged","status":"static acceptance only; never exercised, and not evidence that the daemon, modem manager or CP apply it safely"},
+    "numeric_spaces": {
+      "count": 4,
+      "spaces": [
+        "configured AP/UI policy enum (1/2/3, plus hidden 0)",
+        "AT*BAND NwMode argument space sent to the modem (0/1/5/11, default 99)",
+        "AT*BAND NwMode response space recognised by the parser (0/4/5/8/11/15), mapped back into the policy space",
+        "CI preferred-mode readback space (0/1/2/3/0x3081) consumed by the temporary normalizer"
+      ],
+      "warning": "These four spaces must not be collapsed. In particular the AT*BAND NwMode space and the CI preferred-mode readback space are different: 0x3081 belongs only to the latter."
+    },
+    "round_trip": "Policy values 0, 2 and 3 round-trip through AT*BAND (sent 0/5/11, parsed back to 0/2/3). Policy value 1 sends NwMode 1, which the response parser does not recognise and maps to -1. The set and get value sets overlap but are not identical.",
+    "value_0x3081": {
+      "role": "compared for equality against the raw CI preferred-mode readback at mobile VA 0x4a2f0; normalizes to policy value 3, the same result as raw 0 and as the default branch",
+      "cp_presence": "NEGATIVE EVIDENCE: absent from 05-ARBI.bin as an ARM or Thumb-2 movw immediate and as a literal word",
+      "bit_structure": "unknown; the value is only ever equality-compared, never masked or shifted, and no CP constant corroborates a bitfield reading",
+      "retracted": "It is not an AT*BAND network-mode argument. The NwMode values actually sent are 0, 1, 5 and 11."
+    },
+    "warning": "The configured RPC/UI enum and the modem-facing enums are different numeric spaces. 0x3081 is confirmed only as a distinguished readback value that normalizes to LTE-preferred; calling it a RAT mask is not supported.",
+    "evidence": "networkMode.html; libmobile SetPrefNetType 0xa114 and GetModemPrefNetType 0xd8b0; mobile events 0x33/0x46; mobile AT*BAND builders at VA 0x33220 and 0x3336c; the *BAND response parser jump tables at VA 0x34b98 and 0x38aac; the readback normalizer at VA 0x4a254; CP AT*BAND NwMode/PreferMode log and CI_DEV_NW_GSM/UMTS/LTE assertion",
+    "detail": "See modem-control-paths.json for payloads, builders, gating and confidence boundaries.",
+    "confidence": "high for all four numeric tables; unknown for the authoritative CP NwMode enumeration and for the 0x3081 bit allocation"
   },
   "network_selection_mode_record_76": {
     "values": [{"value": 0, "meaning": "automatic"}, {"value": 1, "meaning": "manual"}],
