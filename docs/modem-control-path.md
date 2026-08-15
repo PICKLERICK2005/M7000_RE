@@ -140,7 +140,39 @@ roaming policy, flow-limit state, network-selection activity, profile changes,
 and packet detach/deactivation all feed this FSM.
 
 For configured RAT policy, record 75 illustrates the reverse direction. The UI
-enum (`1` 3G only, `2` 4G only, `3` 4G/LTE preferred) is persistent policy. An
-AT-facing callback maps a distinct modem-response space into a temporary
-normalized value. The exact modem RAT masks remain unknown; no setter or AT
-command was executed to establish them.
+enum (`1` 3G only, `2` 4G only, `3` 4G/LTE preferred) enters libmobile event
+`0x33` unchanged. `mobile` stages it at status-object offset `0x194`, invokes
+the modem-manager operation, and persists record 75 only after immediate
+acceptance. Startup also repairs an invalid stored preference to `3`.
+
+The lower boundary is the Marvell/ASR `AT*BAND` model. The AP firmware contains
+both `AT*BAND?` and setters with separate network-mode and preferred-mode
+arguments. Its direct read event `0x46` returns the modem scalar that the
+callback normalizes: `1` GSM -> hidden AP value `0`, `2` UMTS -> UI value `1`,
+`3` LTE -> UI value `2`, and multi-RAT `0x3081` (or fallback `0`) -> UI value
+`3`. Consequently the configured policy conversion is 3G-only -> modem mode
+`2`, 4G-only -> mode `3`, and LTE-preferred -> multi-RAT mask `0x3081` with
+preferred mode LTE (`3`). The CP `AT*BAND` handler logs `NwMode` and
+`PreferMode`, checks the two for equality, and explicitly accepts preferred
+mode `CI_DEV_NW_GSM`, `CI_DEV_NW_UMTS`, or `CI_DEV_NW_LTE`.
+
+This establishes the strongest static control chain currently available:
+
+```text
+networkMode UI
+  -> wan configured preferred-network policy
+  -> libmobile SetPrefNetType / event 0x33
+  -> mobile modem-manager AT*BAND operation
+  -> AP AT/RIL channel
+  -> CP AT*BAND handler (networkMode + preferredMode)
+  -> CP RAT/service-manager state
+  -> registration/service indications
+  -> records 81 (registration), 83 (service), 82 (current RAT)
+```
+
+The AP owns durable record 75 in `mobile_config.net_config.pref_net`. The CP
+image contains `SystemControl.nvm`, `LTE_Cfg.nvm`, the NVM client, and named
+NRAM2 PLMN/band-order records, but static evidence does not tie the preferred
+RAT setting to a particular `.nvm` record. It may be runtime CP state reapplied
+from AP policy at startup. This gap is retained rather than assigning false CP
+persistence. No setter or AT command was executed.
