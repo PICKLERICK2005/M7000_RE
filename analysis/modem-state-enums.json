@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "scope": "Offline enum recovery for M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n. Values are firmware-derived unless explicitly marked as comparison only.",
+  "offset_convention": "mobile+0xOFFSET is a file offset; add 0x10000 for the first executable PT_LOAD ELF VA.",
+  "registration_raw": {
+    "values": [
+      {"value": 0, "meaning": "not registered, not searching", "evidence": "mobile_status_at.cpp branch plus embedded log"},
+      {"value": 1, "meaning": "registered home", "evidence": "normalizer branch; value is treated as registered and not roaming"},
+      {"value": 2, "meaning": "not registered, searching", "evidence": "mobile_status_at.cpp branch plus embedded log"},
+      {"value": 3, "meaning": "registration denied", "evidence": "mobile_status_at.cpp branch plus embedded log"},
+      {"value": 4, "meaning": "unknown/not registered", "evidence": "falls into the not-registered/not-searching aggregate branch; exact source label not logged"},
+      {"value": 5, "meaning": "registered roaming", "evidence": "treated as registered and independently raises roaming record 80"}
+    ],
+    "confidence": "high; value 4 label is supported inference"
+  },
+  "registration_normalized_record_81": {
+    "values": [
+      {"value": 0, "meaning": "not registered"},
+      {"value": 1, "meaning": "registered on primary packet-service domain"},
+      {"value": 2, "meaning": "searching, or registered on the secondary service domain"},
+      {"value": 3, "meaning": "registration denied"}
+    ],
+    "derivation": [
+      "primary raw 1 or 5 -> 1",
+      "otherwise secondary raw 1 or 5 -> 2",
+      "otherwise either normalized domain is searching -> 2",
+      "otherwise either normalized domain is denied -> 3",
+      "otherwise -> 0"
+    ],
+    "note": "The numeric value 2 deliberately collapses two distinct internal conditions. Record 83 retains part of the service-domain distinction.",
+    "evidence": "mobile+0x39ab0-mobile+0x39f24 (ELF VA 0x49ab0-0x49f24)",
+    "confidence": "high"
+  },
+  "roaming_record_80": {
+    "values": [{"value": 0, "meaning": "not roaming"}, {"value": 1, "meaning": "roaming"}],
+    "derivation": "1 when any of the three retained raw registration-domain values equals 5; otherwise 0",
+    "confidence": "high"
+  },
+  "service_substate_record_83": {
+    "values": [
+      {"value": 0, "meaning": "no selected service-domain special case"},
+      {"value": 1, "meaning": "secondary service state 11"},
+      {"value": 2, "meaning": "secondary service state 1 or 5, or primary-registered fallback"},
+      {"value": 3, "meaning": "secondary service state 3"}
+    ],
+    "note": "The input service-state enum extends beyond raw registration 0-5 (a jump table covers 1-11). Exact public labels for values 1-3 remain unknown.",
+    "confidence": "high for branch mapping; low for semantic labels"
+  },
+  "connection_record_79": {
+    "values": [
+      {"value": 0, "meaning": "disabled"},
+      {"value": 1, "meaning": "disconnected"},
+      {"value": 2, "meaning": "connecting"},
+      {"value": 3, "meaning": "disconnecting"},
+      {"value": 4, "meaning": "connected"}
+    ],
+    "evidence": "frontend enum and mobile BackHaulFsm state dispatch at ELF VA 0x464bc-0x47004",
+    "confidence": "high"
+  },
+  "current_network_type_record_82": {
+    "values": [
+      {"value": 0, "meaning": "no service"},
+      {"value": 1, "meaning": "GSM"},
+      {"value": 2, "meaning": "WCDMA"},
+      {"value": 3, "meaning": "LTE"},
+      {"value": 4, "meaning": "TD-SCDMA", "reachability": "frontend-supported; AP writer not confirmed"},
+      {"value": 5, "meaning": "CDMA 1x", "reachability": "frontend-supported; AP writer not confirmed"},
+      {"value": 6, "meaning": "CDMA 1x EV-DO", "reachability": "frontend-supported; AP writer not confirmed"}
+    ],
+    "confidence": "high for 0-3; medium for 4-6 as management-layer enum"
+  },
+  "preferred_network_record_75": {
+    "configured_rpc_values": [
+      {"value": 1, "meaning": "3G only"},
+      {"value": 2, "meaning": "4G only"},
+      {"value": 3, "meaning": "4G preferred / LTE preferred"}
+    ],
+    "modem_to_record_mapping": [
+      {"modem_value": 1, "record_value": 0},
+      {"modem_value": 2, "record_value": 1},
+      {"modem_value": 3, "record_value": 2},
+      {"modem_value": 0, "record_value": 3},
+      {"modem_value": "0x3081", "record_value": 3},
+      {"modem_value": "other", "record_value": 3}
+    ],
+    "warning": "The configured RPC/UI enum and modem-response enum are different numeric spaces. The modem command/mask represented by raw 0, 1, 2, 3, and 0x3081 is not yet named.",
+    "evidence": "networkMode.html plus mobile+0x3a25c-mobile+0x3a31c",
+    "confidence": "high for both numeric tables; medium for configured label 3 wording"
+  },
+  "network_selection_mode_record_76": {
+    "values": [{"value": 0, "meaning": "automatic"}, {"value": 1, "meaning": "manual"}],
+    "normalization": "any nonzero modem/status input becomes 1",
+    "storage": "persistent policy with a separate temporary workflow write path; do not collapse these roles",
+    "confidence": "high"
+  },
+  "network_selection_status_record_84": {
+    "values": [
+      {"value": 0, "meaning": "idle"},
+      {"value": 1, "meaning": "registering"},
+      {"value": 2, "meaning": "registered"},
+      {"value": 3, "meaning": "searching"},
+      {"value": 4, "meaning": "search finished"},
+      {"value": 5, "meaning": "generic search failure"},
+      {"value": 6, "meaning": "generic registration failure"},
+      {"value": 7, "meaning": "registration denied by network"},
+      {"value": 8, "meaning": "illegal SIM or ME"},
+      {"value": 9, "meaning": "saving"},
+      {"value": 10, "meaning": "saved"},
+      {"value": 11, "meaning": "canceling"},
+      {"value": 12, "meaning": "canceled"},
+      {"value": 13, "meaning": "search failed because SMS was being sent"}
+    ],
+    "evidence": "shipped frontend enum independently correlated with mobile writer callsites",
+    "confidence": "high"
+  },
+  "call_failure_rpc": {
+    "values": [
+      {"value": 0, "meaning": "normal/no displayed disconnect reason"},
+      {"value": 1, "meaning": "roaming-policy disconnect"},
+      {"value": 2, "meaning": "flow-statistics/data-limit disconnect"}
+    ],
+    "precedence": [
+      "Only derive a reason when record 81 == 1 and record 79 == 1; otherwise return 0.",
+      "If record 74 != 1 and record 80 == 1, return 1.",
+      "Then if record 30 == 1 and record 39 == 2 and record 44 == 0, return 2.",
+      "Otherwise return 0."
+    ],
+    "evidence": "CMobileClient::GetCallFailReason at libmobile ELF VA 0xbc2c-0xbe10 plus frontend labels",
+    "confidence": "high"
+  }
+}

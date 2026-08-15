@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "scope": "Canonical provenance tuples for status-critical and derived-failure libdata_management records in M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n.",
   "offset_convention": {
     "display": "mobile+0xOFFSET",
@@ -12,39 +12,46 @@
     "temporary_mode_argument": 0,
     "permanent_mode_argument": "nonzero"
   },
+  "semantic_artifacts": {
+    "enum_crosswalks": "analysis/modem-state-enums.json",
+    "state_machines": "analysis/modem-state-machines.json"
+  },
   "records": [
     {
       "record": 30,
-      "meaning": "call-failure input; exact semantic unresolved",
+      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
       "writers": [{"location":"unknown","trigger":"unknown"}],
       "trigger": "unknown",
       "upstream_source": "unknown",
       "transformation": "unknown",
       "persistence": "unknown",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
-      "confidence": "high as a consumer input; low for semantic provenance"
+      "derived_role": "GetCallFailReason returns flow-limit reason 2 when record 30 == 1, record 39 == 2, and record 44 == 0, after registration/connection and roaming-policy precedence checks.",
+      "confidence": "high for derived role; low for standalone semantic provenance"
     },
     {
       "record": 39,
-      "meaning": "call-failure input; exact semantic unresolved",
+      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
       "writers": [{"location":"unknown","trigger":"unknown"}],
       "trigger": "unknown",
       "upstream_source": "unknown",
       "transformation": "unknown",
       "persistence": "unknown",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
-      "confidence": "high as a consumer input; low for semantic provenance"
+      "derived_role": "Middle member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
+      "confidence": "high for derived role; low for standalone semantic provenance"
     },
     {
       "record": 44,
-      "meaning": "call-failure input; exact semantic unresolved",
+      "meaning": "flow-limit disconnect derivation input; exact standalone semantic unresolved",
       "writers": [{"location":"unknown","trigger":"unknown"}],
       "trigger": "unknown",
       "upstream_source": "unknown",
       "transformation": "unknown",
       "persistence": "unknown",
       "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
-      "confidence": "high as a consumer input; low for semantic provenance"
+      "derived_role": "Final member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
+      "confidence": "high for derived role; low for standalone semantic provenance"
     },
     {
       "record": 73,
@@ -77,7 +84,13 @@
       ],
       "trigger": "configuration-driven plus modem/status reconciliation",
       "upstream_source": "stored AP preference and direct-modem preferred-network response path",
-      "transformation": "modem/preference enum -> bounded TP-Link preferred-network enum; exact case table not yet named",
+      "transformation": "modem response 1/2/3 maps to record 0/1/2; modem response 0, 0x3081, or any other value maps to record 3. Modem-facing labels for the raw values remain unknown.",
+      "enum_semantics": {
+        "configured_rpc": {"1":"3G only","2":"4G only","3":"4G preferred / LTE preferred"},
+        "modem_response_to_record": {"1":0,"2":1,"3":2,"0":3,"0x3081":3,"other":3},
+        "warning": "Configured/RPC and modem-response values are different numeric spaces; the modem-facing RAT masks remain unnamed."
+      },
+      "configured_vs_effective": "The persistent writer stores the requested UI/RPC policy. The AT-facing callback temporarily reconciles a modem response into the record's 0-3 normalized space; this does not prove a user configuration change.",
       "persistence": "persistent preference with temporary normalized overlay",
       "consumers": ["CMobileClient::GetPrefNetType", "CMobileClient::GetAllStatus", "wan:0", "network-mode policy"],
       "confidence": "high for paths and storage; medium for enum labels"
@@ -93,6 +106,8 @@
       "trigger": "configuration and network-selection workflow",
       "upstream_source": "AP selection policy plus modem selection workflow",
       "transformation": "input scalar normalized to 0/1 for automatic/manual selection",
+      "enum_semantics": {"0":"automatic","1":"manual"},
+      "workflow_overlay": "Permanent policy writers coexist with mobile+0x325e0 temporary workflow writes. Record 84 tracks operation progress/result independently.",
       "persistence": "persistent configuration with temporary workflow overlay",
       "consumers": ["CMobileClient::GetNetSelMode", "CMobileClient::GetAllStatus", "wan:0", "network-selection workflow"],
       "confidence": "high"
@@ -115,6 +130,11 @@
       "trigger": "event/FSM-driven",
       "upstream_source": "backhaul FSM, connect/disconnect completion, and +CGEV detach/deactivation handling",
       "transformation": "internal backhaul state -> TP-Link MP_ConnStat enum by direct stored-state copy",
+      "enum_semantics": {"0":"disabled","1":"disconnected","2":"connecting","3":"disconnecting","4":"connected"},
+      "state_machine": {
+        "routine":"BackHaulFsm at mobile+0x364bc-mobile+0x37004",
+        "principal_transitions":["disabled -> disconnected on enable","disconnected -> connecting on connect/retry","connecting -> connected on success","connecting -> disconnected on failure","connected -> disconnecting on request/precondition loss","disconnecting -> disconnected on completion","disconnecting -> connecting on reconnect/profile-change path"]
+      },
       "persistence": "runtime only",
       "consumers": ["CMobileClient::GetConnState", "CMobileClient::GetAllStatus", "CMobileClient::GetCallFailReason", "wan:0", "status:0", "backhaul FSM"],
       "confidence": "high"
@@ -129,6 +149,8 @@
       "trigger": "registration indication/response and roaming-status callback",
       "upstream_source": "+CGREG/+CREG/+CEREG registration information and AT status parsing",
       "transformation": "raw/home-roaming condition -> boolean-like TP-Link roaming state",
+      "enum_semantics": {"0":"not roaming","1":"roaming"},
+      "raw_mapping": "record 80 is 1 when any of the three retained raw registration-domain values equals 5; otherwise 0",
       "persistence": "runtime only",
       "consumers": ["CMobileClient::GetRoamStat (combined with record 81)", "CMobileClient::GetCallFailReason", "status:0 wan.roaming", "backhaul roaming policy"],
       "confidence": "high"
@@ -139,7 +161,13 @@
       "writers": [{"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 83"}],
       "trigger": "indication-driven with solicited-query and startup support",
       "upstream_source": "+CGREG/+CREG/+CEREG unsolicited results and AT+CGREG?/AT+CREG?/AT+CEREG? responses",
-      "transformation": "CS/PS/LTE registration enums -> consolidated TP-Link MP_RegStat; branch table confirmed, complete raw-to-public enum labels not yet named",
+      "transformation": "Three raw domain states are retained, each raw 0-5 value is normalized, then primary and secondary service states are collapsed into MP_RegStat record 81.",
+      "raw_semantics": {"0":"not registered/not searching","1":"registered home","2":"searching","3":"denied","4":"unknown/not registered","5":"registered roaming"},
+      "enum_semantics": {"0":"not registered","1":"registered on primary packet-service domain","2":"searching or registered on secondary service domain","3":"registration denied"},
+      "normalization": ["primary raw 1/5 -> 1","else secondary raw 1/5 -> 2","else either searching -> 2","else either denied -> 3","else -> 0"],
+      "parser_callback": {"routine":"UpdateRegStat normalization callback","location":"mobile+0x39ab0-mobile+0x39f24","elf_va":"0x49ab0-0x49f24"},
+      "refresh_model": {"primary":"unsolicited indication driven","secondary":"solicited query/startup/fallback"},
+      "derived_dependencies": ["record 80 roaming is derived from raw value 5 before the batch commit","record 83 preserves part of the service-domain substate","record 79 backhaul policy consumes the normalized result"],
       "persistence": "runtime only",
       "consumers": ["CMobileClient::GetRegStat", "CMobileClient::GetAllStatus", "CMobileClient::GetRoamStat", "CMobileClient::GetCallFailReason", "status:0 wan.registerStatus", "backhaul FSM"],
       "confidence": "high for provenance; medium for complete enum-label mapping"
@@ -151,6 +179,7 @@
       "trigger": "AT status indication/response update",
       "upstream_source": "AT network/system information parsed by mobile_status_at.cpp",
       "transformation": "raw radio family -> TP-Link network type; confirmed categories include NONE, GSM, WCDMA, and LTE",
+      "enum_semantics": {"0":"no service","1":"GSM","2":"WCDMA","3":"LTE","4":"TD-SCDMA (frontend-supported)","5":"CDMA 1x (frontend-supported)","6":"CDMA 1x EV-DO (frontend-supported)"},
       "persistence": "runtime only",
       "consumers": ["CMobileClient::GetNetType", "status:0 wan.networkType", "internal status logic"],
       "confidence": "high"
@@ -165,6 +194,8 @@
       "trigger": "registration/status state-machine update",
       "upstream_source": "AT-derived registration/network state",
       "transformation": "internal state-machine cases -> scalar values 0/1/2/3; semantic labels unresolved",
+      "enum_semantics": {"0":"no selected service-domain special case","1":"secondary service state 11","2":"secondary state 1/5 or primary-registered fallback","3":"secondary service state 3"},
+      "state_machine_role": "Retains service-domain detail that record 81 partly collapses; exact public labels remain unknown.",
       "persistence": "runtime only",
       "consumers": ["internal mobile status/backhaul logic; no confirmed direct web getter"],
       "confidence": "high for writer and value range; low for public meaning"
@@ -176,6 +207,8 @@
       "trigger": "network-selection operation/FSM-driven",
       "upstream_source": "manual/automatic selection workflow and modem selection result",
       "transformation": "workflow status scalar -> MP_SelStat enum by direct copy",
+      "enum_semantics": {"0":"idle","1":"registering","2":"registered","3":"searching","4":"search finished","5":"generic search failure","6":"generic registration failure","7":"registration denied by network","8":"illegal SIM or ME","9":"saving","10":"saved","11":"canceling","12":"canceled","13":"search failed because SMS was being sent"},
+      "state_machine_role": "Temporary operation state/result for scan, manual/automatic selection, save, and cancellation. It is not the configured automatic/manual policy.",
       "persistence": "runtime only",
       "consumers": ["CMobileClient::GetNetSelStat", "wan:10 networkSelectionStatus", "network-selection workflow"],
       "confidence": "high"

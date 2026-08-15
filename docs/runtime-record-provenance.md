@@ -33,13 +33,67 @@ data-management write wrapper unless a routine range is stated.
 
 Records `30`, `39`, and `44` are confirmed inputs to `GetCallFailReason`, but
 their individual meanings, writers, and persistence remain unresolved. They are
-included as explicit unknown tuples so future write-oriented analysis cannot
-accidentally treat an inference as established fact.
+included as explicit unknown tuples. Their collective role is confirmed:
+`30 == 1 && 39 == 2 && 44 == 0` produces the flow-limit disconnect reason
+after the registration/connection gate and roaming-policy check.
 
 The profile family (`47`, `48`, `51`, `52`, `61`-`64`, dynamic user records,
 and ISP records starting at `65`) is also represented. Its read expansion and
 persistent configuration role are established; exhaustive per-record writer
 attribution is the remaining gap.
+
+## Recovered enum semantics
+
+Record 81 is a normalized aggregate, not a raw registration value. The
+AT-facing object retains three raw domain states. Raw values `0..5` are handled
+as not-registered/not-searching, registered-home, searching, denied,
+unknown/not-registered, and registered-roaming. The normalizer at
+`mobile+0x39ab0-mobile+0x39f24` then emits:
+
+| Record 81 | Meaning |
+| ---: | --- |
+| 0 | Not registered |
+| 1 | Registered on the primary packet-service domain |
+| 2 | Searching, or registered on the secondary service domain |
+| 3 | Registration denied |
+
+Value `2` therefore collapses two internal conditions. Record 80 is derived
+separately: any retained raw registration value of `5` makes it roaming. Record
+83 preserves some service-domain detail, but its public labels remain unknown.
+
+Record 79 and the shipped UI share `0` disabled, `1` disconnected,
+`2` connecting, `3` disconnecting, and `4` connected. The real `BackHaulFsm`
+at `mobile+0x364bc-mobile+0x37004` dispatches all five states and covers
+enable/disable, connect, completion, failure, automatic retry, disconnect, and
+profile-change reconnect paths.
+
+Record 84 is independently named by frontend and backend evidence: `0` idle,
+`1` registering, `2` registered, `3` searching, `4` search-finished, `5` search
+failure, `6` registration failure, `7` denied, `8` illegal SIM/ME, `9` saving,
+`10` saved, `11` canceling, `12` canceled, and `13` search blocked by SMS
+activity. This operation enum is separate from record 76's persistent
+automatic/manual policy and temporary workflow overlay.
+
+Preferred-network record 75 exposes a numeric-space boundary. Configured UI
+values are `1` = 3G only, `2` = 4G only, and `3` = 4G/LTE preferred. A modem
+response callback maps its different space as `1/2/3 -> 0/1/2`, while `0`,
+`0x3081`, and other values become record value `3`. The modem RAT masks behind
+those raw values remain unnamed; the two spaces are not interchangeable.
+
+The dense tables and transition graph are in
+[`modem-state-enums.json`](../analysis/modem-state-enums.json) and
+[`modem-state-machines.json`](../analysis/modem-state-machines.json).
+
+## Derived disconnect reason
+
+`CMobileClient::GetCallFailReason` at libmobile ELF VA `0xbc2c-0xbe10` takes a
+single seven-record snapshot. Its precedence is:
+
+1. Unless `81 == 1` and `79 == 1`, return `0`.
+2. If roaming is disabled (`74 != 1`) while roaming is active (`80 == 1`),
+   return `1` (roaming-policy disconnect).
+3. If `30 == 1`, `39 == 2`, and `44 == 0`, return `2` (flow-limit disconnect).
+4. Otherwise return `0`.
 
 ## Architectural consequence
 

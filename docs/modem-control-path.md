@@ -124,3 +124,23 @@ consumes radio, calibration, lock, and low-level modem state. SIM-derived and
 runtime network fields remain dynamically sourced. Static setter symbols remain
 code-presence evidence only; they do not establish web reachability, safety, or
 persistence.
+
+## Runtime state normalization
+
+The registration callback at `mobile+0x39ab0-mobile+0x39f24` retains three raw
+registration-domain values, treats home (`1`) and roaming (`5`) as registered,
+emits roaming separately in record 80, and collapses the domains into record
+81. Record 81 value `2` can mean either searching or secondary-domain
+registration, so it is not a lossless copy of any one AT result.
+
+The backhaul FSM at `mobile+0x364bc-mobile+0x37004` owns record 79's source
+field. Its enum is `0` disabled, `1` disconnected, `2` connecting,
+`3` disconnecting, and `4` connected. Registration/service state, data and
+roaming policy, flow-limit state, network-selection activity, profile changes,
+and packet detach/deactivation all feed this FSM.
+
+For configured RAT policy, record 75 illustrates the reverse direction. The UI
+enum (`1` 3G only, `2` 4G only, `3` 4G/LTE preferred) is persistent policy. An
+AT-facing callback maps a distinct modem-response space into a temporary
+normalized value. The exact modem RAT masks remain unknown; no setter or AT
+command was executed to establish them.
