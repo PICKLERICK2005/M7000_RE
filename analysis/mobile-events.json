@@ -1,0 +1,113 @@
+{
+  "scope": "Symbol-to-event mapping recovered statically from libmobile.so in firmware 3.0.2 Build 241129 Rel.3n. No event was transmitted.",
+  "field": "CMobileEvent serialized header word at offset 4",
+  "families": [
+    {
+      "range": "0x00000001",
+      "name": "process control",
+      "events": [{"id":"0x00000001","method":"ExitProcess","kind":"state-changing","payload_bytes":0}]
+    },
+    {
+      "range": "0x00000010-0x00000015",
+      "name": "profiles",
+      "events": [
+        {"id":"0x00000010","method":"AddProfile","kind":"state-changing"},
+        {"id":"0x00000011","method":"AddProfileWzd","kind":"state-changing"},
+        {"id":"0x00000012","method":"DelProfile","kind":"state-changing"},
+        {"id":"0x00000013","method":"EditProfile","kind":"state-changing"},
+        {"id":"0x00000014","method":"EditProfileWzd","kind":"state-changing"},
+        {"id":"0x00000015","method":"SetCurrProf","kind":"state-changing"}
+      ]
+    },
+    {
+      "range": "0x00000020-0x00000025",
+      "name": "backhaul and network scan",
+      "events": [
+        {"id":"0x00000020","method":"ConnectBackHaul","kind":"state-changing"},
+        {"id":"0x00000021","method":"DisconnectBackHaul","kind":"state-changing"},
+        {"id":"0x00000022","method":"UpdateBackHaul","kind":"state-changing"},
+        {"id":"0x00000023","method":"GetAvailableNet","kind":"read"},
+        {"id":"0x00000024","method":"AbortScanNet","kind":"state-changing"},
+        {"id":"0x00000025","method":"ReloadIspFile","kind":"state-changing"}
+      ]
+    },
+    {
+      "range": "0x00000030-0x00000035",
+      "name": "network configuration",
+      "events": [
+        {"id":"0x00000030","method":"SetAllConfig","kind":"state-changing"},
+        {"id":"0x00000031","method":"SetDataSwitch","kind":"state-changing","payload_bytes":4},
+        {"id":"0x00000032","method":"SetRoamSwitch","kind":"state-changing","payload_bytes":4},
+        {"id":"0x00000033","method":"SetPrefNetType","kind":"state-changing","payload_bytes":4},
+        {"id":"0x00000034","method":"SetNetSel","kind":"state-changing"},
+        {"id":"0x00000035","method":"SetModemMode","kind":"state-changing"}
+      ]
+    },
+    {
+      "range": "0x00000040-0x00000047, 0x0000004b",
+      "name": "direct modem reads",
+      "events": [
+        {"id":"0x00000040","method":"GetRtParam","kind":"read"},
+        {"id":"0x00000041","method":"GetPktStat","kind":"read"},
+        {"id":"0x00000042","method":"GetModemMobileCode","kind":"read"},
+        {"id":"0x00000043","method":"GetModemSigLevel","kind":"read"},
+        {"id":"0x00000044","method":"GetModemNetSel","kind":"read"},
+        {"id":"0x00000045","method":"GetModemConnState","kind":"read"},
+        {"id":"0x00000046","method":"GetModemPrefNetType","kind":"read"},
+        {"id":"0x00000047","method":"GetModemRegStat","kind":"read"},
+        {"id":"0x0000004b","method":"GetCellInfo","kind":"read"}
+      ]
+    },
+    {
+      "range": "0x00000050-0x00000057",
+      "name": "voice and USSD",
+      "events": [
+        {"id":"0x00000050","method":"StartVoiceCall","kind":"state-changing"},
+        {"id":"0x00000051","method":"EndVoiceCall","kind":"state-changing"},
+        {"id":"0x00000052","method":"AnswerVoiceCall","kind":"state-changing"},
+        {"id":"0x00000053","method":"StartVoiceDTMF","kind":"state-changing"},
+        {"id":"0x00000054","method":"EndVoiceDTMF","kind":"state-changing"},
+        {"id":"0x00000055","method":"SendUssdReq","kind":"state-changing"},
+        {"id":"0x00000056","method":"CancelUssdReq","kind":"state-changing"},
+        {"id":"0x00000057","method":"GetUssdResp","kind":"read"}
+      ]
+    },
+    {
+      "range": "0x00000060-0x00000067",
+      "name": "SIM and PIN",
+      "events": [
+        {"id":"0x00000060","method":"GetSimStatus","kind":"read"},
+        {"id":"0x00000062","method":"GetPinStatus","kind":"read"},
+        {"id":"0x00000063","method":"SetSimLock(enable)","kind":"state-changing"},
+        {"id":"0x00000064","method":"SetSimLock(disable)","kind":"state-changing"},
+        {"id":"0x00000065","method":"EnterPin","kind":"state-changing"},
+        {"id":"0x00000066","method":"ChangePin","kind":"state-changing"},
+        {"id":"0x00000067","method":"EnterPuk","kind":"state-changing"}
+      ]
+    },
+    {
+      "range": "0x00000079",
+      "name": "mobile-termination state",
+      "events": [{"id":"0x00000079","method":"SetMTStatus","kind":"state-changing"}]
+    },
+    {
+      "range": "0x00010000-0x00010006",
+      "name": "SMS",
+      "events": [
+        {"id":"0x00010000","method":"smsHandler","kind":"mixed callback/dispatch"},
+        {"id":"0x00010001","method":"SendSmsMessage","kind":"state-changing"},
+        {"id":"0x00010003","method":"ReadSmsList","kind":"read"},
+        {"id":"0x00010004","method":"SaveSmsDraft","kind":"state-changing"},
+        {"id":"0x00010005","method":"DeleteSmsMessage","kind":"state-changing"},
+        {"id":"0x00010006","method":"MarkSmsUnread","kind":"state-changing"}
+      ]
+    }
+  ],
+  "observations": [
+    "The numeric grouping is a firmware design property visible in code, not a guessed taxonomy.",
+    "Some high-level getters use libdata_management records, while the methods labelled direct modem reads construct and post CMobileEvent objects.",
+    "Successful synchronous calls generally expect a four-byte response payload containing MP_Ret or another scalar result.",
+    "Missing values in otherwise contiguous ranges were not assigned because no symbol-backed constructor was observed."
+  ],
+  "safety": "All non-read entries are catalogued only. Their presence does not prove web exposure or safe live-device use."
+}

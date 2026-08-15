@@ -43,4 +43,10 @@ WSL 2 and QEMU 10.2.1 now execute the exact firmware rootfs. The complete hook m
 
 ## Next boundary
 
-The sandbox has reached its useful limit for this phase. Preserve it for isolated backend experiments and return to the queued narrowly scoped live read-only RPC plan.
+The `rpmServer` sandbox has reached its useful limit, but static recovery has
+made a bounded `mobile` daemon experiment plausible. Do not start the real
+daemon until `/tmp/atcmd`, network-manager notification, CP-reset/NVM-switch,
+and writable data-management boundaries are fail-closed. See
+[`traces/mobile-sandbox-gate-summary.md`](traces/mobile-sandbox-gate-summary.md).
+The queued narrowly scoped live read-only RPC plan remains the next live-device
+phase; it has not been abandoned.
