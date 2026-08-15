@@ -1,0 +1,21 @@
+{
+  "format": "Marvell_FBF",
+  "descriptor_table": {"offset": 320, "entry_size": 52, "entry_count": 10, "payload_alignment": 8192},
+  "components": [
+    {"raw_id":"JSYS","numeric_id":"SYSJ","offset":8192,"size":10806548,"role":"SquashFS rootfs"},
+    {"raw_id":"GMIZ","numeric_id":"ZIMG","offset":10821632,"size":3928872,"role":"Linux zImage plus DTBs"},
+    {"raw_id":"OLSO","numeric_id":"OSLO","offset":14753792,"size":459168,"role":"U-Boot 2014.01"},
+    {"raw_id":"IBFR","numeric_id":"RFBI","offset":15220736,"size":32768,"role":"opaque RF material"},
+    {"raw_id":"IBRG","numeric_id":"GRBI","offset":15253504,"size":2621440,"role":"LTE Layer-1/baseband image"},
+    {"raw_id":"IBRA","numeric_id":"ARBI","offset":17874944,"size":7707288,"role":"ARM CP/RTOS image"},
+    {"raw_id":"1MIT","numeric_id":"TIM1","offset":25583616,"size":2436,"role":"image-chain metadata"},
+    {"raw_id":"VTOF","numeric_id":"FOTV","offset":25591808,"size":51,"role":"modem build/version string"},
+    {"raw_id":"IASR","numeric_id":"RSAI","offset":25600000,"size":256,"role":"signature-sized high-entropy material; verification unresolved"},
+    {"raw_id":"I5DM","numeric_id":"MD5I","offset":25608192,"size":16,"role":"digest-sized material; covered range unresolved"}
+  ],
+  "integrity_authenticity": {
+    "confirmed":"U-Boot contains kernel verification and checksum vocabulary; FBF carries MD5-sized and RSA-2048-sized tail material",
+    "unresolved":"public key, padding scheme, signed byte range, MD5 covered range, and enforcement policy",
+    "caution":"sizes and names suggest mechanisms but do not alone prove enforced signed boot"
+  }
+}

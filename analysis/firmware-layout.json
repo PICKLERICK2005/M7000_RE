@@ -23,12 +23,15 @@
     ],
     "fbf_components": [
       { "raw_id": "JSYS", "numeric_id": "SYSJ", "offset": 8192, "size": 10806548, "classification": "SquashFS root filesystem", "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8" },
-      { "raw_id": "GMIZ", "numeric_id": "ZIMG", "offset": 10821632, "size": 3928871, "classification": "Linux zImage with appended device trees", "sha256": "f5bd25e04e248fb6a951891d3b4376957d28601d248f56a41c72becd3e2f23cf" },
+      { "raw_id": "GMIZ", "numeric_id": "ZIMG", "offset": 10821632, "size": 3928872, "classification": "Linux zImage with appended device trees", "sha256": "02b23a6e42bdbdc6e5a6e4abd3c433cd3f14589937597d02cfa179d5834d9164" },
       { "raw_id": "OLSO", "numeric_id": "OSLO", "offset": 14753792, "size": 459168, "classification": "U-Boot 2014.01 / OS loader", "sha256": "6fdf944699124c481db00526329565eb6669a6676c200f62644b11013afb26f7" },
       { "raw_id": "IBFR", "numeric_id": "RFBI", "offset": 15220736, "size": 32768, "classification": "Quectel/ASR RF material", "sha256": "4ea1ec20df4d9d4a7a8f1d03f75f71d455cd335202a02339718cb8355c283ead" },
       { "raw_id": "IBRG", "numeric_id": "GRBI", "offset": 15253504, "size": 2621440, "classification": "ASR Falcon LTE Layer-1/baseband image", "sha256": "02e13a743e6405e8f98d4a56e6cc367f236a13ecc219319d568f797d5fae8c80" },
       { "raw_id": "IBRA", "numeric_id": "ARBI", "offset": 17874944, "size": 7707288, "classification": "CP/RTOS cellular image", "sha256": "a0584601d94f97c77368463d7e886926bc5b6f6d948f2901c02af23b648ff064" },
-      { "raw_id": "1MIT", "numeric_id": "TIM1", "offset": 25583616, "size": 2436, "classification": "image-chain metadata", "sha256": "c7e693b00fb2e2335d2e9ea74bec8877d012559e4e5555e483cd9fcf8c5422db" }
+      { "raw_id": "1MIT", "numeric_id": "TIM1", "offset": 25583616, "size": 2436, "classification": "image-chain metadata", "sha256": "c7e693b00fb2e2335d2e9ea74bec8877d012559e4e5555e483cd9fcf8c5422db" },
+      { "raw_id": "VTOF", "numeric_id": "FOTV", "offset": 25591808, "size": 51, "classification": "modem build/version string", "sha256": "4d8bb1ce28bd8557cae3de6da9ecffb5c9d80f7cfedd55dc0c977a0696a3f447" },
+      { "raw_id": "IASR", "numeric_id": "RSAI", "offset": 25600000, "size": 256, "classification": "signature-sized high-entropy material; verification unresolved", "sha256": "c415c84d150996ddff42fcc8a1d188758b6a8bb0996b9ff2c2e1e1fa63412110" },
+      { "raw_id": "I5DM", "numeric_id": "MD5I", "offset": 25608192, "size": 16, "classification": "digest-sized material; covered range unresolved", "sha256": "1eb764c9968dff26dceb9c94e8cc8d9c9a9dd458805d98b5766e28958152ed9b" }
     ]
   },
   "rootfs_comparison": {

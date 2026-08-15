@@ -65,25 +65,39 @@ either `2ECC` identity. This is consistent with the device already residing in
 the loader's charging branch and continuing directly toward Linux when the
 normal power-on condition occurs.
 
+Normal shutdown while USB remained connected did reproduce the loader sequence:
+Linux `3625:0006` disconnected, then `NEZHAS` appeared, then `Openwrt`, followed
+by charging. This confirms that the two stages belong to the charging/power-state
+path rather than only initial cable insertion.
+
+USBPcap captured stable Linux enumeration but did not retain either early
+identity, even during an approved three-minute whole-root capture. Windows PnP
+and USBTreeView continued to observe both. This is treated as a host-tool
+limitation, not evidence that the early stages lack USB transactions.
+
 ## Firmware component map
 
-The `Marvell_FBF` header contains a ten-entry table. Seven entries carry packed,
+The `Marvell_FBF` header contains a ten-entry table. All ten entries carry packed,
 8 KiB-aligned payloads in the official update. Four-character IDs are stored in
 file byte order; their numeric/little-endian reading is shown separately.
 
 | Raw ID | Numeric ID | Bundle offset | Size | Classification and evidence |
 | --- | --- | --- | --- | --- |
 | `JSYS` | `SYSJ` | `0x2000` | 10,806,548 | SquashFS root filesystem |
-| `GMIZ` | `ZIMG` | `0xA52000` | 3,928,871 | Linux zImage; contains appended DTBs naming `mv-udc` at `udc@d4208000` |
+| `GMIZ` | `ZIMG` | `0xA52000` | 3,928,872 | Linux zImage; contains appended DTBs naming `mv-udc` at `udc@d4208000` |
 | `OLSO` | `OSLO` | `0xE12000` | 459,168 | U-Boot 2014.01, built 2024-11-29; owns early USB gadget/fastboot code |
 | `IBFR` | `RFBI` | `0xE84000` | 32,768 | Quectel/ASR RF parameter or RF firmware material |
 | `IBRG` | `GRBI` | `0xE8C000` | 2,621,440 | ASR Falcon LTE Layer-1/baseband image |
 | `IBRA` | `ARBI` | `0x110C000` | 7,707,288 | CP/RTOS image; load table, OS tasks, cellular stack |
 | `1MIT` | `TIM1` | `0x1866000` | 2,436 | Image-chain metadata naming the preceding FBF components and release |
+| `VTOF` | `FOTV` | `0x1868000` | 51 | EC200A-ELAA modem build/version string |
+| `IASR` | `RSAI` | `0x186A000` | 256 | Signature-sized high-entropy material; verification relationship unresolved |
+| `I5DM` | `MD5I` | `0x186C000` | 16 | Digest-sized material; covered range unresolved |
 
-The remaining three table entries (`VTOF`, `IASR`, `I5DM`) have no packed
-payload in this update and appear to describe flags or reserved metadata. Their
-exact semantics remain unassigned.
+All ten entries have packed payloads. Earlier work misread a component attribute
+as the payload-size field and incorrectly classified the final three entries as
+empty. Their names and sizes support version, RSA, and MD5 roles, but signed or
+hashed ranges and enforcement policy remain unresolved.
 
 An earlier signature scan reported an ELF marker at bundle offset `0xE6A7DB`.
 Context shows it is embedded in U-Boot ramdump error text, not the start of an
