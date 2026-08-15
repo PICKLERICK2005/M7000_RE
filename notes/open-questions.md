@@ -4,7 +4,8 @@
 
 - What modem/baseband and ISP profile versions are currently installed?
 - What does the stock UI's `Debug Log` control retrieve or enable?
-- What are the exact firmware paths and safe recovery significance of transient `2ECC:3001` (`NEZHAS`) and `2ECC:4E11` (`Openwrt`)?
+- Is transient `2ECC:3001` (`NEZHAS`) owned by immutable ASR BootROM or an omitted flash-resident primary loader?
+- Does the confirmed U-Boot `2ECC:4E11` gadget accept any protocol during its automatic window, and what are its full descriptors? (Do not test until descriptor-only capture is complete.)
 - Are normal-operation USB functions beyond the observed RNDIS interface disabled, unrouted, or absent?
 - Which chipset/subsystem is under the second shield?
 - What do `CP_*` and `AP_*` test points map to electrically?
