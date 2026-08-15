@@ -4,7 +4,8 @@
 
 - What modem/baseband and ISP profile versions are currently installed?
 - What does the stock UI's `Debug Log` control retrieve or enable?
-- Does USB-C expose data interfaces, and if so which ones?
+- What causes the brief USB activity while the powered-off router transitions to charging, given that no device remains enumerated?
+- Are normal-operation USB functions beyond the observed RNDIS interface disabled, unrouted, or absent?
 - Which chipset/subsystem is under the second shield?
 - What do `CP_*` and `AP_*` test points map to electrically?
 - Is there an accessible boot/debug console?

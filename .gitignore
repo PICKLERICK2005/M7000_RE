@@ -9,6 +9,7 @@ firmware/work/
 captures/http/raw/
 captures/http/**/raw/
 captures/uart/raw/
+captures/usb/**/raw/
 
 # Secrets / identifiers
 *.pcap
