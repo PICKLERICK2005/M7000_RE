@@ -297,6 +297,142 @@ straight 32-bit copy with no threshold logic at all, so the normalization it
 implies happens strictly upstream and is still unlocated. No standard CSQ-to-bars
 mapping should be assumed for record 78.
 
+## The AP/CP boundary is a CI primitive, not AT text
+
+`AT*BAND` does **not** stay textual across the AP/CP link. It is parsed on the
+AP and converted into a binary CI (Common Interface) primitive. The evidence is
+one-sided enough to state plainly:
+
+```text
+mobile                 ASCII AT text, 512-byte buffer, sender at VA 0x3f6a4
+  -> /tmp/atcmd        ASCII, CR-terminated AF_UNIX stream
+  -> atcmdsrv          AT parser + command server
+                       '*BAND' token at VA 0x98eea, dispatch entry at VA 0xdb8ac,
+                       Thumb handler at VA 0x3813c
+  -> NECCI / CCI stub  binary CI primitive with primId + reqHandle
+                       CI_DEV_PRIM_SET_BAND_MODE_REQ / _CNF
+  -> /dev/msocket, /dev/acipc, /dev/cpmem   shared-memory transport
+  -> CP                pSig->networkMode / pSig->preferredMode
+  -> L1CSetRat
+```
+
+What makes this decisive is the *absence* on the CP side. The CP image contains
+no `*BAND` command token and no `CI_DEV_PRIM_*` name strings whatsoever; a sweep
+of the entire CI/CCI/msocket vocabulary across all 7.7 MB returns a single
+unrelated hit, `BAND_MODE_CHANGE`. Its handler asserts on struct fields
+(`pSig->preferredMode == pSig->networkMode`), never on parsed text. Meanwhile
+`atcmdsrv` holds the complete 249-entry `CI_DEV_PRIM_*` enumeration, the CI
+client stub (`ciClientStubInit`, `ciStubEventHandler`,
+`clientCiConfirmCallback_transfer: primId:%d;tem->reqHandle:0x%x;...`), and every
+shared-memory device node. The `AT*BAND` in the CP log string names the
+originating command, not the wire format.
+
+The primitive name table sits at `atcmdsrv` VA `0xb2068`, 255 entries, index 0 =
+`CI_DEV_PRIM_STATUS_IND`. `SET_BAND_MODE_REQ` is index 50, `_CNF` 51,
+`GET_BAND_MODE_REQ` 52, `_CNF` 53. The numeric wire ID remains unknown: no
+absolute, PIC, or Thumb `movw`/`movt` reference to the table base was found, so
+the code that indexes it was not located and any group encoding is unrecovered.
+
+Two AP components sit alongside this. `libmarvellril.so` is a RIL implementation
+that *also* formats `AT*BAND` text, in richer forms than `mobile` uses
+(`AT*BAND=%d,%d,%d` through `AT*BAND=%d,%d,%d,%d,%d,2,4,%d`), and references
+`/tmp/atcmd`, `/tmp/atcmdni`, `/dev/mux1`-`6` and `/dev/ttyHSI3`. `libril.so`
+carries `RIL_REQUEST_SEND_ATCMD`, `RIL_REQUEST_SET_BANDMODE`,
+`RIL_REQUEST_GET_BANDMODE` and `RIL_UNSOL_BANDIND`. `rild` and `atcmdsrv` are
+separate processes in `/etc/telinit`; which one serves `/tmp/atcmd` in the
+running system is supported by the `atcmdsrv` AT-server evidence but was not
+confirmed live.
+
+## The six-field AT*BAND builder is a defect, not a decoding artifact
+
+The anomalous builder at VA `0x3336c` is now explained, and it is **not**
+promoted to the active path.
+
+Disassembly-mode confusion is ruled out: the enclosing function decodes
+coherently as ARM end to end - prologue, four-entry jump table, matching
+epilogue. Literal-pool misinterpretation is ruled out: the pool word at
+`0x33470` is `0x1fde4`, and `0x333d8 + 8 + 0x1fde4` is exactly `0x531c4`, where
+the format string lives.
+
+The explanation is an argument-order defect, and the AT+COPS builder proves it.
+At VA `0x33830` the same `snprintf` stub is called correctly: `r0` = buffer,
+`r1` = `0x200` size, `r2` = format, `r3` = first vararg, second on the stack.
+Builder B instead sets `r0` = buffer, `r1` = format, `r2` = mode, `r3` = flag -
+the `sprintf(buf, fmt, a, b)` argument list, shifted one register left, while the
+call still resolves through GOT slot `0x68dcc` to `snprintf`. Both `sprintf` and
+`snprintf` are imported separately, so this is not symbol aliasing. Because `r1`
+then holds a pointer rather than `0x200`, the compiler's `cmp r1,#0x200 / bhi`
+bound check is unsatisfiable and the `udf` trap always fires.
+
+Neither builder has a direct `bl` call site; both are reached through a
+function-pointer table (builder A at index 25, builder B at index 26), and no
+control-flow evidence selects builder B. Its value mapping is recorded for
+completeness but should not be read as describing commands the device emits.
+
+## Network selection: MP_NetSel decoded
+
+The 56-byte event `0x34` payload is `MP_NetSel` copied verbatim - libmobile
+spills `r1`-`r3` to `sp+0x94`, the caller supplies bytes 12-55 above that, and
+four `ldm`/`stm` pairs move all `0x38` bytes into the payload buffer with no
+transformation. Every byte is now accounted for:
+
+| Offset | Size | Field | Notes |
+| ---: | ---: | --- | --- |
+| `0x00` | 4 | `mode` | `0` automatic, `1` manual, `2` deregister |
+| `0x04` | 4 | `mcc` | `%u` in `AT+COPS=1,2,"%u%02u"`; record 447 |
+| `0x08` | 4 | `mnc` | `%02u`; record 448 |
+| `0x0C` | 44 | `operator_name` | string pointer; record 446 |
+
+`4 + 4 + 4 + 44 = 56`, so no unknown fields remain. There is no RAT or
+access-technology field, which matches the daemon never emitting an `<AcT>`
+argument to `AT+COPS`.
+
+Mode `2` is worth noting: the libmobile client range-checks the field against
+`1`, so deregister is rejected by the public API and is reachable only inside
+the daemon, which emits `AT+COPS=2` for it.
+
+After building the manual-selection command the same routine writes records 446,
+447, 448 and 76 and commits all four permanently in one call at VA `0x338a8`.
+Network selection therefore persists four records atomically from the AT layer -
+the opposite arrangement from preferred RAT, where the event handler persists a
+single record. The shipped frontend model corroborates the field set:
+`networkSelectionMode`, `networkSelectionStatus`, and an `operatorList` whose
+entries carry `operatorNumeric`, `operatorAlphaShort` and `operatorState`.
+
+## Record 78: signal normalization located
+
+The record-78 handler copies its input verbatim, so the normalization is
+upstream - in `src/comm/manager_comm_at.cpp`. It is RAT-dependent, selected by
+the current network type staged at status-object offset `0x190`: value `2` takes
+the `+CSQ` path, value `3` takes the `*CESQ` path.
+
+Three normalization functions were recovered:
+
+- **`0x3a4c8`, CSQ to level.** `0-2` or `99` gives `0`; `3-4` gives `1`; `5-7`
+  gives `2`; `8-11` gives `3`; `12` and above gives `4`. The `99` case is 3GPP's
+  "not known or not detectable". These breakpoints are firmware-specific - this
+  is *not* the generic CSQ-to-bars mapping.
+- **`0x3a50c`, dBm to level.** Outside `-120..-25` gives `0`; `>= -48` gives `4`;
+  `>= -72` gives `3`; `-96..-73` gives `2`; `<= -97` gives `1`. No direct call
+  site was found, so its reachability in this build is unknown.
+- **`0x3a550`, LTE composite.** It computes an RSRP-derived level (`>= -98` to 4,
+  `>= -108` to 3, `>= -118` to 2, `>= -128` to 1, else 0, with `>= -43` as an
+  invalid marker) and an SNR-derived level (SNR x10 `> 129` to 4, `> 44` to 3,
+  `> 9` to 2, `>= -30` to 1), then returns the **minimum of the two**. If RSRP is
+  the invalid marker the SNR level is used alone; if SNR is out of range it falls
+  back to a CSQ-style table on the raw first field.
+
+So record 78 is a 0-4 bars level, RAT-dependent, and on LTE genuinely composite -
+derived from RSRP and SNR together, not from any single metric. It is not a
+percentage.
+
+The unit conversions feeding records 200-205 came out alongside: `rssi = 2*csq -
+111` on the CSQ path, and on `*CESQ`, field 5 becomes `x/2 - 20` (the 3GPP RSRQ
+formula, record 203), field 6 becomes `x - 141` (the 3GPP RSRP formula, record
+202), and field 7 becomes `x * 10` (record 204). The AT layer stages a six-word
+struct - `rat`, `rssi`, `rsrp`, `rsrq`, `snr`, `ecio` - matching records 200-205
+in order.
+
 ## Where to aim next
 
 `AT*BAND` gives a concrete, fully textual AP path: `mobile` formats commands into
@@ -309,10 +445,13 @@ happens does so at or below `/tmp/atcmd`.
 What that means for future work is that the productive layers, in order, are the
 libmobile event API — typed, validated and gated — then the `mobile` AT
 builder/parser layer, which is unusually well symbolized because the shipped
-binary retains log strings and `__FILE__` paths. Only below that does the
-RIL/ACIPC transport matter. Whether `AT*BAND` remains textual across the AP/CP
-link or becomes an ACIPC binary message is still unresolved, and the specific
-ACIPC message ID beneath it was not recovered. The CP image is currently useful
-for vocabulary and assertions but not for control flow, because its load base is
-not established and no self-consistent base could be derived from string
-pointers.
+binary retains log strings and `__FILE__` paths, and then `atcmdsrv`, which is
+where AT text becomes a CI primitive and is therefore the real AP/CP semantic
+boundary. Raw ACIPC framing is the *least* productive layer to attack, because
+the CI primitive layer sitting above it is fully symbolized by name.
+
+The CP load base is now established at `0x06800000`, so CP cross-referencing is
+no longer blocked in principle. What remains missing there is not the base but
+call-graph anchors: the CP is mixed ARM/Thumb with interleaved literal pools, and
+its assertion strings are not reached by plain absolute pointers, so locating a
+specific handler still requires per-case work rather than a global sweep.

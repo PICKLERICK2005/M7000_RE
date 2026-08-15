@@ -126,8 +126,16 @@
             "anomaly": {
               "description": "Between loading the format-string address into r1 and calling snprintf, the function executes `cmp r1,#0x200` followed by `bhi` to a `udf #0` trap. Byte-exact decoding confirms r1 holds the format-string address at that point, so the compare is against a pointer and the trap branch would always be taken.",
               "verified": "Instruction encodings e59f1094 / e08f1001 / e3510c02 / 8a00001b at mobile VA 0x333d4-0x333e0, and the identical sequence at 0x33430-0x3343c. Both sprintf (PLT 0x1233c) and snprintf (PLT 0x120cc) are imported separately; the call target resolves to snprintf through GOT slot 0x68dcc.",
-              "status": "UNKNOWN. Either this builder is unreachable at runtime or the sequence is misdecoded in a way not yet identified. The jump-table value mapping above is unaffected and is decoded unambiguously.",
-              "importance": "This is why builder-A, not builder-B, is treated as the probable live setter."
+              "status": "RESOLVED as a genuine argument-order defect, not disassembly-mode confusion or literal-pool misinterpretation.",
+              "resolution": [
+                "Disassembly mode is not the explanation. The enclosing function decodes coherently as ARM throughout: standard prologue, a 4-entry jump table, and a matching epilogue. The image region is ARM, not Thumb.",
+                "Literal-pool misinterpretation is not the explanation. The pool word at VA 0x33470 is 0x1fde4 and 0x333d8 + 8 + 0x1fde4 = 0x531c4, which is exactly where the format string lives, and the independent string-reference sweep flags the same site.",
+                "The correct calling convention for this binary is established by a known-good site: the AT+COPS manual-selection builder at mobile VA 0x33830 calls the same snprintf PLT stub with r0 = buffer, r1 = 0x200 size, r2 = format, r3 = first vararg and the second vararg on the stack.",
+                "Builder-B instead sets r0 = buffer, r1 = format, r2 = mode, r3 = flag. That is the argument list of sprintf(buf, fmt, a, b), shifted one register left relative to snprintf, while the call target resolves through GOT slot 0x68dcc to snprintf. Both sprintf (PLT 0x1233c) and snprintf (PLT 0x120cc) are imported separately, so this is not a symbol aliasing artifact.",
+                "Given r1 holds a pointer rather than 0x200, the compiler-inserted `cmp r1,#0x200 / bhi` bound check is unsatisfiable and the `udf` trap branch is always taken."
+              ],
+              "reachability": "NOT PROVEN REACHABLE. Neither builder has a direct bl call site; both are reached through the function-pointer table entry (builder-A at index 25, builder-B at index 26). No control-flow evidence was found that the preferred-RAT path selects builder-B.",
+              "importance": "Builder-A remains the probable live setter and builder-B is NOT promoted to the active path. The jump-table value mapping for builder-B is decoded unambiguously and is recorded above regardless, but it should not be treated as describing commands the device actually emits."
             }
           }
         ],
@@ -229,8 +237,16 @@
       "event_payload": {
         "request": {
           "size_bytes": 56,
-          "note": "MP_NetSel is passed by value and copied into a 0x38-byte payload buffer. The internal field layout was not decomposed.",
-          "confidence": "CONFIRMED for the size; UNKNOWN for the field layout"
+          "marshalling": "MP_NetSel is passed by value: libmobile spills r1-r3 to sp+0x94 and the caller supplies bytes 12-55 contiguously above that, then copies all 0x38 bytes verbatim into the payload buffer with four ldm/stm pairs. There is no transformation between MP_NetSel and the wire payload.",
+          "fields": [
+            {"offset": 0, "size": 4, "type": "uint32", "name": "mode", "values": {"0": "automatic", "1": "manual", "2": "deregister"}, "note": "The libmobile client range-checks this against 1, so mode 2 is rejected by the public API and is reachable only inside the daemon, which emits AT+COPS=2 for it.", "confidence": "CONFIRMED"},
+            {"offset": 4, "size": 4, "type": "uint32", "name": "mcc", "note": "formatted with %u into AT+COPS=1,2,\"%u%02u\" and persisted to record 447 (mobile_config.net_config.net_isp_mcc)", "confidence": "CONFIRMED"},
+            {"offset": 8, "size": 4, "type": "uint32", "name": "mnc", "note": "formatted with %02u and persisted to record 448 (mobile_config.net_config.net_isp_mnc)", "confidence": "CONFIRMED"},
+            {"offset": 12, "size": 44, "type": "char[]", "name": "operator_name", "note": "passed as a string pointer (struct+0xC) to the string record setter and persisted to record 446 (mobile_config.net_config.net_isp_name). The 44-byte extent is the remainder of the 56-byte structure; the declared array length is not independently proven.", "confidence": "CONFIRMED for identity and offset; SUPPORTED INFERENCE for the 44-byte extent"}
+          ],
+          "unknown_fields": "None remain unaccounted for: 4 + 4 + 4 + 44 = 56. No separate RAT / access-technology field is present, which is consistent with the daemon never emitting an <AcT> argument in AT+COPS.",
+          "frontend_correlation": "The shipped frontend uses networkSelectionMode, networkSelectionStatus, and an operatorList whose entries carry operatorNumeric, operatorAlphaShort and operatorState (with a 'forbidden' state). operatorNumeric corresponds to the mcc/mnc pair and operatorAlphaShort to the name field.",
+          "confidence": "CONFIRMED"
         },
         "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
         "validation_before_send": [
@@ -245,11 +261,23 @@
         {"commit": "mobile VA 0x4a35c", "mode": "permanent", "context": "status handler at mobile VA 0x4a320, which maps any non-zero raw input to 1"}
       ],
       "record_84_writer": {"commit": "mobile VA 0x42658", "mode": "temporary", "also_stores": "status object +0x2bc"},
-      "modem_representation": "AT+COPS family. 'AT+COPS=?' (scan) and 'AT+COPS=2' are present in mobile, and a '+COPS:%d,%*d,\"%d\"' response parser sits adjacent to the *BAND parser in the same AT response dispatcher.",
+      "modem_representation": {
+        "commands": {
+          "automatic": "AT+COPS=0 (mode 0), built at mobile VA 0x33950",
+          "manual": "AT+COPS=1,2,\"%u%02u\" (mode 1) with mcc then mnc, built at mobile VA 0x33824 / 0x33e10 / 0x34634",
+          "deregister": "AT+COPS=2 (mode 2), built at mobile VA 0x3396c",
+          "set_format": "AT+COPS=3,2",
+          "query": "AT+COPS?",
+          "scan": "AT+COPS=?"
+        },
+        "response_parsers": ["'+COPS:%d,%*d,\"%d\"' at mobile VA 0x34c0c", "'+COPS: %*d,%*d,\"%d\",' at mobile VA 0x34ccc"],
+        "at_command_id_passed_to_sender": "0x34"
+      },
+      "persistence_sequence": "After building the manual-selection command the same routine writes record 446 (operator name, string setter), record 447 (mcc), record 448 (mnc) and record 76 (mode), then commits all four permanently in one call at mobile VA 0x338a8. Network selection therefore persists four records atomically from the AT layer, which is the opposite arrangement from preferred RAT, where the event handler persists a single record.",
       "unknowns": [
-        "The MP_NetSel 56-byte field layout.",
         "The full record 84 enumeration beyond values 1, 3 and 11.",
-        "The exact scan-result, timeout, cancel and restore transitions."
+        "The exact scan-result, timeout, cancel and restore transitions.",
+        "How operatorState / 'forbidden' is represented on the wire for scan results (GetAvailableNet, event 0x23), which uses a different structure from MP_NetSel."
       ],
       "mutation_status": "NOT EXECUTED",
       "confidence": "CONFIRMED for the event ID, payload size, gating and record writers; UNKNOWN for the payload layout and the complete workflow FSM."
@@ -311,8 +339,47 @@
     "record_78": {
       "name": "mobile_status.net_status.sig_lvl",
       "writer": {"commit": "mobile VA 0x4a170", "mode": "temporary"},
-      "transformation": "The handler at mobile VA 0x4a13c copies the incoming 32-bit value straight into record 78 with no threshold logic, arithmetic or table lookup of any kind.",
-      "consequence": "Any RSSI/RSRP/CSQ-to-level normalization happens upstream of this handler and has not been located. The threshold table is therefore still UNKNOWN, and no standard CSQ-to-bars mapping should be assumed.",
+      "transformation": "The handler at mobile VA 0x4a13c copies the incoming 32-bit value straight into record 78. The normalization happens upstream, in the AT response layer, and is now located.",
+      "normalization": {
+        "location": "src/comm/manager_comm_at.cpp parses the signal response, converts raw fields to engineering units, calls a RAT-specific level function, and passes the resulting level to the status object through a virtual call that reaches the record-78 handler.",
+        "rat_selector": "The current network type staged at status-object offset 0x190 selects the path: value 2 takes the +CSQ/WCDMA path, value 3 takes the *CESQ/LTE path.",
+        "commands": {"AT+CSQ": "'+CSQ: %d,%d' and '+CSQ: %d' parsers", "AT*CESQ": "'*CESQ: %d,%d,%d,%d,%d,%d,%d' parser at mobile VA 0x35258"},
+        "functions": [
+          {
+            "address": "mobile VA 0x3a4c8",
+            "name": "CSQ-to-level",
+            "input": "raw +CSQ first field",
+            "table": {"0-2 or 99": 0, "3-4": 1, "5-7": 2, "8-11": 3, "12 and above": 4},
+            "note": "99 is the 3GPP 'not known or not detectable' value and is folded into level 0. This is NOT the generic CSQ-to-bars mapping; the breakpoints are firmware-specific.",
+            "confidence": "CONFIRMED"
+          },
+          {
+            "address": "mobile VA 0x3a50c",
+            "name": "dBm-to-level",
+            "input": "a signed dBm value",
+            "table": {"outside -120..-25": 0, "-48 and above": 4, "-72 and above": 3, "-96..-73": 2, "-97 and below": 1},
+            "note": "No direct call site was found for this function, so it may be reached by tail-call or be unused in this build.",
+            "confidence": "CONFIRMED for the table; UNKNOWN for reachability"
+          },
+          {
+            "address": "mobile VA 0x3a550",
+            "name": "LTE composite level",
+            "inputs": {"r0": "raw *CESQ field 1", "r1": "RSRP in dBm", "r2": "SNR scaled by 10"},
+            "rsrp_table": {"-43 and above": "invalid marker -1", "-98 and above": 4, "-108 and above": 3, "-118 and above": 2, "-128 and above": 1, "below -128": 0},
+            "snr_table_scaled_by_10": {"above 400": "out of range, fall back", "above 129": 4, "above 44": 3, "above 9": 2, "-30 and above": 1},
+            "combination": "The returned level is the minimum of the SNR-derived and RSRP-derived levels when both are valid. If the RSRP level is the invalid marker the SNR level is used alone. If SNR is out of range the function falls back to a CSQ-style table on the raw first field with breakpoints 63, 11, 7 and 4.",
+            "confidence": "CONFIRMED"
+          }
+        ],
+        "unit_conversions": {
+          "csq_to_rssi_dbm": "rssi = 2*csq - 111, applied on the +CSQ path before storing record 201",
+          "cesq_field3": "value - 121",
+          "cesq_field5": "value/2 - 20, which is the 3GPP RSRQ formula, stored as rsrq (record 203)",
+          "cesq_field6": "value - 141, which is the 3GPP RSRP formula, stored as rsrp (record 202)",
+          "cesq_field7": "value * 10, stored as snr (record 204)"
+        },
+        "answer": "Record 78 is a 0-4 normalized level (bars). It is RAT-dependent and, on LTE, composite: derived from RSRP and SNR together rather than from a single metric. On the WCDMA/legacy path it derives from raw CSQ. It is not a percentage and not a generic CSQ-to-bars conversion."
+      },
       "related_raw_records": {
         "200": "mobile_status.rf_info.rat",
         "201": "mobile_status.rf_info.rssi",
@@ -324,8 +391,9 @@
         "207": "mobile_status.rf_info.channel"
       },
       "raw_writer": "Records 200-205 are written together, all temporary, by the handler at mobile VA 0x4a1a0 (commit at 0x4a224); records 206-207 by the handler at mobile VA 0x4a464 (commit at 0x4a4c8).",
+      "raw_struct": "The AT layer stages a six-word struct and passes its address through a virtual call: word 0 rat, word 1 rssi, word 2 rsrp, word 3 rsrq, word 4 snr, word 5 ecio, matching records 200-205 in order. On the LTE path the struct is zeroed with NEON stores before population and ecio is left unset.",
       "significance": "The firmware keeps the raw per-RAT metrics and the normalized level in separate records, so record 78 is a derived level and the raw inputs remain individually available.",
-      "confidence": "CONFIRMED for the writer, the absence of in-handler normalization, and the raw record set; UNKNOWN for the normalization thresholds."
+      "confidence": "CONFIRMED for the writers, the raw record set, the staged struct layout, and the normalization tables."
     },
     "record_83": {
       "name": "mobile_status.net_status.srv_stat",
@@ -345,18 +413,34 @@
     }
   },
   "ap_cp_boundary": {
-    "established": [
-      "mobile builds textual AT commands into a 0x200-byte buffer and hands them to an AT sender at mobile VA 0x3f6a4 together with a numeric AT command ID and a correlation cookie.",
-      "Responses arrive as text and are parsed with sscanf against literal formats such as '*BAND: %d, %*d, %*d, %*d, %*d, %d' and '+COPS:%d,%*d,\"%d\"' inside a single large AT response dispatcher in src/comm/manager_comm_at.cpp.",
-      "The AT text therefore remains textual on the AP side all the way from the builder to the parser; conversion to any binary form happens at or below the /tmp/atcmd boundary described in atcmd-ipc.json."
+    "resolved_question": "AT*BAND does NOT remain textual across the AP/CP boundary. It is parsed on the AP and converted into a binary CI (Common Interface) primitive carried over the Marvell shared-memory/ACIPC transport. The CP receives a structure, not a string.",
+    "chain": [
+      {"stage": "mobile", "form": "ASCII AT text", "detail": "builds the command into a 0x200-byte buffer and calls the sender at mobile VA 0x3f6a4 with a numeric AT command ID and a correlation cookie"},
+      {"stage": "/tmp/atcmd", "form": "ASCII AT text", "detail": "AF_UNIX stream, carriage-return terminated; see atcmd-ipc.json"},
+      {"stage": "atcmdsrv", "form": "AT parser and command server", "detail": "owns the AT command dispatch table; the '*BAND' token at VA 0x98eea has a table entry at VA 0xdb8ac whose handler is the Thumb function at VA 0x3813c. atcmdsrv also generates the '*BAND:' and '*BANDIND:' response text."},
+      {"stage": "NECCI / CCI client stub", "form": "binary CI primitive", "detail": "atcmdsrv contains ciClientStubInit, ciStubEventHandler and 'clientCiConfirmCallback_transfer: primId:%d;tem->reqHandle:0x%x;tem->cci_confirm:%d', i.e. a request-handle plus primitive-ID request/confirm model"},
+      {"stage": "transport devices", "form": "shared memory / IPC", "detail": "/dev/msocket, /dev/acipc, /dev/cpmem, plus /dev/ccidatastub, /dev/psdatastub, /dev/cctdev0 and /dev/cctdatadev0-1"},
+      {"stage": "CP", "form": "CI primitive struct", "detail": "the CP AT*BAND handler works on pSig->networkMode and pSig->preferredMode and logs 'AT*BAND, NwMode=%d, PreferMode=%d'"}
     ],
-    "not_established": [
-      "Whether the AT text stays textual across the AP/CP link or is converted to an ACIPC binary message.",
-      "The specific ACIPC message ID beneath AT*BAND.",
-      "The CP image load base, which blocks CP call-graph reconstruction."
+    "ci_primitive": {
+      "family": "CI_DEV_PRIM_SET_BAND_MODE_REQ / _CNF, with CI_DEV_PRIM_GET_BAND_MODE_REQ / _CNF and CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ / _CNF",
+      "name_table": "atcmdsrv VA 0xb2068, 255 entries, index 0 = CI_DEV_PRIM_STATUS_IND, spanning the CI_DEV group and ending in the CI_ERR group",
+      "table_indices": {"SET_BAND_MODE_REQ": 50, "SET_BAND_MODE_CNF": 51, "GET_BAND_MODE_REQ": 52, "GET_BAND_MODE_CNF": 53, "GET_SUPPORTED_BAND_MODE_REQ": 54, "GET_SUPPORTED_BAND_MODE_CNF": 55},
+      "numeric_wire_id": "UNKNOWN. The name-table index is recovered, but the code that indexes the table was not located (no absolute, PIC or Thumb movw/movt reference to 0xb2068 was found), so the numeric primitive ID and any group encoding are not established."
+    },
+    "decisive_evidence": [
+      "The CP image contains no '*BAND' command token and no CI_DEV_PRIM_* name strings at all. A search of ARBI for the whole CI_DEV_PRIM / CCI / msocket vocabulary returns a single unrelated hit, 'BAND_MODE_CHANGE'.",
+      "The CP handler's own assertion is on struct fields (pSig->preferredMode == pSig->networkMode), not on parsed text.",
+      "atcmdsrv holds the complete 249-entry CI_DEV_PRIM_* enumeration together with the CI client stub and the shared-memory device nodes."
     ],
-    "targeting_guidance": "For future modem-control analysis the productive AP-side layers are, in order: the libmobile event API (typed, validated, gated), the mobile AT builder/parser layer (textual, well-symbolized through log strings and source file names), and only then the RIL/ACIPC transport. The CP image is useful for vocabulary and assertions but not yet for control flow.",
-    "confidence": "CONFIRMED for the AP-side textual path; UNKNOWN for the transport encoding below /tmp/atcmd."
+    "related_ap_components": {
+      "libmarvellril.so": "a RIL implementation that also formats AT*BAND text in richer forms (AT*BAND=%d,%d,%d up to AT*BAND=%d,%d,%d,%d,%d,2,4,%d), references /tmp/atcmd and /tmp/atcmdni, and exports ril_request_send_atcmd. It uses /dev/mux1-6 and /dev/ttyHSI3.",
+      "libril.so": "RIL request vocabulary including RIL_REQUEST_SEND_ATCMD, RIL_REQUEST_SET_BANDMODE, RIL_REQUEST_GET_BANDMODE and RIL_UNSOL_BANDIND.",
+      "at_channel_config": "/etc/config/at_channel maps channel 0 to /dev/ttyS1 (/tmp/Main_Uart) and channel 1 to /dev/smd0 (/tmp/Virtual_Uart).",
+      "caution": "rild and atcmdsrv are separate processes started by /etc/telinit. Which of them serves /tmp/atcmd for the mobile daemon in the running system is supported by the atcmdsrv AT-server evidence but was not confirmed by live observation."
+    },
+    "targeting_guidance": "Future modem-control analysis should target, in order: the libmobile event API (typed, validated, gated); the mobile AT builder/parser layer (textual and well symbolized through log strings and __FILE__ paths); then atcmdsrv, which is where AT text becomes a CI primitive and is the real AP/CP semantic boundary. Raw ACIPC framing is the least productive layer because the CI primitive layer above it is fully symbolized.",
+    "confidence": "CONFIRMED that the boundary is a binary CI primitive rather than textual AT; CONFIRMED for the component chain and transport device set; UNKNOWN for the numeric primitive ID and the on-wire ACIPC framing."
   },
   "safety": {
     "execution": "Nothing in this file was executed. No mobile event was sent, no AT command issued, no RPC invoked, no NVM read or written, no diagnostic mode enabled, and the physical router was not touched.",

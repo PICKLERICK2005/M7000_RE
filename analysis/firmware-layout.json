@@ -27,12 +27,41 @@
       { "raw_id": "OLSO", "numeric_id": "OSLO", "offset": 14753792, "size": 459168, "classification": "U-Boot 2014.01 / OS loader", "sha256": "6fdf944699124c481db00526329565eb6669a6676c200f62644b11013afb26f7" },
       { "raw_id": "IBFR", "numeric_id": "RFBI", "offset": 15220736, "size": 32768, "classification": "Quectel/ASR RF material", "sha256": "4ea1ec20df4d9d4a7a8f1d03f75f71d455cd335202a02339718cb8355c283ead" },
       { "raw_id": "IBRG", "numeric_id": "GRBI", "offset": 15253504, "size": 2621440, "classification": "ASR Falcon LTE Layer-1/baseband image", "sha256": "02e13a743e6405e8f98d4a56e6cc367f236a13ecc219319d568f797d5fae8c80" },
-      { "raw_id": "IBRA", "numeric_id": "ARBI", "offset": 17874944, "size": 7707288, "classification": "CP/RTOS cellular image", "sha256": "a0584601d94f97c77368463d7e886926bc5b6f6d948f2901c02af23b648ff064" },
+      { "raw_id": "IBRA", "numeric_id": "ARBI", "offset": 17874944, "size": 7707288, "classification": "CP/RTOS cellular image", "sha256": "a0584601d94f97c77368463d7e886926bc5b6f6d948f2901c02af23b648ff064", "load_base": "0x06800000", "va_range": "0x06800000-0x06f59a98", "load_base_confidence": "CONFIRMED", "load_base_evidence": "see cp_load_base" },
       { "raw_id": "1MIT", "numeric_id": "TIM1", "offset": 25583616, "size": 2436, "classification": "image-chain metadata", "sha256": "c7e693b00fb2e2335d2e9ea74bec8877d012559e4e5555e483cd9fcf8c5422db" },
       { "raw_id": "VTOF", "numeric_id": "FOTV", "offset": 25591808, "size": 51, "classification": "modem build/version string", "sha256": "4d8bb1ce28bd8557cae3de6da9ecffb5c9d80f7cfedd55dc0c977a0696a3f447" },
       { "raw_id": "IASR", "numeric_id": "RSAI", "offset": 25600000, "size": 256, "classification": "signature-sized high-entropy material; verification unresolved", "sha256": "c415c84d150996ddff42fcc8a1d188758b6a8bb0996b9ff2c2e1e1fa63412110" },
       { "raw_id": "I5DM", "numeric_id": "MD5I", "offset": 25608192, "size": 16, "classification": "digest-sized material; covered range unresolved", "sha256": "1eb764c9968dff26dceb9c94e8cc8d9c9a9dd458805d98b5766e28958152ed9b" }
     ]
+  },
+  "cp_load_base": {
+    "image": "ARBI (05-ARBI.bin)",
+    "base": "0x06800000",
+    "va_range": "0x06800000-0x06f59a98",
+    "confidence": "CONFIRMED",
+    "method": "Pointer-table shape matching. If a table holds pointers to consecutive strings, the differences between successive pointers equal the successive string lengths. That delta sequence is base-independent, so matching it against the image's own string layout fixes the base without guessing an alignment.",
+    "supporting_evidence": [
+      "Eight independent pointer runs shape-match at this base with weighted vote 93. The next-best candidate scores 22, is not aligned, and is supported by only two runs.",
+      "Table at file 0x5bba0 resolves to the ordered list GetRTCPThreshold, GetRTCPInterval, GetRTCPBandWidth, GetRTCPAdaptation, GetRTPProfile, GetRTCPCName.",
+      "Table at file 0x5c9bc resolves to releaseCodecResource, startReceive, pauseReceive, resumeReceive, startSend, pauseSend, resumeSend, DoSetDirection.",
+      "Tables at file 0x7455e8 and 0x745638 resolve to the 3GPP system-information block names SIB1-SIB18 and SIB15_1-SIB15_5, in order.",
+      "The 3-word stub at image offset 0 is `nop; ldr pc,[pc,#-4]; .word 0x06e88c40`. Under this base that entry address maps to file offset 0x688c40, which disassembles as ARM boot code beginning `nop; msr cpsr_c, #0xd3; b ...` - the canonical supervisor-mode-with-interrupts-masked entry sequence.",
+      "The assertion string at file 0x6d4104 is referenced by an absolute pointer word 0x06ed4104 at file 0xb039c, resolving correctly under this base."
+    ],
+    "independent_structures_agreeing": 4,
+    "contradictions_and_limits": [
+      "The TIM image descriptor for ARBI carries LoadAddr = 0xFFFFFFFF, so the image chain metadata does NOT supply a RAM load address. It supplies only FlashEntryAddr = 0x005c0000. This is a negative result, not a contradiction.",
+      "A naive histogram of pointer-to-string-start deltas is NOT decisive on its own: it produces a broad noise floor of roughly 5000 hits across many unaligned candidates in the 0x0687xxxx-0x06f3xxxx range. Only the delta-shape method separates signal from noise. A base must not be promoted from the histogram alone.",
+      "An earlier attempt to intersect candidate bases derived from assertion condition strings returned the empty set. Those strings are not referenced by plain absolute pointers, so their absence of agreement is not evidence against this base.",
+      "This base is established for ARBI only. No load base has been established for GRBI, and none is claimed."
+    ],
+    "tim_descriptor": {
+      "format": "Marvell TIM v3.4.0, identifier TIMH, 7 images, 96-byte image descriptors",
+      "arbi_descriptor_offset": "0x98",
+      "fields": {"ImageID": "ARBI", "NextImageID": "GRBI", "FlashEntryAddr": "0x005c0000", "LoadAddr": "0xffffffff", "ImageSize": "0x759a98", "ImageSizeToHash": "0x759a98"},
+      "other_flash_entries": {"TIM1": "0x00100000", "GRBI": "0x001c0000", "RFBI": "0x00180000"},
+      "note": "Only the descriptors read directly are listed. LoadAddr is 0xffffffff for TIM1, ARBI, GRBI and RFBI alike."
+    }
   },
   "rootfs_comparison": {
     "3.0.1": { "size": 10805836, "sha256": "4579e69045105845be8272604c68c33f6be9da781a349ee8c841bfadd620f6c8", "inodes": 1383 },
