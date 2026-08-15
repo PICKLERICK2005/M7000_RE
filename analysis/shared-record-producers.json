@@ -81,7 +81,7 @@
       "rpc": "wan:10",
       "native_getter": "CMobileClient::GetNetSelStat",
       "record_ids": [84],
-      "classification": "local shared-state read; no direct modem event in getter",
+      "classification": "local shared-state read; mobile 0x425ec-0x42658 writes workflow state to record 84 temporarily; no direct modem event in getter",
       "confidence": "high"
     },
     {
@@ -95,8 +95,8 @@
   ],
   "refresh_model": {
     "confirmed": "Runtime connection and registration records are written by mobile status routines with temporary data-management writes; persistent policy fields use permanent writes.",
-    "supported_inference": "The registration writer belongs to the AT-facing status state machine, so CP/modem indications are normalized in mobile before web getters read them.",
-    "unknown": "Exact timer or unsolicited-AT callback entry for every writer, refresh latency, and every profile-record writer remain unresolved."
+    "supported_inference": "The registration writer belongs to the AT-facing mobile_status_at state machine. SetupModemIndication enables CGREG, CREG, CEREG, CGEREP, and BANDIND indications, so CP/modem indications are normalized in mobile before web getters read them.",
+    "unknown": "Exact periodic fallback-query intervals, propagation latency, and exhaustive profile-record writer mapping. See modem-refresh-path.json."
   },
   "safety": "Static analysis only. No mobile event, AT command, live RPC, or device operation was performed."
 }

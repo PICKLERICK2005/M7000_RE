@@ -1,0 +1,42 @@
+{
+  "scope": "Offline static reconstruction of how exact firmware 3.0.2 refreshes modem-derived shared records. No router traffic or modem command was generated.",
+  "pipeline": [
+    "AT transport in mobile_manager_at.cpp (/tmp/atcmd)",
+    "solicited responses and unsolicited modem indications",
+    "parsers/dispatch in manager_comm_at.cpp",
+    "normalization in mobile_status_at.cpp and backhaul FSM",
+    "temporary libdata_management records",
+    "libmobile getters",
+    "rpmServer web models"
+  ],
+  "initialization": {
+    "function_label": "SetupModemIndication",
+    "confirmed_commands_present": ["AT+CGREG=1","AT+CREG=1","AT+CTZR=1","AT+CEREG=1","AT+CGEREP=2,0","AT*BANDIND=1","AT+MEDCR=0,57,1"],
+    "classification": "The daemon explicitly enables registration, packet-domain, time-zone, and band-related indications during modem setup.",
+    "confidence": "high"
+  },
+  "indication_parsers": [
+    {"prefix":"+CGREG","role":"packet-service registration indication","updates":"registration/status state machine"},
+    {"prefix":"+CREG","role":"circuit-service registration indication","updates":"registration/status state machine"},
+    {"prefix":"+CEREG","role":"LTE packet-service registration indication","updates":"registration/status state machine"},
+    {"prefix":"+CGEV","role":"packet-domain deactivation/detach indication","updates":"backhaul disconnect path and WAN notifications"},
+    {"prefix":"*BANDIND","role":"radio-band indication","updates":"band/status model"},
+    {"prefix":"+CSQ / *CESQ","role":"signal indication/response forms","updates":"signal model"}
+  ],
+  "solicited_queries_present": ["AT+CSQ","AT*CESQ","AT^DSFLOWQRY","AT+COPS?","AT+CGACT?","AT*BAND?","AT+CGREG?","AT+CEREG?","AT+CREG?","AT^LOCINFO?","AT+CFUN?","AT+CGCONTRDP=2","AT^SYSINFO","AT^DHCPV6?","AT*BANDIND?"],
+  "record_refresh": [
+    {"record_id":81,"meaning":"registration state","source":"CGREG/CREG/CEREG indication and response parsing, normalized by mobile_status_at.cpp","write_semantics":"temporary","refresh_type":"indication-driven with solicited-query support","confidence":"high"},
+    {"record_id":79,"meaning":"connection state","source":"backhaul/mobile FSM state, including CGEV disconnect/detach handling and connect/disconnect completion","write_semantics":"temporary","refresh_type":"event/FSM-driven","confidence":"high for ownership and write semantics; medium for exhaustive trigger list"},
+    {"record_id":75,"meaning":"preferred network type","source":"persistent preference plus status normalization; direct modem query support exists through GetModemPrefNetType","write_semantics":"permanent setter plus temporary normalization","refresh_type":"configuration-driven with modem reconciliation","confidence":"high"},
+    {"record_id":84,"meaning":"network-selection status","source":"network-selection workflow state at object offset 0x2bc","writer":"mobile 0x425ec-0x42658","write_semantics":"temporary","refresh_type":"operation/FSM-driven","confidence":"high"}
+  ],
+  "connection_notifications": {
+    "imports": ["send_wan_ipv4_connect_msg","send_wan_ipv4_disconnect_msg","send_wan_ipv6_connect_msg","send_wan_ipv6_disconnect_msg","wm_lte_wifi_coex_notify"],
+    "interpretation": "After parsing runtime IP or disconnect state, mobile both updates its shared model and notifies the WAN/WLAN managers. The web getter reads the shared model; it is not the refresh trigger."
+  },
+  "timing_limits": {
+    "confirmed": "The daemon supports timer events and a backhaul-status checking timer, but modem registration also has explicit unsolicited indications.",
+    "not_recovered": "Exact periodic query intervals, debounce windows, and worst-case web-visible propagation latency.",
+    "conclusion": "Do not infer a polling interval from the three stable two-second live status samples."
+  }
+}
