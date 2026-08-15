@@ -20,239 +20,650 @@
     {
       "record": 30,
       "meaning": "flow/data-limit enable switch (flowstat.property.limit_enabled)",
-      "writers": [{"location":"libflowstat.so enableLimit at ELF VA 0x1938","mode":"permanent","record_id":30}],
+      "writers": [
+        {
+          "location": "libflowstat.so enableLimit at ELF VA 0x1938",
+          "mode": "permanent",
+          "record_id": 30
+        }
+      ],
       "trigger": "flow-limit configuration",
       "upstream_source": "AP flow-statistics policy/UI",
       "transformation": "boolean-like input -> decimal string -> permanent shared record 30/UCI option",
       "persistence": "persistent configuration",
-      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "consumers": [
+        "CMobileClient::GetCallFailReason",
+        "internal mobile decision routine at ELF VA 0x42068-0x42118"
+      ],
       "derived_role": "GetCallFailReason returns flow-limit reason 2 when record 30 == 1, record 39 == 2, and record 44 == 0, after registration/connection and roaming-policy precedence checks.",
       "confidence": "high"
     },
     {
       "record": 39,
       "meaning": "flow-limit threshold state (flowstat.property.limit_reached)",
-      "writers": [{"location":"libflowstat.so reachLimit at ELF VA 0x1dd8","mode":"permanent","record_id":39}],
+      "writers": [
+        {
+          "location": "libflowstat.so reachLimit at ELF VA 0x1dd8",
+          "mode": "permanent",
+          "record_id": 39
+        }
+      ],
       "trigger": "periodic flow accounting / limit evaluation by flowstat",
       "upstream_source": "accumulated ccinet1 RX/TX byte counts, configured limit, warning percentage, monthly mode, and free-duration policy",
       "transformation": "judgeLimit computes 0 below warning, 1 warning threshold reached, or 2 hard limit reached; reachLimit persists the result",
-      "enum_semantics": {"0":"below warning threshold","1":"warning threshold reached","2":"hard data limit reached"},
+      "enum_semantics": {
+        "0": "below warning threshold",
+        "1": "warning threshold reached",
+        "2": "hard data limit reached"
+      },
       "persistence": "persistent flow-statistics state",
-      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "consumers": [
+        "CMobileClient::GetCallFailReason",
+        "internal mobile decision routine at ELF VA 0x42068-0x42118"
+      ],
       "derived_role": "Middle member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
       "confidence": "high"
     },
     {
       "record": 44,
       "meaning": "one-boot permission to dial despite the flow limit (flowstat_current_boot_up.property.allow_dial_once)",
-      "writers": [{"location":"libflowstat.so allowDialOnce at ELF VA 0x1c14","mode":"temporary","record_id":44}],
+      "writers": [
+        {
+          "location": "libflowstat.so allowDialOnce at ELF VA 0x1c14",
+          "mode": "temporary",
+          "record_id": 44
+        }
+      ],
       "trigger": "explicit AP override for the current boot",
       "upstream_source": "local flow-limit override workflow; no modem/CP input",
       "transformation": "boolean-like input -> decimal string -> temporary shared record 44",
-      "enum_semantics": {"0":"no override","1":"permit one-boot dialing despite limit"},
+      "enum_semantics": {
+        "0": "no override",
+        "1": "permit one-boot dialing despite limit"
+      },
       "persistence": "runtime/current boot only",
-      "consumers": ["CMobileClient::GetCallFailReason", "internal mobile decision routine at ELF VA 0x42068-0x42118"],
+      "consumers": [
+        "CMobileClient::GetCallFailReason",
+        "internal mobile decision routine at ELF VA 0x42068-0x42118"
+      ],
       "derived_role": "Final member of the confirmed flow-limit tuple: record 30 == 1, record 39 == 2, record 44 == 0.",
       "confidence": "high"
     },
     {
       "record": 73,
       "meaning": "mobile data switch",
-      "writers": [{"location":"mobile+0x3238c","elf_va":"0x4238c","routine_range":"mobile+0x32330-mobile+0x3238c","mode":"permanent"}],
+      "writers": [
+        {
+          "location": "mobile+0x3238c",
+          "elf_va": "0x4238c",
+          "routine_range": "mobile+0x32330-mobile+0x3238c",
+          "mode": "permanent"
+        }
+      ],
       "trigger": "configuration/setter-driven",
       "upstream_source": "web/mobile event policy input; not a modem indication",
       "transformation": "boolean-like policy value -> MP switch scalar",
       "persistence": "persistent configuration",
-      "consumers": ["CMobileClient::GetDataSwitch", "CMobileClient::GetAllStatus", "wan:0", "status:0", "backhaul FSM"],
+      "consumers": [
+        "CMobileClient::GetDataSwitch",
+        "CMobileClient::GetAllStatus",
+        "wan:0",
+        "status:0",
+        "backhaul FSM"
+      ],
       "confidence": "high"
     },
     {
       "record": 74,
       "meaning": "data-roaming switch",
-      "writers": [{"location":"mobile+0x3243c","elf_va":"0x4243c","routine_range":"mobile+0x323e0-mobile+0x3243c","mode":"permanent"}],
+      "writers": [
+        {
+          "location": "mobile+0x3243c",
+          "elf_va": "0x4243c",
+          "routine_range": "mobile+0x323e0-mobile+0x3243c",
+          "mode": "permanent"
+        }
+      ],
       "trigger": "configuration/setter-driven",
       "upstream_source": "web/mobile event policy input; not a modem indication",
       "transformation": "boolean-like policy value -> MP switch scalar",
       "persistence": "persistent configuration",
-      "consumers": ["CMobileClient::GetRoamSwitch", "CMobileClient::GetAllStatus", "CMobileClient::GetCallFailReason", "wan:0", "status:0", "backhaul FSM"],
+      "consumers": [
+        "CMobileClient::GetRoamSwitch",
+        "CMobileClient::GetAllStatus",
+        "CMobileClient::GetCallFailReason",
+        "wan:0",
+        "status:0",
+        "backhaul FSM"
+      ],
       "confidence": "high"
     },
     {
       "record": 75,
       "meaning": "preferred network type",
       "writers": [
-        {"location":"mobile+0x3a2b0","elf_va":"0x4a2b0","routine_range":"mobile+0x3a25c-mobile+0x3a31c","mode":"temporary","role":"runtime normalization/reconciliation"},
-        {"location":"mobile+0x3256c","elf_va":"0x4256c","routine_range":"mobile+0x32504-mobile+0x32574","mode":"permanent","role":"the only permanent record-75 writer; all persistence goes through it"}
+        {
+          "location": "mobile+0x3a2b0",
+          "elf_va": "0x4a2b0",
+          "routine_range": "mobile+0x3a25c-mobile+0x3a31c",
+          "mode": "temporary",
+          "role": "runtime normalization/reconciliation"
+        },
+        {
+          "location": "mobile+0x3256c",
+          "elf_va": "0x4256c",
+          "routine_range": "mobile+0x32504-mobile+0x32574",
+          "mode": "permanent",
+          "role": "the only permanent record-75 writer; all persistence goes through it"
+        }
       ],
       "permanent_writer_callers": [
-        {"elf_va":"0x3b070","file_offset":"mobile+0x2b070","context":"ProcUserEventComm, src/comm/process_comm.cpp. Persists only after the modem-manager operation invoked through virtual slot +0x24 returns 0."},
-        {"elf_va":"0x36f84","file_offset":"mobile+0x26f84","context":"src/comm/manager_comm_at.cpp. Persists the staged +0x194 value after the AT transaction completes successfully."},
-        {"elf_va":"0x3b4bc","file_offset":"mobile+0x2b4bc","context":"a second src/comm/process_comm.cpp path; not further characterised."},
-        {"elf_va":"0x42f34","file_offset":"mobile+0x32f34","context":"src/base/mobile_status.cpp GetNetModePref. When the stored preference is not 2 or 3 it logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3. This is a 3GPP2/CDMA-card repair path, not a generic startup validity check."}
+        {
+          "elf_va": "0x3b070",
+          "file_offset": "mobile+0x2b070",
+          "context": "ProcUserEventComm, src/comm/process_comm.cpp. Persists only after the modem-manager operation invoked through virtual slot +0x24 returns 0."
+        },
+        {
+          "elf_va": "0x36f84",
+          "file_offset": "mobile+0x26f84",
+          "context": "src/comm/manager_comm_at.cpp. Persists the staged +0x194 value after the AT transaction completes successfully."
+        },
+        {
+          "elf_va": "0x3b4bc",
+          "file_offset": "mobile+0x2b4bc",
+          "context": "a second src/comm/process_comm.cpp path; not further characterised."
+        },
+        {
+          "elf_va": "0x42f34",
+          "file_offset": "mobile+0x32f34",
+          "context": "src/base/mobile_status.cpp GetNetModePref. When the stored preference is not 2 or 3 it logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3. This is a 3GPP2/CDMA-card repair path, not a generic startup validity check."
+        }
       ],
       "writer_correction": "A complete scan of mobile for the CCfgHelper write-then-commit pattern finds exactly two record-75 writers: the permanent one at commit 0x4256c and the temporary normalizer at commit 0x4a2b0. Addresses 0x4b070 and 0x42f34 are not record writes. 0x42f34 is a call into the permanent writer, and the address 0x3b070 is an ELF VA rather than a file offset.",
       "trigger": "configuration-driven plus modem/status reconciliation",
       "upstream_source": "stored AP preference and direct-modem preferred-network response path",
       "transformation": "SetPrefNetType sends the configured scalar unchanged in synchronous mobile event 0x33. The daemon passes it to its modem manager and persists it only after immediate acceptance. The modem response from event 0x46 maps 1/2/3 to record 0/1/2; response 0, 0x3081, or any other value maps to record 3.",
       "enum_semantics": {
-        "configured_rpc": {"1":"3G only","2":"4G only","3":"4G preferred / LTE preferred"},
-        "modem_response_to_record": {"1":"0 (GSM/2G-only hidden AP value)","2":"1 (UMTS/3G only)","3":"2 (LTE/4G only)","0":"3 (multi-RAT/preferred fallback)","0x3081":"3 (multi-RAT/LTE-preferred mask)","other":"3 (fallback)"},
-        "modem_facing_policy": {"configured_0":"AT*BAND NwMode 0","configured_1":"AT*BAND NwMode 1","configured_2":"AT*BAND NwMode 5","configured_3":"AT*BAND NwMode 11","out_of_range":"AT*BAND NwMode 99"},
+        "configured_rpc": {
+          "1": "3G only",
+          "2": "4G only",
+          "3": "4G preferred / LTE preferred"
+        },
+        "modem_response_to_record": {
+          "1": "0 (GSM/2G-only hidden AP value)",
+          "2": "1 (UMTS/3G only)",
+          "3": "2 (LTE/4G only)",
+          "0": "3 (multi-RAT/preferred fallback)",
+          "0x3081": "3 (multi-RAT/LTE-preferred mask)",
+          "other": "3 (fallback)"
+        },
+        "modem_facing_policy": {
+          "configured_0": "AT*BAND NwMode 0",
+          "configured_1": "AT*BAND NwMode 1",
+          "configured_2": "AT*BAND NwMode 5",
+          "configured_3": "AT*BAND NwMode 11",
+          "out_of_range": "AT*BAND NwMode 99"
+        },
         "modem_facing_policy_source": "jump table in the AT*BAND builder at mobile ELF VA 0x33220, which appends the literal decimal strings \"0\", \"1\", \"5\", \"11\" and \"99\" to \"AT*BAND=\".",
         "readback_space_note": "The 0x3081 value belongs to the CI preferred-mode readback space consumed by the temporary normalizer, not to the AT*BAND NwMode space. The two must not be merged.",
         "warning": "Configured/RPC, AT*BAND NwMode send, AT*BAND NwMode parse, and CI preferred-mode readback are four distinct numeric spaces. An earlier draft mapped configured 1/2/3 to modem values 2/3/0x3081; that is superseded by the builder disassembly recorded here. 0x3081's individual bit allocation is not recovered and no CP constant corroborates a bitfield reading."
       },
       "configured_vs_effective": "The persistent writer stores the requested UI/RPC policy. The AT-facing callback temporarily reconciles a modem response into the record's 0-3 normalized space; this does not prove a user configuration change.",
       "persistence": "persistent preference with temporary normalized overlay",
-      "consumers": ["CMobileClient::GetPrefNetType", "CMobileClient::GetAllStatus", "wan:0", "network-mode policy"],
+      "consumers": [
+        "CMobileClient::GetPrefNetType",
+        "CMobileClient::GetAllStatus",
+        "wan:0",
+        "network-mode policy"
+      ],
       "confidence": "high for paths and storage; medium for enum labels"
     },
     {
       "record": 76,
       "meaning": "network-selection mode (automatic/manual)",
       "writers": [
-        {"location":"mobile+0x238a8","elf_va":"0x338a8","routine_range":"mobile+0x23850-mobile+0x2397c","mode":"permanent","role":"network-selection update with records 446-448"},
-        {"location":"mobile+0x3a35c","elf_va":"0x4a35c","routine_range":"mobile+0x3a320-mobile+0x3a388","mode":"permanent","role":"nonzero-to-one normalization"},
-        {"location":"mobile+0x325e0","elf_va":"0x425e0","routine_range":"mobile+0x32578-mobile+0x325e8","mode":"temporary","role":"workflow/state update"}
+        {
+          "location": "mobile+0x238a8",
+          "elf_va": "0x338a8",
+          "routine_range": "mobile+0x23850-mobile+0x2397c",
+          "mode": "permanent",
+          "role": "network-selection update with records 446-448"
+        },
+        {
+          "location": "mobile+0x3a35c",
+          "elf_va": "0x4a35c",
+          "routine_range": "mobile+0x3a320-mobile+0x3a388",
+          "mode": "permanent",
+          "role": "nonzero-to-one normalization"
+        },
+        {
+          "location": "mobile+0x325e0",
+          "elf_va": "0x425e0",
+          "routine_range": "mobile+0x32578-mobile+0x325e8",
+          "mode": "temporary",
+          "role": "workflow/state update"
+        }
       ],
       "trigger": "configuration and network-selection workflow",
       "upstream_source": "AP selection policy plus modem selection workflow",
       "transformation": "input scalar normalized to 0/1 for automatic/manual selection",
-      "enum_semantics": {"0":"automatic","1":"manual"},
+      "enum_semantics": {
+        "0": "automatic",
+        "1": "manual"
+      },
       "workflow_overlay": "Permanent policy writers coexist with mobile+0x325e0 temporary workflow writes. Record 84 tracks operation progress/result independently.",
       "persistence": "persistent configuration with temporary workflow overlay",
-      "consumers": ["CMobileClient::GetNetSelMode", "CMobileClient::GetAllStatus", "wan:0", "network-selection workflow"],
+      "consumers": [
+        "CMobileClient::GetNetSelMode",
+        "CMobileClient::GetAllStatus",
+        "wan:0",
+        "network-selection workflow"
+      ],
       "confidence": "high"
     },
     {
       "record": 78,
       "meaning": "signal level (mobile_status.net_status.sig_lvl)",
-      "writers": [{"location":"mobile+0x3a170","elf_va":"0x4a170","routine_range":"mobile+0x3a13c-mobile+0x3a19c","mode":"temporary"}],
+      "writers": [
+        {
+          "location": "mobile+0x3a170",
+          "elf_va": "0x4a170",
+          "routine_range": "mobile+0x3a13c-mobile+0x3a19c",
+          "mode": "temporary"
+        }
+      ],
       "trigger": "event/status callback",
-      "upstream_source": "AT signal-quality/status callback; the raw-metric-to-level threshold routine is still unlocated",
-      "transformation": "normalized signal-level scalar copied directly to record 78",
-      "handler_detail": "The writing handler at ELF VA 0x4a13c performs a straight 32-bit copy into record 78 with no threshold logic, arithmetic or table lookup, so the normalization happens strictly upstream of it and has not been located.",
-      "related_raw_records": {"200":"mobile_status.rf_info.rat","201":"rssi","202":"rsrp","203":"rsrq","204":"snr","205":"ecio","206":"band","207":"channel"},
+      "upstream_source": "AT+CSQ on the WCDMA/legacy path and AT*CESQ on the LTE path, parsed in src/comm/manager_comm_at.cpp",
+      "transformation": "RAT-dependent normalization to a 0-4 level, then a direct copy into record 78",
+      "handler_detail": "The writing handler at ELF VA 0x4a13c performs a straight 32-bit copy into record 78. The normalization is upstream, in the AT response layer, and is now recovered.",
+      "normalization_functions": {
+        "0x3a4c8": "CSQ-to-level: 0-2 or 99 -> 0, 3-4 -> 1, 5-7 -> 2, 8-11 -> 3, 12+ -> 4",
+        "0x3a50c": "dBm-to-level: outside -120..-25 -> 0, >=-48 -> 4, >=-72 -> 3, -96..-73 -> 2, <=-97 -> 1 (no direct call site found)",
+        "0x3a550": "LTE composite: minimum of an RSRP-derived level (>=-98 -> 4, >=-108 -> 3, >=-118 -> 2, >=-128 -> 1, else 0; >=-43 is an invalid marker) and an SNR-derived level (SNRx10 >129 -> 4, >44 -> 3, >9 -> 2, >=-30 -> 1), with a CSQ-style fallback when SNR is out of range"
+      },
+      "rat_selection": "The current network type staged at status-object offset 0x190 selects the path: 2 = WCDMA/+CSQ, 3 = LTE/*CESQ.",
+      "unit_conversions": {
+        "csq_to_rssi_dbm": "2*csq - 111",
+        "cesq_rsrq": "field5/2 - 20",
+        "cesq_rsrp": "field6 - 141",
+        "cesq_snr": "field7 * 10"
+      },
+      "related_raw_records": {
+        "200": "mobile_status.rf_info.rat",
+        "201": "rssi",
+        "202": "rsrp",
+        "203": "rsrq",
+        "204": "snr",
+        "205": "ecio",
+        "206": "band",
+        "207": "channel"
+      },
       "related_raw_writers": "Records 200-205 are written together, all temporary, by the handler at ELF VA 0x4a1a0 (commit 0x4a224); records 206-207 by the handler at ELF VA 0x4a464 (commit 0x4a4c8).",
-      "open": "Whether record 78 is bars, percentage or another normalized level, and the exact per-RAT thresholds, remain UNKNOWN. The firmware keeps raw RSSI/RSRP/RSRQ/SNR/EcIo separately from record 78, so no standard CSQ-to-bars mapping should be assumed.",
-      "enum_semantics": {"0":"none or unknown","1":"poor","2":"moderate","3":"good","4":"great"},
+      "open": "Remaining unknown: the exact raw metric used on paths other than +CSQ (WCDMA) and *CESQ (LTE), and whether the dBm-to-level function at 0x3a50c is reachable in this build.",
+      "enum_semantics": {
+        "0": "none or unknown",
+        "1": "poor",
+        "2": "moderate",
+        "3": "good",
+        "4": "great"
+      },
       "persistence": "runtime only",
-      "consumers": ["signal-strength getter/status model", "OLED/status presentation", "internal mobile status logic"],
-      "enum_semantics_status": "The 0-4 labels come from the shipped configuration/frontend vocabulary, not from a recovered firmware threshold table. They are a SUPPORTED INFERENCE about presentation, not a proven normalization output range.",
-      "confidence": "high for identity and writer; high that the writing handler applies no normalization; supported inference for the 0-4 labels; unknown for the threshold table and the raw metric actually used per RAT"
+      "consumers": [
+        "signal-strength getter/status model",
+        "OLED/status presentation",
+        "internal mobile status logic"
+      ],
+      "enum_semantics_status": "The 0-4 range is now proven by the normalization functions themselves. The word labels remain shipped-vocabulary presentation terms rather than firmware strings.",
+      "confidence": "high for identity, writer, RAT selection, unit conversions and all three normalization tables; supported inference for the word labels; unknown for reachability of the dBm variant",
+      "resolved": "Record 78 is a 0-4 normalized level (bars). It is RAT-dependent and, on LTE, composite: derived from RSRP and SNR together rather than from any single metric. It is not a percentage, and the CSQ breakpoints are firmware-specific rather than the generic CSQ-to-bars mapping."
     },
     {
       "record": 79,
       "meaning": "connection state",
-      "writers": [{"location":"mobile+0x3a10c","elf_va":"0x4a10c","routine_range":"mobile+0x3a0d8-mobile+0x3a138","mode":"temporary","object_source_offset":"0x2b8"}],
+      "writers": [
+        {
+          "location": "mobile+0x3a10c",
+          "elf_va": "0x4a10c",
+          "routine_range": "mobile+0x3a0d8-mobile+0x3a138",
+          "mode": "temporary",
+          "object_source_offset": "0x2b8"
+        }
+      ],
       "trigger": "event/FSM-driven",
       "upstream_source": "backhaul FSM, connect/disconnect completion, and +CGEV detach/deactivation handling",
       "transformation": "internal backhaul state -> TP-Link MP_ConnStat enum by direct stored-state copy",
-      "enum_semantics": {"0":"disabled","1":"disconnected","2":"connecting","3":"disconnecting","4":"connected"},
+      "enum_semantics": {
+        "0": "disabled",
+        "1": "disconnected",
+        "2": "connecting",
+        "3": "disconnecting",
+        "4": "connected"
+      },
       "state_machine": {
-        "routine":"BackHaulFsm at mobile+0x364bc-mobile+0x37004",
-        "principal_transitions":["disabled -> disconnected on enable","disconnected -> connecting on connect/retry","connecting -> connected on success","connecting -> disconnected on failure","connected -> disconnecting on request/precondition loss","disconnecting -> disconnected on completion","disconnecting -> connecting on reconnect/profile-change path"]
+        "routine": "BackHaulFsm at mobile+0x364bc-mobile+0x37004",
+        "principal_transitions": [
+          "disabled -> disconnected on enable",
+          "disconnected -> connecting on connect/retry",
+          "connecting -> connected on success",
+          "connecting -> disconnected on failure",
+          "connected -> disconnecting on request/precondition loss",
+          "disconnecting -> disconnected on completion",
+          "disconnecting -> connecting on reconnect/profile-change path"
+        ]
       },
       "persistence": "runtime only",
-      "consumers": ["CMobileClient::GetConnState", "CMobileClient::GetAllStatus", "CMobileClient::GetCallFailReason", "wan:0", "status:0", "backhaul FSM"],
+      "consumers": [
+        "CMobileClient::GetConnState",
+        "CMobileClient::GetAllStatus",
+        "CMobileClient::GetCallFailReason",
+        "wan:0",
+        "status:0",
+        "backhaul FSM"
+      ],
       "confidence": "high"
     },
     {
       "record": 80,
       "meaning": "roaming state used in derived status",
       "writers": [
-        {"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 81 and 83"},
-        {"location":"mobile+0x39fdc","elf_va":"0x49fdc","routine_range":"mobile+0x39f90-mobile+0x3a0b4","mode":"temporary","role":"dedicated roaming-state update"}
+        {
+          "location": "mobile+0x39ef8",
+          "elf_va": "0x49ef8",
+          "routine_range": "mobile+0x39a00-mobile+0x39f24",
+          "mode": "temporary",
+          "role": "batched status update with records 81 and 83"
+        },
+        {
+          "location": "mobile+0x39fdc",
+          "elf_va": "0x49fdc",
+          "routine_range": "mobile+0x39f90-mobile+0x3a0b4",
+          "mode": "temporary",
+          "role": "dedicated roaming-state update"
+        }
       ],
       "trigger": "registration indication/response and roaming-status callback",
       "upstream_source": "+CGREG/+CREG/+CEREG registration information and AT status parsing",
       "transformation": "raw/home-roaming condition -> boolean-like TP-Link roaming state",
-      "enum_semantics": {"0":"not roaming","1":"roaming"},
+      "enum_semantics": {
+        "0": "not roaming",
+        "1": "roaming"
+      },
       "raw_mapping": "record 80 is 1 when any of the three retained raw registration-domain values equals 5; otherwise 0",
       "persistence": "runtime only",
-      "consumers": ["CMobileClient::GetRoamStat (combined with record 81)", "CMobileClient::GetCallFailReason", "status:0 wan.roaming", "backhaul roaming policy"],
+      "consumers": [
+        "CMobileClient::GetRoamStat (combined with record 81)",
+        "CMobileClient::GetCallFailReason",
+        "status:0 wan.roaming",
+        "backhaul roaming policy"
+      ],
       "confidence": "high"
     },
     {
       "record": 81,
       "meaning": "registration state",
-      "writers": [{"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 83"}],
+      "writers": [
+        {
+          "location": "mobile+0x39ef8",
+          "elf_va": "0x49ef8",
+          "routine_range": "mobile+0x39a00-mobile+0x39f24",
+          "mode": "temporary",
+          "role": "batched status update with records 80 and 83"
+        }
+      ],
       "trigger": "indication-driven with solicited-query and startup support",
       "upstream_source": "+CGREG/+CREG/+CEREG unsolicited results and AT+CGREG?/AT+CREG?/AT+CEREG? responses",
       "transformation": "Three raw domain states are retained, each raw 0-5 value is normalized, then primary and secondary service states are collapsed into MP_RegStat record 81.",
-      "raw_semantics": {"0":"not registered/not searching","1":"registered home","2":"searching","3":"denied","4":"unknown/not registered","5":"registered roaming"},
-      "enum_semantics": {"0":"not registered","1":"registered on primary packet-service domain","2":"searching or registered on secondary service domain","3":"registration denied"},
-      "normalization": ["primary raw 1/5 -> 1","else secondary raw 1/5 -> 2","else either searching -> 2","else either denied -> 3","else -> 0"],
-      "parser_callback": {"routine":"UpdateRegStat normalization callback","location":"mobile+0x39ab0-mobile+0x39f24","elf_va":"0x49ab0-0x49f24"},
-      "refresh_model": {"primary":"unsolicited indication driven","secondary":"solicited query/startup/fallback"},
-      "derived_dependencies": ["record 80 roaming is derived from raw value 5 before the batch commit","record 83 preserves part of the service-domain substate","record 79 backhaul policy consumes the normalized result"],
+      "raw_semantics": {
+        "0": "not registered/not searching",
+        "1": "registered home",
+        "2": "searching",
+        "3": "denied",
+        "4": "unknown/not registered",
+        "5": "registered roaming"
+      },
+      "enum_semantics": {
+        "0": "not registered",
+        "1": "registered on primary packet-service domain",
+        "2": "searching or registered on secondary service domain",
+        "3": "registration denied"
+      },
+      "normalization": [
+        "primary raw 1/5 -> 1",
+        "else secondary raw 1/5 -> 2",
+        "else either searching -> 2",
+        "else either denied -> 3",
+        "else -> 0"
+      ],
+      "parser_callback": {
+        "routine": "UpdateRegStat normalization callback",
+        "location": "mobile+0x39ab0-mobile+0x39f24",
+        "elf_va": "0x49ab0-0x49f24"
+      },
+      "refresh_model": {
+        "primary": "unsolicited indication driven",
+        "secondary": "solicited query/startup/fallback"
+      },
+      "derived_dependencies": [
+        "record 80 roaming is derived from raw value 5 before the batch commit",
+        "record 83 preserves part of the service-domain substate",
+        "record 79 backhaul policy consumes the normalized result"
+      ],
       "persistence": "runtime only",
-      "consumers": ["CMobileClient::GetRegStat", "CMobileClient::GetAllStatus", "CMobileClient::GetRoamStat", "CMobileClient::GetCallFailReason", "status:0 wan.registerStatus", "backhaul FSM"],
+      "consumers": [
+        "CMobileClient::GetRegStat",
+        "CMobileClient::GetAllStatus",
+        "CMobileClient::GetRoamStat",
+        "CMobileClient::GetCallFailReason",
+        "status:0 wan.registerStatus",
+        "backhaul FSM"
+      ],
       "confidence": "high for provenance; medium for complete enum-label mapping"
     },
     {
       "record": 82,
       "meaning": "current network type",
-      "writers": [{"location":"mobile+0x39828","elf_va":"0x49828","routine_range":"mobile+0x397d0-mobile+0x39850","mode":"temporary","object_source_offset":"0x190"}],
+      "writers": [
+        {
+          "location": "mobile+0x39828",
+          "elf_va": "0x49828",
+          "routine_range": "mobile+0x397d0-mobile+0x39850",
+          "mode": "temporary",
+          "object_source_offset": "0x190"
+        }
+      ],
       "trigger": "AT status indication/response update",
       "upstream_source": "AT network/system information parsed by mobile_status_at.cpp",
       "transformation": "raw radio family -> TP-Link network type; confirmed categories include NONE, GSM, WCDMA, and LTE",
-      "enum_semantics": {"0":"no service","1":"GSM","2":"WCDMA","3":"LTE","4":"TD-SCDMA (frontend-supported)","5":"CDMA 1x (frontend-supported)","6":"CDMA 1x EV-DO (frontend-supported)"},
+      "enum_semantics": {
+        "0": "no service",
+        "1": "GSM",
+        "2": "WCDMA",
+        "3": "LTE",
+        "4": "TD-SCDMA (frontend-supported)",
+        "5": "CDMA 1x (frontend-supported)",
+        "6": "CDMA 1x EV-DO (frontend-supported)"
+      },
       "persistence": "runtime only",
-      "consumers": ["CMobileClient::GetNetType", "status:0 wan.networkType", "internal status logic"],
+      "consumers": [
+        "CMobileClient::GetNetType",
+        "status:0 wan.networkType",
+        "internal status logic"
+      ],
       "confidence": "high"
     },
     {
       "record": 83,
       "meaning": "service status (mobile_status.net_status.srv_stat)",
       "writers": [
-        {"location":"mobile+0x39a50","elf_va":"0x49a50","routine_range":"mobile+0x399f0-mobile+0x39a78","mode":"temporary","role":"dedicated derived-state update"},
-        {"location":"mobile+0x39ef8","elf_va":"0x49ef8","routine_range":"mobile+0x39a00-mobile+0x39f24","mode":"temporary","role":"batched status update with records 80 and 81"}
+        {
+          "location": "mobile+0x39a50",
+          "elf_va": "0x49a50",
+          "routine_range": "mobile+0x399f0-mobile+0x39a78",
+          "mode": "temporary",
+          "role": "dedicated derived-state update"
+        },
+        {
+          "location": "mobile+0x39ef8",
+          "elf_va": "0x49ef8",
+          "routine_range": "mobile+0x39a00-mobile+0x39f24",
+          "mode": "temporary",
+          "role": "batched status update with records 80 and 81"
+        }
       ],
       "trigger": "registration/status state-machine update",
       "upstream_source": "AT-derived registration/network state",
       "transformation": "internal service/registration states -> MP service-status values 0/1/2/3",
-      "enum_semantics": {"0":"no service","1":"limited service","2":"available","3":"limited area"},
+      "enum_semantics": {
+        "0": "no service",
+        "1": "limited service",
+        "2": "available",
+        "3": "limited area"
+      },
       "state_machine_role": "Retains service availability detail that record 81 partly collapses; mapping branches include secondary state 11 -> limited service, secondary 1/5 or primary-registered fallback -> available, and secondary state 3 -> limited area.",
       "persistence": "runtime only",
-      "consumers": ["internal mobile status/backhaul logic", "service-status presentation"],
+      "consumers": [
+        "internal mobile status/backhaul logic",
+        "service-status presentation"
+      ],
       "confidence": "high"
     },
     {
       "record": 84,
       "meaning": "network-selection operation status",
-      "writers": [{"location":"mobile+0x32658","elf_va":"0x42658","routine_range":"mobile+0x325ec-mobile+0x32658","mode":"temporary","object_source_offset":"0x2bc"}],
+      "writers": [
+        {
+          "location": "mobile+0x32658",
+          "elf_va": "0x42658",
+          "routine_range": "mobile+0x325ec-mobile+0x32658",
+          "mode": "temporary",
+          "object_source_offset": "0x2bc"
+        }
+      ],
       "trigger": "network-selection operation/FSM-driven",
       "upstream_source": "manual/automatic selection workflow and modem selection result",
       "transformation": "workflow status scalar -> MP_SelStat enum by direct copy",
-      "enum_semantics": {"0":"idle","1":"registering","2":"registered","3":"searching","4":"search finished","5":"generic search failure","6":"generic registration failure","7":"registration denied by network","8":"illegal SIM or ME","9":"saving","10":"saved","11":"canceling","12":"canceled","13":"search failed because SMS was being sent"},
+      "enum_semantics": {
+        "0": "idle",
+        "1": "registering",
+        "2": "registered",
+        "3": "searching",
+        "4": "search finished",
+        "5": "generic search failure",
+        "6": "generic registration failure",
+        "7": "registration denied by network",
+        "8": "illegal SIM or ME",
+        "9": "saving",
+        "10": "saved",
+        "11": "canceling",
+        "12": "canceled",
+        "13": "search failed because SMS was being sent"
+      },
       "state_machine_role": "Temporary operation state/result for scan, manual/automatic selection, save, and cancellation. It is not the configured automatic/manual policy.",
       "persistence": "runtime only",
-      "consumers": ["CMobileClient::GetNetSelStat", "wan:10 networkSelectionStatus", "network-selection workflow"],
+      "consumers": [
+        "CMobileClient::GetNetSelStat",
+        "wan:10 networkSelectionStatus",
+        "network-selection workflow"
+      ],
       "confidence": "high"
     },
     {
       "record": 446,
       "meaning": "selected ISP name",
-      "writers": [{"location":"mobile+0x238a8","elf_va":"0x338a8","routine_range":"mobile+0x23850-mobile+0x2397c","mode":"permanent","role":"batched network-selection update with records 447, 448, and 76"}],
+      "writers": [
+        {
+          "location": "mobile+0x238a8",
+          "elf_va": "0x338a8",
+          "routine_range": "mobile+0x23850-mobile+0x2397c",
+          "mode": "permanent",
+          "role": "batched network-selection update with records 447, 448, and 76"
+        }
+      ],
       "trigger": "network-selection configuration/result",
       "upstream_source": "selected operator/ISP metadata in AP selection workflow",
       "transformation": "bounded ISP-name string copy",
       "persistence": "persistent configuration",
-      "consumers": ["CMobileClient::GetSelIspName", "CMobileClient::GetAllStatus", "wan:0 selectedIspName"],
+      "consumers": [
+        "CMobileClient::GetSelIspName",
+        "CMobileClient::GetAllStatus",
+        "wan:0 selectedIspName"
+      ],
+      "confidence": "high"
+    },
+    {
+      "record": 447,
+      "meaning": "manually selected operator MCC (mobile_config.net_config.net_isp_mcc)",
+      "writers": [
+        {
+          "location": "mobile+0x228a8",
+          "elf_va": "0x338a8",
+          "routine_range": "mobile+0x23760-mobile+0x238a8",
+          "mode": "permanent",
+          "role": "network-selection persistence from the AT layer"
+        }
+      ],
+      "trigger": "manual network selection (mobile event 0x34)",
+      "upstream_source": "MP_NetSel+0x04",
+      "transformation": "copied verbatim from the MP_NetSel request payload; also formatted into AT+COPS=1,2,\"%u%02u\"",
+      "persistence": "persistent configuration",
+      "consumers": [
+        "network-selection workflow",
+        "operator display"
+      ],
+      "note": "Written in the same permanent commit as records 446 (operator name) and 76 (selection mode), so all four persist atomically.",
+      "confidence": "high"
+    },
+    {
+      "record": 448,
+      "meaning": "manually selected operator MNC (mobile_config.net_config.net_isp_mnc)",
+      "writers": [
+        {
+          "location": "mobile+0x228a8",
+          "elf_va": "0x338a8",
+          "routine_range": "mobile+0x23760-mobile+0x238a8",
+          "mode": "permanent",
+          "role": "network-selection persistence from the AT layer"
+        }
+      ],
+      "trigger": "manual network selection (mobile event 0x34)",
+      "upstream_source": "MP_NetSel+0x08",
+      "transformation": "copied verbatim from the MP_NetSel request payload; also formatted into AT+COPS=1,2,\"%u%02u\"",
+      "persistence": "persistent configuration",
+      "consumers": [
+        "network-selection workflow",
+        "operator display"
+      ],
+      "note": "Written in the same permanent commit as records 446 (operator name) and 76 (selection mode), so all four persist atomically.",
       "confidence": "high"
     }
   ],
   "profile_record_family": {
-    "records": [47, 48, 51, 52, 61, 62, 63, 64],
-    "dynamic_records": ["user-profile record = stored index + 53", "ISP-profile records begin at 65"],
+    "records": [
+      47,
+      48,
+      51,
+      52,
+      61,
+      62,
+      63,
+      64
+    ],
+    "dynamic_records": [
+      "user-profile record = stored index + 53",
+      "ISP-profile records begin at 65"
+    ],
     "meaning": "profile-list counts, active/default indices, and profile references",
     "writers": "profile add/edit/delete/current-profile and ISP reload/update paths; exact per-record writer callsites are not yet exhaustively assigned",
     "trigger": "configuration/profile operation and ISP-profile load",
     "upstream_source": "AP profile configuration and /misc/NetIspInfo.ini",
     "transformation": "stored metadata/indices -> PROF_LIST plus expanded user/ISP profile objects",
     "persistence": "persistent configuration",
-    "consumers": ["CMobileClient::GetProfileList", "CMobileClient::GetAllStatus", "wan:0 profileSettings", "backhaul dial profile selection"],
+    "consumers": [
+      "CMobileClient::GetProfileList",
+      "CMobileClient::GetAllStatus",
+      "wan:0 profileSettings",
+      "backhaul dial profile selection"
+    ],
     "confidence": "high for read model and storage class; incomplete writer attribution"
   },
   "known_limits": [
