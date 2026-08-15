@@ -28,6 +28,44 @@ function findAll(data, needle) {
   return offsets;
 }
 
+function align(value, boundary) {
+  return Math.ceil(value / boundary) * boundary;
+}
+
+function parseFbfComponents(data, errors) {
+  const descriptorOffset = 0x140;
+  const descriptorSize = 52;
+  const descriptorCount = 10;
+  const payloadAlignment = 0x2000;
+  if (data.length < descriptorOffset + descriptorSize * descriptorCount) {
+    errors.push("truncated FBF component table");
+    return [];
+  }
+
+  let payloadOffset = payloadAlignment;
+  const components = [];
+  for (let index = 0; index < descriptorCount; index += 1) {
+    const offset = descriptorOffset + index * descriptorSize;
+    const rawId = data.subarray(offset, offset + 4).toString("ascii");
+    const numericId = [...rawId].reverse().join("");
+    const size = data.readUInt32LE(offset + 24);
+    const component = { index, raw_id: rawId, numeric_id: numericId, size };
+    if (size > 0) {
+      component.offset = payloadOffset;
+      component.offset_hex = `0x${payloadOffset.toString(16)}`;
+      component.end = payloadOffset + size;
+      if (component.end > data.length) {
+        errors.push(`component ${rawId} exceeds image boundary`);
+      } else {
+        component.sha256 = sha256(data.subarray(component.offset, component.end));
+      }
+      payloadOffset = align(component.end, payloadAlignment);
+    }
+    components.push(component);
+  }
+  return components;
+}
+
 function inspect(path) {
   const data = readFileSync(path);
   const errors = [];
@@ -37,6 +75,7 @@ function inspect(path) {
   if (magic !== "Marvell_FBF") errors.push(`unrecognized container magic ${JSON.stringify(magic)}`);
 
   const rootfsOffset = data.indexOf(Buffer.from("hsqs"));
+  const components = parseFbfComponents(data, errors);
   let rootfs = null;
   if (rootfsOffset < 0) {
     errors.push("SquashFS little-endian magic not found");
@@ -93,6 +132,7 @@ function inspect(path) {
     container: magic === "Marvell_FBF" ? "Marvell_FBF" : "unknown",
     image: { path, filename: basename(path), size: data.length, sha256: sha256(data) },
     rootfs,
+    components,
     architecture,
     detected_sections: detected,
     authenticity: "not assessed; no cryptographic signature scheme has been identified",
@@ -140,15 +180,19 @@ try {
 
 if (command === "extract" && result.valid) {
   mkdirSync(outputDir, { recursive: true });
-  const rootfsPath = join(outputDir, "rootfs.squashfs");
-  writeFileSync(rootfsPath, result._data.subarray(result.rootfs.offset, result.rootfs.end));
   const report = publicResult(result);
-  report.extracted = [{ path: rootfsPath, size: result.rootfs.size, sha256: result.rootfs.sha256 }];
+  report.extracted = [];
+  for (const component of result.components.filter((item) => item.size > 0)) {
+    const outputName = `${String(component.index).padStart(2, "0")}-${component.numeric_id}.bin`;
+    const outputPath = join(outputDir, outputName);
+    writeFileSync(outputPath, result._data.subarray(component.offset, component.end));
+    report.extracted.push({ path: outputPath, raw_id: component.raw_id, numeric_id: component.numeric_id, size: component.size, sha256: component.sha256 });
+  }
   writeFileSync(join(outputDir, "manifest.json"), `${JSON.stringify(report, null, 2)}\n`);
   if (json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   else {
     printHuman(result, "Extractor");
-    process.stdout.write(`Output            ${rootfsPath}\nManifest          ${join(outputDir, "manifest.json")}\n`);
+    process.stdout.write(`Components        ${report.extracted.length}\nManifest          ${join(outputDir, "manifest.json")}\n`);
   }
 } else {
   if (json) process.stdout.write(`${JSON.stringify(publicResult(result), null, 2)}\n`);

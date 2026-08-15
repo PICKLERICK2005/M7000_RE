@@ -1,0 +1,14 @@
+{
+  "baseline": "M7000(EU) v3.2 / 3.0.2 Build 241129 Rel.3n",
+  "entries": [
+    {"parameter":"IMEI/device identity","read_path":"rpmServer -> libmobile/RIL -> CP; factory seed also exists in /misc tp_data","write_path":"factory/RIL code exists but not exercised","persistent_location":"CP-managed identity/NVM and factory /misc relationship unresolved","owner":"CP plus factory provisioning","confidence":"medium"},
+    {"parameter":"SIM identity and state","read_path":"libmobile/RIL -> CP USIM stack","write_path":"SIM state controls only; identity not assumed writable","persistent_location":"SIM-derived","owner":"SIM and CP USIM stack","confidence":"high"},
+    {"parameter":"APN/profile","read_path":"AP UCI/mobile service and CP PDP context","write_path":"stock management API -> mobile/RIL/AT","persistent_location":"AP configuration with runtime CP context","owner":"AP policy, CP execution","confidence":"high"},
+    {"parameter":"band/RAT preference","read_path":"libmobile RF-band getters -> RIL/CP","write_path":"static setters exist; not exercised","persistent_location":"likely CP NVM; exact file unresolved","owner":"CP","confidence":"medium"},
+    {"parameter":"RF calibration","read_path":"CP RF/calibration modules","write_path":"factory/calibration handlers present; not exercised","persistent_location":"CP NVM files such as GsmCalData, DCXO and RF performance records","owner":"CP/RF subsystem","confidence":"high"},
+    {"parameter":"diagnostic enable state","read_path":"AP /cache marker and CP diag configuration","write_path":"CATStudio boot scripts and CP diag handlers; not exercised","persistent_location":"AP /cache plus CP diagCfg/Log_Cfg NVM","owner":"AP boot policy and CP diagnostics","confidence":"high"},
+    {"parameter":"modem firmware version","read_path":"FOTV metadata and runtime modem getter","write_path":"FBF update path","persistent_location":"flash firmware components","owner":"boot/update chain and CP","confidence":"high"},
+    {"parameter":"region/device code","read_path":"/misc factory files -> UCI product configuration","write_path":"factory tooling exists; not exercised","persistent_location":"AP /misc tp_data","owner":"AP factory provisioning","confidence":"high"}
+  ]
+}
+
