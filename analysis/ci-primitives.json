@@ -309,5 +309,2355 @@
     "AP modem readback enum used by mobile 0x4a254, values 0-3.",
     "CI numeric primitive id, per service group, 1-based, plus the global 0xF000 error range."
   ],
-  "safety": "Static recovery only. The presence of a primitive name, index, or request structure is not evidence that it is reachable, permitted, or safe to invoke."
+  "safety": "Static recovery only. The presence of a primitive name, index, or request structure is not evidence that it is reachable, permitted, or safe to invoke.",
+  "ap_sender_catalogue": {
+    "status": "CONFIRMED",
+    "method": "Every BL/B.W to the CI send stub at atcmdsrv 0x7cd14 was enumerated (397 sites); for each, the primitive id was taken from the immediate that sets r1 and the service group from the CI client-object slot, using the confirmed rule slot_offset = 4 * svgId.",
+    "validation": "392 of 397 sites resolve to a name ending in _REQ under this model. The residue is 5 sites: one where the primitive id is loaded from a register rather than an immediate, and CI_SIM_PRIM_RSAP_STATUS_IND (an indication genuinely sent AP-to-CP).",
+    "why_it_matters": "This replaces one-by-one recovery from isolated handlers. Any CI primitive reachable from an AT command can now be looked up rather than reverse-engineered.",
+    "groups": {
+      "CC": {
+        "1": {
+          "name": "CI_CC_PRIM_GET_NUMBERTYPE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x17c12"
+          ]
+        },
+        "3": {
+          "name": "CI_CC_PRIM_SET_NUMBERTYPE_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x17c4a"
+          ]
+        },
+        "5": {
+          "name": "CI_CC_PRIM_GET_SUPPORTED_CALLMODES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16524"
+          ]
+        },
+        "7": {
+          "name": "CI_CC_PRIM_GET_CALLMODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16508"
+          ]
+        },
+        "9": {
+          "name": "CI_CC_PRIM_SET_CALLMODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x16562"
+          ]
+        },
+        "11": {
+          "name": "CI_CC_PRIM_GET_SUPPORTED_DATA_BSTYPES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x162ec"
+          ]
+        },
+        "13": {
+          "name": "CI_CC_PRIM_GET_DATA_BSTYPE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x162d0"
+          ]
+        },
+        "15": {
+          "name": "CI_CC_PRIM_SET_DATA_BSTYPE_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x164d8"
+          ]
+        },
+        "21": {
+          "name": "CI_CC_PRIM_LIST_CURRENT_CALLS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16184"
+          ]
+        },
+        "25": {
+          "name": "CI_CC_PRIM_MAKE_CALL_REQ",
+          "req_size": 56,
+          "ap_senders": [
+            "0x17dea",
+            "0x1804a"
+          ]
+        },
+        "35": {
+          "name": "CI_CC_PRIM_ANSWER_CALL_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x16d4a",
+            "0x1709a"
+          ]
+        },
+        "37": {
+          "name": "CI_CC_PRIM_REFUSE_CALL_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x15f1a"
+          ]
+        },
+        "40": {
+          "name": "CI_CC_PRIM_HOLD_CALL_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x189a2"
+          ]
+        },
+        "50": {
+          "name": "CI_CC_PRIM_RELEASE_CALL_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x171ca",
+            "0x17276"
+          ]
+        },
+        "52": {
+          "name": "CI_CC_PRIM_RELEASE_ALL_CALLS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x161c2"
+          ]
+        },
+        "70": {
+          "name": "CI_CC_PRIM_START_DTMF_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x17d10"
+          ]
+        },
+        "74": {
+          "name": "CI_CC_PRIM_GET_DTMF_PACING_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16104"
+          ]
+        },
+        "76": {
+          "name": "CI_CC_PRIM_SET_DTMF_PACING_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x1606e",
+            "0x16150"
+          ]
+        },
+        "78": {
+          "name": "CI_CC_PRIM_SEND_DTMF_STRING_REQ",
+          "req_size": 34,
+          "ap_senders": [
+            "0x1870e"
+          ]
+        },
+        "83": {
+          "name": "CI_CC_PRIM_GET_CCM_VALUE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1658c"
+          ]
+        },
+        "89": {
+          "name": "CI_CC_PRIM_GET_ACM_VALUE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x161ec"
+          ]
+        },
+        "91": {
+          "name": "CI_CC_PRIM_RESET_ACM_VALUE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16212"
+          ]
+        },
+        "93": {
+          "name": "CI_CC_PRIM_GET_ACMMAX_VALUE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x16240"
+          ]
+        },
+        "95": {
+          "name": "CI_CC_PRIM_SET_ACMMAX_VALUE_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x1628e"
+          ]
+        },
+        "97": {
+          "name": "CI_CC_PRIM_GET_PUCT_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x17c6a"
+          ]
+        },
+        "99": {
+          "name": "CI_CC_PRIM_SET_PUCT_INFO_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x17cb2"
+          ]
+        },
+        "105": {
+          "name": "CI_CC_PRIM_GET_DATACOMP_CAP_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x17bb6"
+          ]
+        },
+        "107": {
+          "name": "CI_CC_PRIM_GET_DATACOMP_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x17ba2"
+          ]
+        },
+        "109": {
+          "name": "CI_CC_PRIM_SET_DATACOMP_REQ",
+          "req_size": 6,
+          "ap_senders": [
+            "0x17bf2"
+          ]
+        },
+        "111": {
+          "name": "CI_CC_PRIM_GET_RLP_CAP_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x165f4"
+          ]
+        },
+        "113": {
+          "name": "CI_CC_PRIM_GET_RLP_CFG_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x165ca"
+          ]
+        },
+        "115": {
+          "name": "CI_CC_PRIM_SET_RLP_CFG_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x16638"
+          ]
+        },
+        "131": {
+          "name": "CI_CC_PRIM_SET_CTM_STATUS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x15fcc"
+          ]
+        },
+        "135": {
+          "name": "CI_CC_PRIM_SYNC_AUDIO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x15ea0"
+          ]
+        },
+        "142": {
+          "name": "CI_CC_PRIM_SRVCC_STATUS_REQ",
+          "req_size": 1724,
+          "ap_senders": [
+            "0x1811c"
+          ]
+        }
+      },
+      "DAT": {
+        "13": {
+          "name": "CI_DAT_PRIM_SET_UL_TP_IND_REQ",
+          "req_size": null,
+          "ap_senders": [
+            "0x474ac"
+          ]
+        },
+        "16": {
+          "name": "CI_DAT_PRIM_TEST_APP_REQ",
+          "req_size": null,
+          "ap_senders": [
+            "0x46e70"
+          ]
+        },
+        "21": {
+          "name": "CI_DAT_PRIM_SET_MBMS_CMD_REQ",
+          "req_size": null,
+          "ap_senders": [
+            "0x4796e"
+          ]
+        },
+        "25": {
+          "name": "CI_DAT_PRIM_GET_MBMS_CMD_AREA_INFO_REQ",
+          "req_size": null,
+          "ap_senders": [
+            "0x47162"
+          ]
+        },
+        "27": {
+          "name": "CI_DAT_PRIM_SET_MBMS_EV_REQ",
+          "req_size": null,
+          "ap_senders": [
+            "0x47d7a"
+          ]
+        }
+      },
+      "DEV": {
+        "6": {
+          "name": "CI_DEV_PRIM_GET_REVISION_ID_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x5b5b6",
+            "0x5b5ce"
+          ]
+        },
+        "10": {
+          "name": "CI_DEV_PRIM_SET_FUNC_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x40c0a"
+          ]
+        },
+        "12": {
+          "name": "CI_DEV_PRIM_GET_FUNC_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x40aea"
+          ]
+        },
+        "24": {
+          "name": "CI_DEV_PRIM_SET_ENGMODE_REPORT_OPTION_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x40e06"
+          ]
+        },
+        "26": {
+          "name": "CI_DEV_PRIM_GET_ENGMODE_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x40eaa",
+            "0x40efc",
+            "0x40f50",
+            "0x40fa8",
+            "0x41886",
+            "0x418ba",
+            "0x418ee",
+            "0x41922",
+            "0x41956",
+            "0x4198a",
+            "0x419c2",
+            "0x419f6",
+            "0x41a2e",
+            "0x461a2"
+          ]
+        },
+        "44": {
+          "name": "CI_DEV_PRIM_LP_NWUL_MSG_REQ",
+          "req_size": 492,
+          "ap_senders": [
+            "0x41050"
+          ]
+        },
+        "50": {
+          "name": "CI_DEV_PRIM_COMM_ASSERT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x36c78"
+          ]
+        },
+        "51": {
+          "name": "CI_DEV_PRIM_SET_BAND_MODE_REQ",
+          "req_size": 32,
+          "ap_senders": [
+            "0x40d30",
+            "0x46324"
+          ]
+        },
+        "53": {
+          "name": "CI_DEV_PRIM_GET_BAND_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x40ca4",
+            "0x40d5c",
+            "0x461d0"
+          ]
+        },
+        "55": {
+          "name": "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x40c88"
+          ]
+        },
+        "57": {
+          "name": "CI_DEV_PRIM_SET_SV_REQ",
+          "req_size": 17,
+          "ap_senders": [
+            "0x411da"
+          ]
+        },
+        "59": {
+          "name": "CI_DEV_PRIM_GET_SV_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41188"
+          ]
+        },
+        "61": {
+          "name": "CI_DEV_PRIM_AP_POWER_NOTIFY_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x41802"
+          ]
+        },
+        "63": {
+          "name": "CI_DEV_PRIM_SET_TD_MODE_TX_RX_REQ",
+          "req_size": 6,
+          "ap_senders": [
+            "0x412e2"
+          ]
+        },
+        "65": {
+          "name": "CI_DEV_PRIM_SET_TD_MODE_LOOPBACK_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x4132e"
+          ]
+        },
+        "67": {
+          "name": "CI_DEV_PRIM_SET_GSM_MODE_TX_RX_REQ",
+          "req_size": 24,
+          "ap_senders": [
+            "0x41396"
+          ]
+        },
+        "71": {
+          "name": "CI_DEV_PRIM_ENABLE_HSDPA_REQ",
+          "req_size": 9,
+          "ap_senders": [
+            "0x41260"
+          ]
+        },
+        "73": {
+          "name": "CI_DEV_PRIM_GET_HSDPA_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4129c"
+          ]
+        },
+        "75": {
+          "name": "CI_DEV_PRIM_READ_RF_TEMPERATURE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4171e"
+          ]
+        },
+        "104": {
+          "name": "CI_DEV_PRIM_SET_POWER_BACK_OFF_REQ",
+          "req_size": 24,
+          "ap_senders": [
+            "0x414b4"
+          ]
+        },
+        "106": {
+          "name": "CI_DEV_PRIM_GET_INTERNAL_REVISION_ID_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x5b5c2",
+            "0x5b5da"
+          ]
+        },
+        "108": {
+          "name": "CI_DEV_PRIM_SET_COM_CONFIG_REQ",
+          "req_size": 124,
+          "ap_senders": [
+            "0x41614"
+          ]
+        },
+        "110": {
+          "name": "CI_DEV_PRIM_GET_COM_CONFIG_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x41502",
+            "0x4154c"
+          ]
+        },
+        "112": {
+          "name": "CI_DEV_PRIM_SET_WCDMA_MODE_TX_RX_REQ",
+          "req_size": 14,
+          "ap_senders": [
+            "0x41408"
+          ]
+        },
+        "124": {
+          "name": "CI_DEV_PRIM_GET_PARK_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41de8"
+          ]
+        },
+        "126": {
+          "name": "CI_DEV_PRIM_LP_ECID_MEAS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x410a4"
+          ]
+        },
+        "134": {
+          "name": "CI_DEV_PRIM_GET_LTE_MEAS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41640",
+            "0x4165c",
+            "0x41ca0"
+          ]
+        },
+        "136": {
+          "name": "CI_DEV_PRIM_SET_LTE_COEX_REPORT_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4184e"
+          ]
+        },
+        "138": {
+          "name": "CI_DEV_PRIM_GET_LTE_COEX_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x417a8"
+          ]
+        },
+        "146": {
+          "name": "CI_DEV_PRIM_SET_LTE_MODE_TX_RX_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x4177c"
+          ]
+        },
+        "148": {
+          "name": "CI_DEV_PRIM_SET_L2_RAND_FILL_ENABLED_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x41a76"
+          ]
+        },
+        "150": {
+          "name": "CI_DEV_PRIM_GET_L2_RAND_FILL_ENABLED_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41aa0"
+          ]
+        },
+        "161": {
+          "name": "CI_DEV_PRIM_SET_L1DEBUG_REQ",
+          "req_size": 12,
+          "ap_senders": [
+            "0x41e40"
+          ]
+        },
+        "164": {
+          "name": "CI_DEV_PRIM_LP_OTDOA_MEAS_REQ",
+          "req_size": 1304,
+          "ap_senders": [
+            "0x4112c"
+          ]
+        },
+        "167": {
+          "name": "CI_DEV_PRIM_LP_OTDOA_MEAS_ABORT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4116c"
+          ]
+        },
+        "176": {
+          "name": "CI_DEV_PRIM_SET_IGNITION_STATE_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x41c6c"
+          ]
+        },
+        "178": {
+          "name": "CI_DEV_PRIM_GET_IGNITION_STATE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41c14"
+          ]
+        },
+        "180": {
+          "name": "CI_DEV_PRIM_SET_IMLCONFIG_REQ",
+          "req_size": 66,
+          "ap_senders": [
+            "0x41af6"
+          ]
+        },
+        "182": {
+          "name": "CI_DEV_PRIM_GET_IMLCONFIG_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x41bf8"
+          ]
+        },
+        "185": {
+          "name": "CI_DEV_PRIM_SET_LTE_BAND_ORDER_REQ",
+          "req_size": 21,
+          "ap_senders": [
+            "0x416a8"
+          ]
+        },
+        "187": {
+          "name": "CI_DEV_PRIM_GET_LTE_BAND_ORDER_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x416e0"
+          ]
+        },
+        "193": {
+          "name": "CI_DEV_PRIM_SET_OPER_CONFIG_REQ",
+          "req_size": 260,
+          "ap_senders": [
+            "0x41d50"
+          ]
+        },
+        "195": {
+          "name": "CI_DEV_PRIM_GET_OPER_CONFIG_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x41cf4"
+          ]
+        },
+        "197": {
+          "name": "CI_DEV_PRIM_MRD_CONFIG_REQ",
+          "req_size": 899,
+          "ap_senders": [
+            "0x41b5e",
+            "0x41bca"
+          ]
+        },
+        "199": {
+          "name": "CI_DEV_PRIM_GET_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x40c6c"
+          ]
+        },
+        "201": {
+          "name": "CI_DEV_PRIM_FACTORY_RESET_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x417c4"
+          ]
+        },
+        "205": {
+          "name": "CI_DEV_PRIM_SET_MEDATA_RESERVER_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x4627a"
+          ]
+        },
+        "207": {
+          "name": "CI_DEV_PRIM_GET_MEDATA_RESERVER_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x46224"
+          ]
+        },
+        "214": {
+          "name": "CI_DEV_PRIM_SET_ROAMING_FORBIDEN_PLMN_REQ",
+          "req_size": 62,
+          "ap_senders": [
+            "0x4637c"
+          ]
+        },
+        "240": {
+          "name": "CI_DEV_PRIM_SET_COMMON_FEATURE_REQ",
+          "req_size": 1028,
+          "ap_senders": [
+            "0x42982"
+          ]
+        },
+        "242": {
+          "name": "CI_DEV_PRIM_GET_COMMON_FEATURE_REQ",
+          "req_size": 16,
+          "ap_senders": [
+            "0x42a3a"
+          ]
+        },
+        "244": {
+          "name": "CI_DEV_PRIM_SET_NST_TX_RX_REQ",
+          "req_size": 44,
+          "ap_senders": [
+            "0x41436"
+          ]
+        }
+      },
+      "MM": {
+        "1": {
+          "name": "CI_MM_PRIM_GET_NUM_SUBSCRIBER_NUMBERS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1ba94"
+          ]
+        },
+        "3": {
+          "name": "CI_MM_PRIM_GET_SUBSCRIBER_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1ba48"
+          ]
+        },
+        "5": {
+          "name": "CI_MM_PRIM_GET_SUPPORTED_REGRESULT_OPTIONS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b2fc"
+          ]
+        },
+        "9": {
+          "name": "CI_MM_PRIM_SET_REGRESULT_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1b49e"
+          ]
+        },
+        "12": {
+          "name": "CI_MM_PRIM_GET_REGRESULT_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b31a"
+          ]
+        },
+        "20": {
+          "name": "CI_MM_PRIM_GET_NUM_NETWORK_OPERATORS_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x1b502"
+          ]
+        },
+        "22": {
+          "name": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1b962"
+          ]
+        },
+        "24": {
+          "name": "CI_MM_PRIM_GET_NUM_PREFERRED_OPERATORS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b7dc"
+          ]
+        },
+        "26": {
+          "name": "CI_MM_PRIM_GET_PREFERRED_OPERATOR_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1b9ae"
+          ]
+        },
+        "28": {
+          "name": "CI_MM_PRIM_ADD_PREFERRED_OPERATOR_REQ",
+          "req_size": 44,
+          "ap_senders": [
+            "0x1ab8a"
+          ]
+        },
+        "30": {
+          "name": "CI_MM_PRIM_DELETE_PREFERRED_OPERATOR_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1b886"
+          ]
+        },
+        "32": {
+          "name": "CI_MM_PRIM_GET_CURRENT_OPERATOR_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b52c"
+          ]
+        },
+        "38": {
+          "name": "CI_MM_PRIM_DEREGISTER_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b56c"
+          ]
+        },
+        "42": {
+          "name": "CI_MM_PRIM_SET_SIGQUALITY_IND_CONFIG_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x1c1b8"
+          ]
+        },
+        "49": {
+          "name": "CI_MM_PRIM_GET_NITZ_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b924",
+            "0x1d2cc"
+          ]
+        },
+        "54": {
+          "name": "CI_MM_PRIM_SELECT_PREFERRED_PLMN_LIST_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1ca46"
+          ]
+        },
+        "56": {
+          "name": "CI_MM_PRIM_GET_PREFERRED_PLMN_LIST_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1ca08"
+          ]
+        },
+        "59": {
+          "name": "CI_MM_PRIM_SET_BANDIND_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1caae"
+          ]
+        },
+        "61": {
+          "name": "CI_MM_PRIM_GET_BANDIND_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1ca70"
+          ]
+        },
+        "65": {
+          "name": "CI_MM_PRIM_CELL_LOCK_REQ",
+          "req_size": 12,
+          "ap_senders": [
+            "0x1bb9e"
+          ]
+        },
+        "72": {
+          "name": "CI_MM_PRIM_SET_NAS_INTEGRITY_CHECK_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1bf36"
+          ]
+        },
+        "74": {
+          "name": "CI_MM_PRIM_GET_NAS_INTEGRITY_CHECK_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1bedc"
+          ]
+        },
+        "76": {
+          "name": "CI_MM_PRIM_GET_NUM_LTE_NETWORK_OPERATORS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1bc5c"
+          ]
+        },
+        "78": {
+          "name": "CI_MM_PRIM_GET_LTE_NETWORK_OPERATOR_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1bc9a"
+          ]
+        },
+        "80": {
+          "name": "CI_MM_PRIM_GET_LTE_BACKGROUND_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1bef8"
+          ]
+        },
+        "82": {
+          "name": "CI_MM_PRIM_SET_LTE_BACKGROUND_INFO_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x1bf86"
+          ]
+        },
+        "87": {
+          "name": "CI_MM_SET_SRVCC_SUPPORT_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1cf32"
+          ]
+        },
+        "89": {
+          "name": "CI_MM_GET_SRVCC_SUPPORT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1cf5c"
+          ]
+        },
+        "91": {
+          "name": "CI_MM_SET_IMS_NW_REPORT_MODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1cf9a"
+          ]
+        },
+        "93": {
+          "name": "CI_MM_GET_IMS_NW_REPORT_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1cfc4"
+          ]
+        },
+        "97": {
+          "name": "CI_MM_SET_EMERGENCY_NUMBER_REPORT_MODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1ce62"
+          ]
+        },
+        "99": {
+          "name": "CI_MM_GET_EMERGENCY_NUMBER_REPORT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1ce8c"
+          ]
+        },
+        "102": {
+          "name": "CI_MM_SET_NW_EMERGENCY_BEARER_SERVICES_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1ceca"
+          ]
+        },
+        "104": {
+          "name": "CI_MM_GET_NW_EMERGENCY_BEARER_SERVICES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1cef4"
+          ]
+        },
+        "108": {
+          "name": "CI_MM_GET_SSAC_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1cfe0"
+          ]
+        },
+        "110": {
+          "name": "CI_MM_PRIM_GET_SIGQUALITY_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1b9fa",
+            "0x1ce10",
+            "0x1d2a0"
+          ]
+        },
+        "114": {
+          "name": "CI_MM_PRIM_CANCEL_MANUAL_PLMN_SEARCH_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1b7f8"
+          ]
+        },
+        "116": {
+          "name": "CI_MM_PRIM_TRIGGER_USER_RESELECTION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1c1ec"
+          ]
+        },
+        "118": {
+          "name": "CI_MM_PRIM_SET_POWER_UP_PLMN_MODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1c246"
+          ]
+        },
+        "120": {
+          "name": "CI_MM_PRIM_GET_POWER_UP_PLMN_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1c208"
+          ]
+        },
+        "125": {
+          "name": "CI_MM_PRIM_FRAT_LIST_ACTION_REQ",
+          "req_size": 12,
+          "ap_senders": [
+            "0x1c2c0"
+          ]
+        },
+        "127": {
+          "name": "CI_MM_PRIM_GET_FRAT_LIST_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1c270"
+          ]
+        },
+        "129": {
+          "name": "CI_MM_PRIM_CSG_AUTO_SEARCH_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d096"
+          ]
+        },
+        "131": {
+          "name": "CI_MM_PRIM_CSG_LIST_SEARCH_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x1eaf6"
+          ]
+        },
+        "138": {
+          "name": "CI_MM_PRIM_SET_SECURITY_CAPABILITY_REQ",
+          "req_size": 12,
+          "ap_senders": [
+            "0x2026a"
+          ]
+        },
+        "140": {
+          "name": "CI_MM_PRIM_GET_SECURITY_CAPABILITY_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x202c0"
+          ]
+        },
+        "159": {
+          "name": "CI_MM_PRIM_RPM_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1c2f0",
+            "0x1c360",
+            "0x1c448",
+            "0x1c464",
+            "0x1c504"
+          ]
+        },
+        "162": {
+          "name": "CI_MM_PRIM_SET_NETWORK_SELECTION_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x1d1de"
+          ]
+        },
+        "164": {
+          "name": "CI_MM_PRIM_GET_NETWORK_SELECTION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d18c"
+          ]
+        },
+        "166": {
+          "name": "CI_MM_PRIM_GET_LTE_CA_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d264"
+          ]
+        },
+        "168": {
+          "name": "CI_MM_PRIM_GET_OPERATOR_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d170"
+          ]
+        },
+        "171": {
+          "name": "CI_MM_PRIM_GET_ASRCURRENT_OPERATOR_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d3b2",
+            "0x71396"
+          ]
+        },
+        "173": {
+          "name": "CI_MM_PRIM_GET_CELL_LOCK_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1bbe6"
+          ]
+        },
+        "180": {
+          "name": "CI_MM_PRIM_GET_OOS_PHASE_PERIOD_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x1d36e"
+          ]
+        },
+        "194": {
+          "name": "CI_MM_PRIM_SET_RPM_REQ",
+          "req_size": 21,
+          "ap_senders": [
+            "0x1c336",
+            "0x1c41c",
+            "0x1c4d8"
+          ]
+        }
+      },
+      "MSG": {
+        "1": {
+          "name": "CI_MSG_PRIM_GET_SUPPORTED_SERVICES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d314"
+          ]
+        },
+        "3": {
+          "name": "CI_MSG_PRIM_SELECT_SERVICE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4d36e"
+          ]
+        },
+        "5": {
+          "name": "CI_MSG_PRIM_GET_CURRENT_SERVICE_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d330"
+          ]
+        },
+        "7": {
+          "name": "CI_MSG_PRIM_GET_SUPPORTED_STORAGES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d398"
+          ]
+        },
+        "11": {
+          "name": "CI_MSG_PRIM_GET_CURRENT_STORAGE_INFO_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d3b8"
+          ]
+        },
+        "13": {
+          "name": "CI_MSG_PRIM_READ_MESSAGE_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x4ce44"
+          ]
+        },
+        "15": {
+          "name": "CI_MSG_PRIM_DELETE_MESSAGE_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x4de50",
+            "0x50e4c"
+          ]
+        },
+        "17": {
+          "name": "CI_MSG_PRIM_SEND_MESSAGE_REQ",
+          "req_size": 230,
+          "ap_senders": [
+            "0x4bb08",
+            "0x4e572",
+            "0x50aee"
+          ]
+        },
+        "23": {
+          "name": "CI_MSG_PRIM_SEND_STORED_MESSAGE_REQ",
+          "req_size": 92,
+          "ap_senders": [
+            "0x4dc04"
+          ]
+        },
+        "25": {
+          "name": "CI_MSG_PRIM_CONFIG_MSG_IND_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x4d734"
+          ]
+        },
+        "30": {
+          "name": "CI_MSG_PRIM_GET_SMSC_ADDR_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d4a8"
+          ]
+        },
+        "32": {
+          "name": "CI_MSG_PRIM_SET_SMSC_ADDR_REQ",
+          "req_size": 43,
+          "ap_senders": [
+            "0x4d500"
+          ]
+        },
+        "34": {
+          "name": "CI_MSG_PRIM_GET_MOSMS_SERVICE_CAP_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4ded4"
+          ]
+        },
+        "36": {
+          "name": "CI_MSG_PRIM_GET_MOSMS_SERVICE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4e1c8"
+          ]
+        },
+        "38": {
+          "name": "CI_MSG_PRIM_SET_MOSMS_SERVICE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4e206"
+          ]
+        },
+        "42": {
+          "name": "CI_MSG_PRIM_GET_CBM_TYPES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4d5bc"
+          ]
+        },
+        "44": {
+          "name": "CI_MSG_PRIM_SET_CBM_TYPES_REQ",
+          "req_size": 744,
+          "ap_senders": [
+            "0x4d652",
+            "0x5127c"
+          ]
+        },
+        "46": {
+          "name": "CI_MSG_PRIM_SELECT_STORAGES_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x4d468",
+            "0x503a6"
+          ]
+        },
+        "48": {
+          "name": "CI_MSG_PRIM_WRITE_MSG_WITH_INDEX_REQ",
+          "req_size": 230,
+          "ap_senders": [
+            "0x4e8a8"
+          ]
+        },
+        "52": {
+          "name": "CI_MSG_PRIM_RESET_MEMCAP_FULL_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4df12"
+          ]
+        },
+        "54": {
+          "name": "CI_MSG_PRIM_SET_RECORD_STATUS_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x51364"
+          ]
+        },
+        "56": {
+          "name": "CI_MSG_PRIM_SET_FILTER_STATUS_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x4e908"
+          ]
+        },
+        "58": {
+          "name": "CI_MSG_PRIM_GET_FILTER_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x4e934"
+          ]
+        },
+        "60": {
+          "name": "CI_MSG_PRIM_LOCK_SMS_STATUS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4d852",
+            "0x4dd2c",
+            "0x4e976"
+          ]
+        },
+        "68": {
+          "name": "CI_MSG_PRIM_SET_CB_RAT_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x4eace"
+          ]
+        },
+        "70": {
+          "name": "CI_MSG_PRIM_GET_STORED_SMS_STATUS_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x512d0"
+          ]
+        },
+        "72": {
+          "name": "CI_MSG_PRIM_GET_SMS_STATUS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x513f4"
+          ]
+        },
+        "74": {
+          "name": "CI_MSG_PRIM_SET_SMS_STATUS_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x513b0"
+          ]
+        },
+        "82": {
+          "name": "CI_MSG_PRIM_SET_SM_REASNED_PARA_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x51452"
+          ]
+        },
+        "84": {
+          "name": "CI_MSG_PRIM_GET_SM_REASNED_PARA_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x51480"
+          ]
+        }
+      },
+      "PB": {
+        "1": {
+          "name": "CI_PB_PRIM_GET_SUPPORTED_PHONEBOOKS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x32fe0"
+          ]
+        },
+        "3": {
+          "name": "CI_PB_PRIM_GET_PHONEBOOK_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x33022"
+          ]
+        },
+        "5": {
+          "name": "CI_PB_PRIM_SELECT_PHONEBOOK_REQ",
+          "req_size": 18,
+          "ap_senders": [
+            "0x3310e"
+          ]
+        },
+        "17": {
+          "name": "CI_PB_PRIM_DELETE_PHONEBOOK_ENTRY_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x32cc0"
+          ]
+        },
+        "19": {
+          "name": "CI_PB_PRIM_REPLACE_PHONEBOOK_ENTRY_REQ",
+          "req_size": 594,
+          "ap_senders": [
+            "0x32e7e",
+            "0x332a0"
+          ]
+        },
+        "21": {
+          "name": "CI_PB_PRIM_READ_PHONEBOOK_ENTRY_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x32c7c"
+          ]
+        },
+        "40": {
+          "name": "CI_PB_PRIM_GET_PHONEBOOK_CAPA_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x3316c",
+            "0x33210",
+            "0x33320"
+          ]
+        },
+        "42": {
+          "name": "CI_PB_PRIM_BYPASS_FDN_CHECK_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x3333c"
+          ]
+        }
+      },
+      "PS": {
+        "1": {
+          "name": "CI_PS_PRIM_SET_ATTACH_STATE_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2ada6"
+          ]
+        },
+        "3": {
+          "name": "CI_PS_PRIM_GET_ATTACH_STATE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2add8"
+          ]
+        },
+        "5": {
+          "name": "CI_PS_PRIM_DEFINE_PDP_CTX_REQ",
+          "req_size": 268,
+          "ap_senders": [
+            "0x2ac12"
+          ]
+        },
+        "7": {
+          "name": "CI_PS_PRIM_DELETE_PDP_CTX_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2ac8a"
+          ]
+        },
+        "9": {
+          "name": "CI_PS_PRIM_GET_PDP_CTX_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2aa04",
+            "0x2ab7c",
+            "0x2ae28",
+            "0x2b08e",
+            "0x2b67c",
+            "0x2c2ce",
+            "0x2c8f2",
+            "0x2dd5e",
+            "0x2e182",
+            "0x2e2e4",
+            "0x2e364",
+            "0x2e44a",
+            "0x2e876",
+            "0x2ea10"
+          ]
+        },
+        "13": {
+          "name": "CI_PS_PRIM_SET_PDP_CTX_ACT_STATE_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x2af16"
+          ]
+        },
+        "15": {
+          "name": "CI_PS_PRIM_GET_PDP_CTXS_ACT_STATE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2aadc"
+          ]
+        },
+        "17": {
+          "name": "CI_PS_PRIM_ENTER_DATA_STATE_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x2b16a"
+          ]
+        },
+        "22": {
+          "name": "CI_PS_PRIM_SET_GSMGPRS_CLASS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c4fc"
+          ]
+        },
+        "24": {
+          "name": "CI_PS_PRIM_GET_GSMGPRS_CLASS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c490"
+          ]
+        },
+        "26": {
+          "name": "CI_PS_PRIM_GET_GSMGPRS_CLASSES_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c4ac"
+          ]
+        },
+        "28": {
+          "name": "CI_PS_PRIM_ENABLE_NW_REG_IND_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2a978"
+          ]
+        },
+        "31": {
+          "name": "CI_PS_PRIM_SET_QOS_REQ",
+          "req_size": 7,
+          "ap_senders": [
+            "0x2ad56"
+          ]
+        },
+        "35": {
+          "name": "CI_PS_PRIM_GET_QOS_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2acf0",
+            "0x2dfa0"
+          ]
+        },
+        "37": {
+          "name": "CI_PS_PRIM_ENABLE_POWERON_AUTO_ATTACH_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b752"
+          ]
+        },
+        "46": {
+          "name": "CI_PS_PRIM_GET_NW_REG_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2a9b0"
+          ]
+        },
+        "52": {
+          "name": "CI_PS_PRIM_GET_3G_QOS_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2b228",
+            "0x2f23e"
+          ]
+        },
+        "54": {
+          "name": "CI_PS_PRIM_SET_3G_QOS_REQ",
+          "req_size": 28,
+          "ap_senders": [
+            "0x2b2a2"
+          ]
+        },
+        "58": {
+          "name": "CI_PS_PRIM_GET_3G_QOS_CAPS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b2f0"
+          ]
+        },
+        "60": {
+          "name": "CI_PS_PRIM_DEFINE_SEC_PDP_CTX_REQ",
+          "req_size": 9,
+          "ap_senders": [
+            "0x2b566"
+          ]
+        },
+        "62": {
+          "name": "CI_PS_PRIM_DELETE_SEC_PDP_CTX_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b61a"
+          ]
+        },
+        "64": {
+          "name": "CI_PS_PRIM_GET_SEC_PDP_CTX_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b438",
+            "0x2e0d4"
+          ]
+        },
+        "66": {
+          "name": "CI_PS_PRIM_DEFINE_TFT_FILTER_REQ",
+          "req_size": 92,
+          "ap_senders": [
+            "0x2aab0"
+          ]
+        },
+        "68": {
+          "name": "CI_PS_PRIM_DELETE_TFT_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2aa56"
+          ]
+        },
+        "70": {
+          "name": "CI_PS_PRIM_GET_TFT_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2e328"
+          ]
+        },
+        "72": {
+          "name": "CI_PS_PRIM_MODIFY_PDP_CTX_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2ab1e"
+          ]
+        },
+        "83": {
+          "name": "CI_PS_PRIM_SET_ACL_SERVICE_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x2c99c"
+          ]
+        },
+        "91": {
+          "name": "CI_PS_PRIM_AUTHENTICATE_REQ",
+          "req_size": 406,
+          "ap_senders": [
+            "0x2afe6"
+          ]
+        },
+        "93": {
+          "name": "CI_PS_PRIM_FAST_DORMANT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2b6ac"
+          ]
+        },
+        "97": {
+          "name": "CI_PS_PRIM_SET_FAST_DORMANCY_CONFIG_REQ",
+          "req_size": 20,
+          "ap_senders": [
+            "0x2b702"
+          ]
+        },
+        "100": {
+          "name": "CI_PS_PRIM_SET_PS_PAGING_CONFIG_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b9ba"
+          ]
+        },
+        "102": {
+          "name": "CI_PS_PRIM_GET_POWERON_AUTO_ATTACH_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2b77c"
+          ]
+        },
+        "104": {
+          "name": "CI_PS_PRIM_READ_4G_PDP_CTX_DYN_PARA_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2be82",
+            "0x2f99c"
+          ]
+        },
+        "106": {
+          "name": "CI_PS_PRIM_READ_4G_PDP_CTXS_ACT_DYN_PARA_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2be18"
+          ]
+        },
+        "108": {
+          "name": "CI_PS_PRIM_ENABLE_4G_NW_REG_IND_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c458"
+          ]
+        },
+        "111": {
+          "name": "CI_PS_PRIM_GET_4G_NW_REG_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c3a8"
+          ]
+        },
+        "113": {
+          "name": "CI_PS_PRIM_GET_4G_QOS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2bd3a"
+          ]
+        },
+        "115": {
+          "name": "CI_PS_PRIM_SET_4G_QOS_REQ",
+          "req_size": 36,
+          "ap_senders": [
+            "0x2bdea"
+          ]
+        },
+        "117": {
+          "name": "CI_PS_PRIM_DEL_4G_QOS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2bcd6"
+          ]
+        },
+        "119": {
+          "name": "CI_PS_PRIM_GET_4G_QOS_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2bd86"
+          ]
+        },
+        "121": {
+          "name": "CI_PS_PRIM_GET_4G_MODE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c1b4"
+          ]
+        },
+        "123": {
+          "name": "CI_PS_PRIM_SET_4G_MODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c20e"
+          ]
+        },
+        "125": {
+          "name": "CI_PS_PRIM_GET_4G_MODE_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c1d0"
+          ]
+        },
+        "129": {
+          "name": "CI_PS_PRIM_GET_PDP_ADDR_LIST_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c23c"
+          ]
+        },
+        "131": {
+          "name": "CI_PS_PRIM_READ_4G_SEC_PDP_CTX_DYN_PARA_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2bf0a"
+          ]
+        },
+        "133": {
+          "name": "CI_PS_PRIM_READ_4G_SEC_PDP_CTXS_ACT_DYN_PARA_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2beb8"
+          ]
+        },
+        "135": {
+          "name": "CI_PS_PRIM_READ_4G_QOS_DYN_PARA_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c00a"
+          ]
+        },
+        "137": {
+          "name": "CI_PS_PRIM_READ_4G_QOS_DYN_PARA_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2bfb8"
+          ]
+        },
+        "139": {
+          "name": "CI_PS_PRIM_GET_4G_EVET_REP_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c038"
+          ]
+        },
+        "141": {
+          "name": "CI_PS_PRIM_SET_4G_EVET_REP_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x2c0c4"
+          ]
+        },
+        "143": {
+          "name": "CI_PS_PRIM_GET_4G_EVET_REP_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c054"
+          ]
+        },
+        "145": {
+          "name": "CI_PS_PRIM_GET_4G_VOICE_CALL_MODE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c11e"
+          ]
+        },
+        "147": {
+          "name": "CI_PS_PRIM_SET_4G_VOICE_CALL_MODE_REQ",
+          "req_size": 4,
+          "ap_senders": [
+            "0x2c18a"
+          ]
+        },
+        "149": {
+          "name": "CI_PS_PRIM_GET_4G_VOICE_CALL_MODE_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c148"
+          ]
+        },
+        "151": {
+          "name": "CI_PS_PRIM_READ_4G_TRAFFIC_FLOW_TEMP_DYN_PARA_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2bf8a"
+          ]
+        },
+        "153": {
+          "name": "CI_PS_PRIM_READ_4G_TRAFFIC_FLOW_TEMP_DYN_PARA_CAPS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2bf38"
+          ]
+        },
+        "158": {
+          "name": "CI_PS_PRIM_SET_IMS_VOICE_CALL_AVAILABILITY_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c6b2"
+          ]
+        },
+        "160": {
+          "name": "CI_PS_PRIM_GET_IMS_VOICE_CALL_AVAILABILITY_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c674"
+          ]
+        },
+        "162": {
+          "name": "CI_PS_PRIM_SET_IMS_SMS_AVAILABILITY_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c71a"
+          ]
+        },
+        "164": {
+          "name": "CI_PS_PRIM_GET_IMS_SMS_AVAILABILITY_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c6dc"
+          ]
+        },
+        "166": {
+          "name": "CI_PS_PRIM_SET_MM_IMS_VOICE_TERMINATION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c782"
+          ]
+        },
+        "168": {
+          "name": "CI_PS_PRIM_GET_MM_IMS_VOICE_TERMINATION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c744"
+          ]
+        },
+        "170": {
+          "name": "CI_PS_PRIM_DEFINE_DEFAULT_PDP_CTX_REQ",
+          "req_size": 144,
+          "ap_senders": [
+            "0x2b85a"
+          ]
+        },
+        "172": {
+          "name": "CI_PS_PRIM_GET_DEFAULT_PDP_CTX_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b7ba",
+            "0x2b806"
+          ]
+        },
+        "174": {
+          "name": "CI_PS_PRIM_SET_APN_REQ",
+          "req_size": 116,
+          "ap_senders": [
+            "0x2b96e"
+          ]
+        },
+        "176": {
+          "name": "CI_PS_PRIM_GET_APN_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2b928"
+          ]
+        },
+        "178": {
+          "name": "CI_PS_PRIM_SET_IMS_REG_STATE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c826"
+          ]
+        },
+        "186": {
+          "name": "CI_PS_PRIM_SET_DEFAULT_PDP_AUTHENTICATE_REQ",
+          "req_size": 408,
+          "ap_senders": [
+            "0x2b8fc"
+          ]
+        },
+        "188": {
+          "name": "CI_PS_PRIM_GET_DEFAULT_PDP_AUTHENTICATE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2b8a6"
+          ]
+        },
+        "190": {
+          "name": "CI_PS_PRIM_SET_VOICE_DOMAIN_PREFERENCE_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2c5c6"
+          ]
+        },
+        "192": {
+          "name": "CI_PS_PRIM_GET_VOICE_DOMAIN_PREFERENCE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c57e"
+          ]
+        },
+        "194": {
+          "name": "CI_PS_PRIM_SET_EPS_USAGE_SETTING_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c63c"
+          ]
+        },
+        "196": {
+          "name": "CI_PS_PRIM_GET_EPS_USAGE_SETTING_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c604"
+          ]
+        },
+        "198": {
+          "name": "CI_PS_PRIM_SET_AP_UNIVERSAL_SETTING_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x2c7d8"
+          ]
+        },
+        "200": {
+          "name": "CI_PS_PRIM_SET_PS_SERVICE_DOMAIN_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c872"
+          ]
+        },
+        "202": {
+          "name": "CI_PS_PRIM_GET_PS_SERVICE_DOMAIN_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c89c"
+          ]
+        },
+        "204": {
+          "name": "CI_PS_PRIM_SET_IMS_SERVICE_STATUS_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x2c94a"
+          ]
+        },
+        "209": {
+          "name": "CI_PS_PRIM_ACTIVATE_RECONF_PDP_CTX_REQ",
+          "req_size": 674,
+          "ap_senders": [
+            "0x2a0e6"
+          ]
+        },
+        "227": {
+          "name": "CI_PS_PRIM_CONFIG_SIGNALLING_CONNECTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x2c36e"
+          ]
+        },
+        "229": {
+          "name": "CI_PS_PRIM_GET_SIGNALLING_CONNECTION_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x2c328"
+          ]
+        }
+      },
+      "SIM": {
+        "1": {
+          "name": "CI_SIM_PRIM_EXECCMD_REQ",
+          "req_size": 266,
+          "ap_senders": [
+            "0x55a28",
+            "0x55ab6"
+          ]
+        },
+        "4": {
+          "name": "CI_SIM_PRIM_PERSONALIZEME_REQ",
+          "req_size": 35,
+          "ap_senders": [
+            "0x56808"
+          ]
+        },
+        "6": {
+          "name": "CI_SIM_PRIM_OPERCHV_REQ",
+          "req_size": 36,
+          "ap_senders": [
+            "0x55d5e"
+          ]
+        },
+        "8": {
+          "name": "CI_SIM_PRIM_DOWNLOADPROFILE_REQ",
+          "req_size": 65,
+          "ap_senders": [
+            "0x56062"
+          ]
+        },
+        "13": {
+          "name": "CI_SIM_PRIM_ENVELOPE_CMD_REQ",
+          "req_size": 264,
+          "ap_senders": [
+            "0x560dc"
+          ]
+        },
+        "15": {
+          "name": "CI_SIM_PRIM_GET_SUBSCRIBER_ID_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x55ae4"
+          ]
+        },
+        "17": {
+          "name": "CI_SIM_PRIM_GET_PIN_STATE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x55b02",
+            "0x55c2e"
+          ]
+        },
+        "21": {
+          "name": "CI_SIM_PRIM_ENABLE_SIMAT_INDS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x55f86",
+            "0x55fc4"
+          ]
+        },
+        "23": {
+          "name": "CI_SIM_PRIM_LOCK_FACILITY_REQ",
+          "req_size": 19,
+          "ap_senders": [
+            "0x55eec"
+          ]
+        },
+        "31": {
+          "name": "CI_SIM_PRIM_GET_SERVICE_PROVIDER_NAME_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x55f3a",
+            "0x7175a"
+          ]
+        },
+        "42": {
+          "name": "CI_SIM_PRIM_GET_DEFAULT_LANGUAGE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x566f8"
+          ]
+        },
+        "44": {
+          "name": "CI_SIM_PRIM_GENERIC_CMD_REQ",
+          "req_size": 366,
+          "ap_senders": [
+            "0x5534c",
+            "0x558e2"
+          ]
+        },
+        "47": {
+          "name": "CI_SIM_PRIM_IS_EMERGENCY_NUMBER_REQ",
+          "req_size": 7,
+          "ap_senders": [
+            "0x5673e"
+          ]
+        },
+        "53": {
+          "name": "CI_SIM_PRIM_READ_MEP_CODES_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x5656a"
+          ]
+        },
+        "61": {
+          "name": "CI_SIM_PRIM_SET_VSIM_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x5635c"
+          ]
+        },
+        "63": {
+          "name": "CI_SIM_PRIM_GET_VSIM_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x56340"
+          ]
+        },
+        "67": {
+          "name": "CI_SIM_PRIM_BTSAP_CONNECT_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x563b2"
+          ]
+        },
+        "69": {
+          "name": "CI_SIM_PRIM_BTSAP_DISCONNECT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x563dc"
+          ]
+        },
+        "71": {
+          "name": "CI_SIM_PRIM_BTSAP_TRANSFER_APDU_REQ",
+          "req_size": 264,
+          "ap_senders": [
+            "0x56434"
+          ]
+        },
+        "73": {
+          "name": "CI_SIM_PRIM_BTSAP_TRANSFER_ATR_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x56374",
+            "0x56470"
+          ]
+        },
+        "75": {
+          "name": "CI_SIM_PRIM_BTSAP_SIM_CONTROL_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x564ae"
+          ]
+        },
+        "78": {
+          "name": "CI_SIM_PRIM_BTSAP_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x564d8"
+          ]
+        },
+        "80": {
+          "name": "CI_SIM_PRIM_BTSAP_SET_TRANSPORT_PROTOCOL_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x56516"
+          ]
+        },
+        "84": {
+          "name": "CI_SIM_PRIM_OPEN_LOGICAL_CHANNEL_REQ",
+          "req_size": 20,
+          "ap_senders": [
+            "0x559b4",
+            "0x5629a"
+          ]
+        },
+        "86": {
+          "name": "CI_SIM_PRIM_CLOSE_LOGICAL_CHANNEL_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x56316"
+          ]
+        },
+        "95": {
+          "name": "CI_SIM_PRIM_RSAP_STAT_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x5a0d6"
+          ]
+        },
+        "106": {
+          "name": "CI_SIM_PRIM_RSAP_SIM_SELECT_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x568d8",
+            "0x5a12c"
+          ]
+        },
+        "108": {
+          "name": "CI_SIM_PRIM_RSAP_STATUS_IND",
+          "req_size": 1,
+          "ap_senders": [
+            "0x55448"
+          ]
+        },
+        "113": {
+          "name": "CI_SIM_PRIM_GET_ICCID_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x585d0"
+          ]
+        },
+        "119": {
+          "name": "CI_SIM_PRIM_GET_NUM_UICC_APPLICATIONS_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x56682"
+          ]
+        },
+        "121": {
+          "name": "CI_SIM_PRIM_GET_UICC_APPLICATIONS_INFO_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x566ce"
+          ]
+        },
+        "130": {
+          "name": "CI_SIM_PRIM_UPDATE_COUNT_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x5a01c"
+          ]
+        },
+        "132": {
+          "name": "CI_SIM_PRIM_SET_POLL_REQ",
+          "req_size": 8,
+          "ap_senders": [
+            "0x5a06a"
+          ]
+        },
+        "134": {
+          "name": "CI_SIM_PRIM_GET_POLL_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x5a098"
+          ]
+        }
+      },
+      "SS": {
+        "3": {
+          "name": "CI_SS_PRIM_SET_CLIP_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x35f50",
+            "0x373fa"
+          ]
+        },
+        "7": {
+          "name": "CI_SS_PRIM_SET_CLIR_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x35fea"
+          ]
+        },
+        "11": {
+          "name": "CI_SS_PRIM_SET_COLP_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x360ce"
+          ]
+        },
+        "13": {
+          "name": "CI_SS_PRIM_GET_CUG_CONFIG_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x3794c"
+          ]
+        },
+        "15": {
+          "name": "CI_SS_PRIM_SET_CUG_CONFIG_REQ",
+          "req_size": 3,
+          "ap_senders": [
+            "0x37992"
+          ]
+        },
+        "19": {
+          "name": "CI_SS_PRIM_SET_CNAP_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x367fe"
+          ]
+        },
+        "33": {
+          "name": "CI_SS_PRIM_GET_CW_OPTION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x3657a"
+          ]
+        },
+        "35": {
+          "name": "CI_SS_PRIM_SET_CW_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x365d6"
+          ]
+        },
+        "45": {
+          "name": "CI_SS_PRIM_START_USSD_SESSION_REQ",
+          "req_size": 231,
+          "ap_senders": [
+            "0x36688"
+          ]
+        },
+        "47": {
+          "name": "CI_SS_PRIM_ABORT_USSD_SESSION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x36766"
+          ]
+        },
+        "49": {
+          "name": "CI_SS_PRIM_GET_CCM_OPTION_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x37910"
+          ]
+        },
+        "51": {
+          "name": "CI_SS_PRIM_SET_CCM_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x378e6"
+          ]
+        },
+        "53": {
+          "name": "CI_SS_PRIM_GET_AOC_WARNING_ENABLE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x37824"
+          ]
+        },
+        "55": {
+          "name": "CI_SS_PRIM_SET_AOC_WARNING_ENABLE_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x37862"
+          ]
+        },
+        "57": {
+          "name": "CI_SS_PRIM_GET_SS_NOTIFY_OPTIONS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x36878"
+          ]
+        },
+        "59": {
+          "name": "CI_SS_PRIM_SET_SS_NOTIFY_OPTIONS_REQ",
+          "req_size": 2,
+          "ap_senders": [
+            "0x3684e"
+          ]
+        },
+        "97": {
+          "name": "CI_SS_PRIM_GET_CDIP_STATUS_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x35e7c"
+          ]
+        },
+        "99": {
+          "name": "CI_SS_PRIM_SET_CDIP_OPTION_REQ",
+          "req_size": 1,
+          "ap_senders": [
+            "0x35eb8"
+          ]
+        },
+        "103": {
+          "name": "CI_SS_PRIM_MMI_CODE_FDN_CHECK_REQ",
+          "req_size": 274,
+          "ap_senders": [
+            "0x35c9a",
+            "0x35e3a"
+          ]
+        },
+        "111": {
+          "name": "CI_SS_PRIM_GET_LOCAL_PROFILE_REQ",
+          "req_size": 0,
+          "ap_senders": [
+            "0x379bc"
+          ]
+        }
+      }
+    }
+  },
+  "client_object_table": {
+    "status": "CONFIRMED",
+    "rule": "The CI client-object table is indexed by service group id; the slot offset is 4 * svgId.",
+    "slots": {
+      "CC": "+0x04",
+      "SS": "+0x08",
+      "MM": "+0x0c",
+      "PB": "+0x10",
+      "SIM": "+0x14",
+      "MSG": "+0x18",
+      "PS": "+0x1c",
+      "DAT": "+0x20",
+      "DEV": "+0x24"
+    },
+    "evidence": "Applied blind to all 397 send sites it yields a valid _REQ name 392 times; the DEV slot +0x24 independently matches the already-proven SET_BAND_MODE path.",
+    "corroborates": "The 1-based service-group numbering, since a 0-based numbering would shift every slot."
+  }
 }

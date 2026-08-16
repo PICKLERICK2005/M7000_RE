@@ -729,3 +729,218 @@ So the honest answer is that `0x3081` encodes nothing this firmware acts on. Its
 bit structure cannot be recovered because no code decomposes it, and its meaning
 cannot be recovered because no code distinguishes it. It is recorded as a closed
 negative result rather than an open question.
+
+## Network selection at the CI layer
+
+With the preferred-RAT chain as the reference implementation, the network-selection
+workflow resolves the same way — and it turns out to be four different CI
+primitives, not one.
+
+Everything here is service group `CI_SG_ID_MM = 3`. That was not guessed from the
+name: it follows from a rule worth stating on its own.
+
+### The client-object table is indexed by service group
+
+Every CI sender loads its client object from a fixed slot before calling the send
+stub, and the slot offset is simply `4 × svgId` — CC at `+0x04`, MM at `+0x0c`,
+DEV at `+0x24`. Applying that rule blind to all **397** send sites in `atcmdsrv`
+resolves **392** of them to a primitive name ending in `_REQ`. A wrong group
+assignment would produce nonsense, so the 392/397 hit rate is the validation.
+
+The five that do not resolve are honest residue: one site loads the primitive id
+from a register rather than an immediate, and `CI_SIM_PRIM_RSAP_STATUS_IND` is a
+genuine indication sent AP-to-CP rather than a request.
+
+That catalogue is now in `analysis/ci-primitives.json`. It replaces recovering
+primitives one at a time from isolated handlers.
+
+### Scan: polled, not pushed
+
+`AT+COPS=?` does **not** produce one confirmation containing an array, and it does
+not produce a stream of indications. It is an AP-driven count-then-iterate loop:
+
+1. `CI_MM_PRIM_GET_NUM_NETWORK_OPERATORS_REQ` (primitive 20, 2-byte payload whose
+   first byte is the constant 3)
+2. the confirmation (21, 4 bytes) returns a status word and a one-byte **count**,
+   and the AP immediately allocates `count × 80` bytes
+3. `CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_REQ` (22) carrying a single byte: the index
+4. the confirmation (23, **80 bytes**) delivers one operator; the index is
+   incremented and step 3 re-issued
+
+The loop is visible directly: the MM confirmation handler compares a running index
+against the stored count, increments it, and calls the step-3 sender again from two
+sites inside itself.
+
+An LTE-specific pair (76/78) mirrors the same shape. Asynchronous alternatives do
+exist in the MM table — `NETWORK_SEARCH_IND`, `FIRST_SEARCHED_NETWORK_OPERATOR_IND`,
+`OPERATOR_STATUS_IND` — but none of them is part of this sequence, and whether any
+is enabled in this build is unknown.
+
+### Registration, and a real coupling to the RAT path
+
+`AT+COPS=<mode>,…` dispatches on mode through a `tbb` at `0x1b534`:
+
+| mode | meaning | primitive |
+| ---: | --- | --- |
+| 0 | automatic | `CI_MM_PRIM_AUTO_REGISTER_REQ` (34) |
+| 1, 4 | manual / manual with fallback | `CI_MM_PRIM_MANUAL_REGISTER_REQ` (36) |
+| 2 | deregister | `CI_MM_PRIM_DEREGISTER_REQ` (38) |
+| 3 | set format only | `CI_MM_PRIM_SET_ID_FORMAT_REQ` (18) |
+| 5 | not implemented | error return |
+
+Mode 0 is more than a single primitive. It runs a sequence: read the current band
+mode, arm a 10-second timer, then send `CI_DEV_PRIM_SET_BAND_MODE_REQ` with
+`networkMode = preferredMode = 6` — all three RATs, no preference — and only then
+`AUTO_REGISTER`. **Selecting automatic network selection resets the preferred-RAT
+policy at the CI layer.** That is a genuine cross-path coupling, recovered from
+control flow rather than inferred.
+
+Mode 1 does the same in reverse: it narrows the RAT first. The AT `AcT` parameter is
+mapped to a CI `networkMode` by three bitmask tests before the registration is sent —
+`1 << AcT` against `0x0b` → GSM, against `0x574` → UMTS, against `0x280` → LTE.
+
+Which gives a **third independent confirmation** of `GSM = 0, UMTS = 1, LTE = 3`,
+this time from 3GPP access-technology numbering rather than from the `AT*BAND` table
+or the CP translation tables. (Faithfulness note: the mask order puts `AcT` 8 and 10
+in the UMTS group, which is not what those values mean in 3GPP. Recorded as the code
+behaves.)
+
+### How the PLMN actually crosses the boundary
+
+The 42-byte `MANUAL_REGISTER_REQ` carries a discriminated union selected by the
+format byte at `+0x03`:
+
+| Offset | Size | Field |
+| --- | ---: | --- |
+| `0x00` | 1 | 1 for modes 1/4, 0 for command type 1 |
+| `0x02` | 1 | 1 |
+| `0x03` | 1 | format: 0/1 alphanumeric, 2 numeric |
+| `0x04` | 1 | name length *(alphanumeric only)* |
+| `0x05` | 35 | operator name *(alphanumeric only)* |
+| `0x04` | 2 | **MCC** *(numeric only)* |
+| `0x06` | 2 | **MNC** *(numeric only)* |
+| `0x08` | 1 | MNC digit count *(numeric only)* |
+| `0x28` | 1 | `AcT`, 0–11 |
+
+So the answer to how the PLMN is represented after `atcmdsrv` is: **numeric MCC and
+MNC as two separate little-endian 16-bit integers, with an explicit MNC digit
+count.** Not packed BCD, not text. The parser at `0x5f280` accepts a 5- or
+6-character numeric string, converts characters 4-onward to the MNC and 1–3 to the
+MCC, and the digit count is simply the string length minus three.
+
+In the alphanumeric formats no MCC/MNC is present at all — the name is sent instead.
+
+### Cancellation cannot target a request
+
+`AT+CPLMNS` with command type 4 (ABORT) sends
+`CI_MM_PRIM_CANCEL_MANUAL_PLMN_SEARCH_REQ` (114). Its **payload size is zero**, so
+there is nothing in it that could name a request. It is a global abort of whatever
+manual PLMN search is running, not a per-`reqHandle` abort. The handler does mint a
+fresh `reqHandle` for the cancel itself, so the cancel's own confirmation routes
+independently of the search it kills.
+
+Two sibling primitives share the shape — `ABORT_BANDS_SCAN_REQ` (189) and
+`CSG_SEARCH_STOP_REQ` (135), both zero-payload.
+
+How record 76's temporary overlay is restored afterwards was not traced.
+
+## The AP-side confirmation demultiplexer
+
+Everything returning from the CP — every CNF, every IND, every `CI_ERR` — passes
+through one function, `atcmdsrv 0x7ee28`.
+
+By the time it runs, the frame is already unpacked into a small struct: payload
+pointer at `+0x00`, service group at `+0x04`, primitive id at `+0x06`, request
+handle at `+0x08`. The dispatcher reads the service group and indexes a table of
+function pointers:
+
+    handler = table_0x000eeb94[svgId]
+    handler(payload, svgId, primId, reqHandle, length)
+
+A null slot is logged and dropped; there is no fallback. It also calls the *same*
+decoder used on the send path, so transmit and receive share one symbolic view of
+`(svgId, primId)`.
+
+That table lives in `.bss` and is filled at run time. The registrar is a control
+message: `atcmdsrv 0x7da76`, reached when the msocket envelope's type field is 3
+rather than 4. It populates four parallel per-group tables from a registration
+record. So the envelope's second word, previously recorded only as "constant 4 for
+CI primitives", is really a **message-type discriminator** on a shared control
+channel.
+
+The practical consequence is that handler pointers are not statically resolvable —
+they come from whichever module registers for the group. They are recoverable
+indirectly: the MM handler is `0x1d644`, identified by its `cmp r6, #0xc3` bound
+check against 195, the MM primitive maximum.
+
+## `reqHandle` is a routing key, not an id
+
+Traced end to end, the handle turns out to be four fields, and the "overloaded bits
+20–23" from the previous milestone were a partial view of a wider one.
+
+| Bits | Field | Evidence |
+| --- | --- | --- |
+| 0–11 | transaction counter | wraps `0xfff → 0x0b`, not to 0 |
+| 12–19 | AT session / channel index | extracted with `ubfx …,#12,#8` and used as an array index — `0x2c8d2` computes `base + 0x34 × index` |
+| 20–29 | caller request tag | cleared then set by the builder; read back with `ubfx …,#20,#10` and compared |
+| 30–31 | session class | set from `0x5ce80(session)`; the MM handler branches on bit 30 to pick between two context tables |
+
+The 10-bit tag is **caller-defined, not the primitive id**. Most builders do set it
+to the primitive id (`0x33`, `0x35`, `0x37`, `0x14`, `0xca`), but `0x2c8e4` sets
+`0x103` while sending PS primitive 9 — so the convention is not a rule. Confirmation
+handlers compare it (the MM handler tests `== 0xca`) to tell apart different internal
+callers of the *same* primitive.
+
+Read together, the handle is a composite routing key: bits 12–19 pick the originating
+AT session, bits 20–29 pick which caller inside it, bits 0–11 disambiguate concurrent
+requests. That is enough to route a confirmation home without any per-request
+allocation table — which is why no such table exists.
+
+Whether the CP inspects any part of the handle, or merely echoes it, is unknown.
+
+## The four reserved header bytes
+
+Offset `0x18` of the wire buffer — the last four bytes of the 16-byte inner header —
+is **never written by the sender and never read by the receive dispatcher**, which
+consumes only the payload pointer, service group, primitive id and handle. The bytes
+carry whatever the allocator left there.
+
+That is a negative result about the mapped paths, not about the protocol: the CP side
+was not audited for a reader. The field stays unnamed.
+
+## Record 84: the producer map closes
+
+All fifteen call sites of the setter at `mobile 0x425ec` are now attributed, and the
+two that "passed a computed register" turn out to be conditional selects:
+
+- `0x370dc` selects between **6** and **7** on the normalized AT-error code — 6 or 13
+  give state 7, any other non-zero code gives state 6
+- `0x3b620` selects between **1** and **9** on whether the saved selection is zero
+
+Those error codes are worth a caution. They come from `mobile 0x41110`, which returns
+0 for a bare `OK`, 1 for a bare `ERROR`, and otherwise maps `+CME ERROR: <n>` through
+a comparison chain into a small **internal** enum. The values 6 and 13 live in that
+internal space, *not* in 3GPP `+CME` numbering, and the internal-to-CME mapping was
+not completed. They must not be read as CME 6 and CME 13.
+
+State **8** is a negative result: none of the fifteen sites can emit it, and no site
+passes a value that could evaluate to it. The frontend enumerates the state; this
+daemon build cannot reach it.
+
+## The operator-info structure, partially
+
+`GET_NETWORK_OPERATOR_INFO_CNF` (23) and `GET_CURRENT_OPERATOR_INFO_CNF` (33) are both
+80 bytes, and the formatter at `0x1df00` reveals part of the layout: a status word at
+`+0x00`, a field bounded to `≤ 3` at `+0x02`, a name/identity block starting at
+`+0x04`, flags at `+0x29` and `+0x2a`, and two numeric halfwords at `+0x48` and
+`+0x4a`.
+
+The `≤ 3` field at `+0x02` is the `operatorState` candidate. It indexes a four-byte
+table at `0x85601` containing `00 01 02 01`. That is as far as the evidence goes: the
+mapping is confirmed to exist and to be indexed by that field, but it is notably *not*
+the identity and never emits 3 — so it is not a pass-through to the AT `+COPS <stat>`
+field, and the four states have no recovered names.
+
+The 80 bytes were not fully partitioned. The long/short name extents and any
+access-technology field were not isolated. Those gaps are recorded as unknown rather
+than filled in from 3GPP terminology, which the firmware has not been shown to use.

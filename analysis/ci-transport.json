@@ -23,15 +23,63 @@
     "status": "CONFIRMED",
     "total_length": "0x1c + payloadLen; the whole buffer is written to the socket",
     "fields": [
-      { "offset": "0x00", "size": 4, "name": "envelope_tag", "value": "constant 1", "evidence": "0x7d090 `str r6,[r4]` with r6 = 1" },
-      { "offset": "0x04", "size": 4, "name": "envelope_type", "value": "constant 4 for CI primitives", "evidence": "0x7e33a `movs r0,#4` passed to 0x7d060, stored at 0x7d092" },
-      { "offset": "0x08", "size": 4, "name": "inner_length", "value": "0x10 + payloadLen", "evidence": "0x7e334 `add.w r2, r8, #0x10`, stored at 0x7d092" },
-      { "offset": "0x0c", "size": 4, "name": "service_group_id", "evidence": "0x7e312 `str r5,[r0,#0xc]`" },
-      { "offset": "0x10", "size": 2, "name": "primitive_id", "evidence": "0x7e316 `strh r6,[r0,#0x10]` - note the id is 16-bit on the wire, which is why the 0xF000 error range fits" },
-      { "offset": "0x12", "size": 2, "name": "pad", "evidence": "not written; implied by the 16-byte inner header" },
-      { "offset": "0x14", "size": 4, "name": "request_handle", "evidence": "0x7e31a `str r7,[r0,#0x14]`" },
-      { "offset": "0x18", "size": 4, "name": "reserved", "confidence": "UNKNOWN - inside the 16-byte inner header but never written on this path" },
-      { "offset": "0x1c", "size": "payloadLen", "name": "primitive payload", "evidence": "0x7e31e/0x7e320 memcpy into buf+0x1c" }
+      {
+        "offset": "0x00",
+        "size": 4,
+        "name": "envelope_tag",
+        "value": "constant 1",
+        "evidence": "0x7d090 `str r6,[r4]` with r6 = 1"
+      },
+      {
+        "offset": "0x04",
+        "size": 4,
+        "name": "envelope_type",
+        "value": "message type discriminator; 4 = CI primitive, 3 = handler registration",
+        "evidence": "0x7e33a `movs r0,#4` passed to 0x7d060, stored at 0x7d092"
+      },
+      {
+        "offset": "0x08",
+        "size": 4,
+        "name": "inner_length",
+        "value": "0x10 + payloadLen",
+        "evidence": "0x7e334 `add.w r2, r8, #0x10`, stored at 0x7d092"
+      },
+      {
+        "offset": "0x0c",
+        "size": 4,
+        "name": "service_group_id",
+        "evidence": "0x7e312 `str r5,[r0,#0xc]`"
+      },
+      {
+        "offset": "0x10",
+        "size": 2,
+        "name": "primitive_id",
+        "evidence": "0x7e316 `strh r6,[r0,#0x10]` - note the id is 16-bit on the wire, which is why the 0xF000 error range fits"
+      },
+      {
+        "offset": "0x12",
+        "size": 2,
+        "name": "pad",
+        "evidence": "not written; implied by the 16-byte inner header"
+      },
+      {
+        "offset": "0x14",
+        "size": 4,
+        "name": "request_handle",
+        "evidence": "0x7e31a `str r7,[r0,#0x14]`"
+      },
+      {
+        "offset": "0x18",
+        "size": 4,
+        "name": "reserved",
+        "confidence": "NEGATIVE EVIDENCE on the mapped paths - never written by the sender and never read by the AP RX dispatcher. Not audited on the CP side. Do not name it."
+      },
+      {
+        "offset": "0x1c",
+        "size": "payloadLen",
+        "name": "primitive payload",
+        "evidence": "0x7e31e/0x7e320 memcpy into buf+0x1c"
+      }
     ],
     "note": "The inner header is exactly 16 bytes (0x0c..0x1c), matching `inner_length = 0x10 + payloadLen`. The outer 12 bytes are the msocket envelope."
   },
@@ -45,11 +93,6 @@
       "PS primId 0x42 is hardcoded to 0x5c at 0x7f062."
     ],
     "confidence": "CONFIRMED - the table value for DEV/51 is 32, matching the `movs r2,#0x20` allocation in the SET_BAND_MODE builder."
-  },
-  "request_handle": {
-    "construction": "Built in the AT handler prologue (AT*BAND: atcmdsrv 0x38152-0x38174) from a 12-bit wrapping counter in a static halfword, an 8-bit field at bits 12-19, and 2 bits at 30-31. The counter wraps 0xfff -> 0x0b rather than to 0.",
-    "mutation_in_builder": "0x40cf8-0x40d08 clears bits 20-29 and 31, then reinserts a 4-bit field at bits 20-23. For SET_BAND_MODE that field is the CI networkMode; for the GET variants it is the literal primId (0x35 / 0x37). The purpose of overloading these bits is UNKNOWN.",
-    "confidence": "SUPPORTED INFERENCE for the field roles; the arithmetic itself is CONFIRMED."
   },
   "device_nodes": {
     "note": "These three nodes are NOT interchangeable. Only msocket is on the CI request path.",
@@ -68,13 +111,68 @@
     }
   },
   "receive_path": {
-    "dump_function": {
-      "va": "0x7ddec",
-      "role": "Debug decoder for (svgId, primId, reqHandle, payload, len). It is the structure that reveals the whole namespace: a tbb switch on svgId-1 selecting per-group name tables, preceded by the 0xF000 error-range test.",
-      "note": "Called on the send path at 0x7e330, so its argument order is the authoritative reading of the wire fields."
+    "status": "CONFIRMED",
+    "dispatcher": {
+      "va": "atcmdsrv 0x7ee28",
+      "role": "The AP-side CI confirmation/indication demultiplexer. Every CNF, IND and CI_ERR returning from the CP passes through here."
     },
-    "confirmation_routing": "reqHandle is echoed by the CP and used AP-side to match a CNF to its REQ. The matching code was not traced in this pass.",
-    "confidence": "UNKNOWN for the AP-side CNF demultiplexer"
+    "rx_message_struct": {
+      "note": "The struct the dispatcher receives, after the msocket frame parser has unpacked the wire envelope. Field roles are fixed by how the dispatcher passes them on.",
+      "fields": [
+        {
+          "offset": "0x00",
+          "size": 4,
+          "name": "payload pointer",
+          "evidence": "0x7ee5a `ldr r0,[r4]`, passed as arg0"
+        },
+        {
+          "offset": "0x04",
+          "size": 1,
+          "name": "service group id",
+          "evidence": "0x7ee42/0x7ee4a `ldrb r_,[r4,#4]`"
+        },
+        {
+          "offset": "0x06",
+          "size": 2,
+          "name": "primitive id",
+          "evidence": "0x7ee3a/0x7ee58 `ldrh r_,[r4,#6]`"
+        },
+        {
+          "offset": "0x08",
+          "size": 4,
+          "name": "request handle",
+          "evidence": "0x7ee56 `ldr r3,[r4,#8]`, passed as arg3 and decoded as a handle by every group handler"
+        }
+      ]
+    },
+    "dispatch_rule": {
+      "table": "atcmdsrv .bss 0x000eeb94, one function pointer per service group id",
+      "lookup": "0x7ee4e `ldr.w r5,[r0, r1, lsl #2]` with r1 = svgId",
+      "null_handling": "A NULL slot falls through to 0x7ee76, which logs and drops the message. There is no fallback handler.",
+      "handler_signature": "handler(payload, svgId, primId, reqHandle, length)",
+      "logging": "0x7ee46 calls the same decoder (0x7ddec) used on the send path, so RX and TX share one symbolic view of (svgId, primId)."
+    },
+    "handler_registration": {
+      "status": "CONFIRMED as a runtime mechanism; the registering clients were not enumerated",
+      "site": "atcmdsrv 0x7da76, inside a control-message handler selected by message type 3",
+      "action": "Writes four parallel per-service-group tables from a registration record: 0x000eeb94[svgId] = record+0x10 (the CNF/IND handler the dispatcher calls), 0x000eeb50[svgId] = record+0x08, 0x000f3ebc[svgId] = record+0x04, 0x000f3ef8[svgId] = record+0x0c. Service groups <= 14 additionally populate 0x000eec48 and 0x000eec0c.",
+      "consequence": "The handler pointers cannot be resolved from static data alone; they are supplied by whichever module registers for that group. They are recoverable indirectly, by identifying the function that decodes primitives of that group.",
+      "known_handlers": {
+        "MM (svgId 3)": "0x1d644 - confirmed by its primId bound check `cmp r6,#0xc3` (195 = the MM maximum) and by its handling of MM CNF ids 0x15, 0x25 and others."
+      }
+    },
+    "envelope_types": {
+      "4": "CI primitive request (the SET_BAND_MODE and network-selection paths)",
+      "3": "client/handler registration control message",
+      "5": "a further control message handled at 0x7da26; not decoded",
+      "note": "The outer envelope's second word, previously recorded only as 'constant 4 for CI primitives', is a message type discriminator on a shared msocket control channel."
+    },
+    "reserved_header_bytes": {
+      "offset": "0x18 of the wire buffer (the last 4 bytes of the 16-byte inner header)",
+      "status": "NEGATIVE EVIDENCE",
+      "finding": "Never written on the send path and never read by the RX dispatcher, which consumes only the payload pointer, svgId, primId and reqHandle. The four bytes are left at whatever the allocator returned.",
+      "caution": "This is 'unused on the mapped paths', not 'unused by the protocol'. The CP side was not audited for a reader. Do not name the field."
+    }
   },
   "cp_side": {
     "dev_request_dispatch_table": {
@@ -90,5 +188,37 @@
       "confidence": "SUPPORTED INFERENCE"
     }
   },
-  "safety": "Recovery only. No CI primitive, AT command, or socket write was executed, and no device was contacted."
+  "safety": "Recovery only. No CI primitive, AT command, or socket write was executed, and no device was contacted.",
+  "req_handle": {
+    "status": "CONFIRMED field map; two fields have confirmed use, two are partially understood",
+    "construction": "Built in each AT command handler's prologue (AT*BAND at 0x38152, +COPS at 0x18e4c, +CPLMNS at 0x18f5c - all identical code).",
+    "fields": [
+      {
+        "bits": "0-11",
+        "name": "transaction counter",
+        "detail": "12-bit counter in a static halfword, incremented per request. It wraps 0xfff -> 0x0b, not to 0, so the low 12 bits are never 0..0x0a after the first wrap.",
+        "confidence": "CONFIRMED"
+      },
+      {
+        "bits": "12-19",
+        "name": "AT session / channel index",
+        "detail": "8 bits, from the AT session object shifted left 12 and masked with 0xff000. Consumers extract it with `ubfx rX, handle, #12, #8` and use it as an array index - e.g. atcmdsrv 0x2c8d2 computes `base + 0x34 * index` into a per-session context array, and the MM handler passes it to 0x2a8ac at 0x1d660.",
+        "confidence": "CONFIRMED"
+      },
+      {
+        "bits": "20-29",
+        "name": "caller request tag",
+        "detail": "10-bit tag chosen by the request builder, which first clears bits 20-29 and 31. Most builders set it to the primitive id (0x33/0x35/0x37 for band mode, 0x14 for the operator-count scan, 0xca for PS primitive 202), but not all: atcmdsrv 0x2c8e4 sets 0x103 while sending PS primitive 9. Confirmation handlers read it back with `ubfx r3, handle, #20, #10` and compare - e.g. the MM handler tests `== 0xca` at 0x1dbcc - to tell apart different internal callers of the same primitive.",
+        "confidence": "CONFIRMED as a caller-defined tag; NEGATIVE EVIDENCE against it being strictly the primitive id"
+      },
+      {
+        "bits": "30-31",
+        "name": "session class",
+        "detail": "2 bits, from the return value of 0x5ce80(sessionObject) shifted left 30. The MM handler tests bit 30 at 0x1d676 and selects between two different context-table bases accordingly. Bit 31 is cleared by every builder's `bic #0xbf000000`.",
+        "confidence": "SUPPORTED INFERENCE for the meaning; CONFIRMED for the construction and the two-way branch"
+      }
+    ],
+    "not_a_bit_puzzle": "The handle is a composite routing key, not an opaque id: bits 12-19 select the originating AT session, bits 20-29 select which internal caller within that session, and bits 0-11 disambiguate concurrent requests. That is enough to route a CNF back to its caller without any per-request allocation table.",
+    "unknown": "Whether the CP inspects any part of the handle, or only echoes it."
+  }
 }

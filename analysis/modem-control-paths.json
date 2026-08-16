@@ -1172,5 +1172,356 @@
       "11": "AP policy 3 -> UMTS+LTE, prefer LTE"
     },
     "namespace_warning": "AT NwMode, CI networkMode, CI preferredMode, the CP internal RAT state, the AP configured policy enum and the AP readback enum are six different numeric spaces. They must not be collapsed."
+  },
+  "network_selection_ci_workflow": {
+    "status": "CONFIRMED",
+    "scope": "The CI layer beneath the network-selection workflow, recovered with the preferred-RAT path as the reference implementation. Service group throughout is CI_SG_ID_MM = 3, whose client object lives at +0x0c of the CI client table.",
+    "client_object_rule": {
+      "finding": "The CI client-object table is indexed by service group id: the slot offset is 4 * svgId (CC=1 -> +0x04, SS=2 -> +0x08, MM=3 -> +0x0c, ... DEV=9 -> +0x24).",
+      "confidence": "CONFIRMED",
+      "evidence": "Applying this rule to all 397 CI send sites in atcmdsrv resolves 392 of them to a name ending in _REQ. A wrong group assignment would produce nonsense names.",
+      "value": "It makes the service group of any CI sender readable directly from its object load, with no need to trace the object's construction."
+    },
+    "scan": {
+      "question_closed": "Do scan results arrive as one confirmation containing an array, as a stream of indications, or otherwise?",
+      "answer": "Neither. It is an AP-driven count-then-iterate polling loop.",
+      "at_trigger": "AT+COPS=? (command type 5 / TEST), atcmdsrv handler 0x18e2c -> 0x1b4cc",
+      "sequence": [
+        {
+          "step": 1,
+          "primitive": "CI_MM_PRIM_GET_NUM_NETWORK_OPERATORS_REQ",
+          "prim_id": 20,
+          "req_size": 2,
+          "sender": "0x1b4cc",
+          "payload": "byte at +0x00 = 3 (constant); second byte not written"
+        },
+        {
+          "step": 2,
+          "primitive": "CI_MM_PRIM_GET_NUM_NETWORK_OPERATORS_CNF",
+          "prim_id": 21,
+          "cnf_size": 4,
+          "handled_at": "0x1dbcc",
+          "payload": "+0x00 u16 status (must be 0), +0x02 u8 operator count",
+          "action": "allocates count * 80 bytes (`movs r1,#0x50; muls r1,r4,r1` at 0x1dc22) as the result array"
+        },
+        {
+          "step": 3,
+          "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_REQ",
+          "prim_id": 22,
+          "req_size": 1,
+          "sender": "0x1b92c (send site 0x1b962)",
+          "payload": "a single byte: the operator index"
+        },
+        {
+          "step": 4,
+          "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_CNF",
+          "prim_id": 23,
+          "cnf_size": 80,
+          "action": "one operator record is copied into the array; the index counter is incremented and step 3 is re-issued from 0x1dd7e / 0x1de7c until the counter reaches the count, after which the +COPS list is formatted"
+        }
+      ],
+      "iteration_proof": "0x1de62-0x1de7c loads the running index, compares it against the stored count, increments it, and calls the step-3 sender again. The two call sites of that sender are both inside the MM confirmation handler.",
+      "lte_variant": "CI_MM_PRIM_GET_NUM_LTE_NETWORK_OPERATORS_REQ (76) / CI_MM_PRIM_GET_LTE_NETWORK_OPERATOR_INFO_REQ (78) mirror the same count-then-iterate shape with an 80-byte CNF, sent from 0x1bc5c and 0x1bc9a.",
+      "asynchronous_alternatives_present_but_unused_here": [
+        "CI_MM_PRIM_NETWORK_SEARCH_IND (175, 364 bytes)",
+        "CI_MM_PRIM_FIRST_SEARCHED_NETWORK_OPERATOR_IND (124, 10 bytes)",
+        "CI_MM_PRIM_OPERATOR_STATUS_IND (170, 82 bytes)",
+        "These exist in the MM primitive table but are not part of the +COPS=? sequence. Whether any is enabled in this build is UNKNOWN."
+      ]
+    },
+    "registration": {
+      "at_trigger": "AT+COPS=<mode>,<format>,<oper>,<AcT> (command type 3 / SET)",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "mode",
+          "range": "0..5",
+          "default": 0
+        },
+        {
+          "index": 1,
+          "name": "format",
+          "range": "0..2",
+          "default": 2
+        },
+        {
+          "index": 2,
+          "name": "oper",
+          "type": "string",
+          "max_len": 16
+        },
+        {
+          "index": 3,
+          "name": "AcT",
+          "range": "0..7",
+          "default": 11
+        }
+      ],
+      "dispatcher": "0x1b534, a tbb switch on mode",
+      "modes": {
+        "0": {
+          "name": "automatic",
+          "arm": "0x1b57a",
+          "sequence": [
+            "internal state 3",
+            "CI_DEV_PRIM_GET_BAND_MODE_REQ (DEV 9, primId 53)",
+            "10000 ms timer (0x63e54)",
+            "internal state 4",
+            "CI_DEV_PRIM_SET_BAND_MODE_REQ (DEV 9, primId 51) with networkMode = preferredMode = 6, i.e. all three RATs with no preference, reusing cached band masks from a global at +0x10..+0x1c",
+            "10000 ms timer",
+            "CI_MM_PRIM_AUTO_REGISTER_REQ (MM 3, primId 34, payload 0)"
+          ],
+          "cross_path_note": "Selecting automatic network selection RESETS the preferred-RAT policy to all-RAT at the CI layer. This is a real coupling between the network-selection and preferred-RAT paths, not an inference."
+        },
+        "1": {
+          "name": "manual",
+          "arm": "0x1b612"
+        },
+        "2": {
+          "name": "deregister",
+          "arm": "0x1b558",
+          "primitive": "CI_MM_PRIM_DEREGISTER_REQ (MM 3, primId 38, payload 0)",
+          "note": "This is the CI primitive behind the internal MP_NetSel mode 2. Documented statically only; never invoked."
+        },
+        "3": {
+          "name": "set format only",
+          "arm": "0x1b5dc",
+          "primitive": "CI_MM_PRIM_SET_ID_FORMAT_REQ (MM 3, primId 18, 1 byte, value <= 2)"
+        },
+        "4": {
+          "name": "manual with automatic fallback",
+          "arm": "0x1b612 (shared with mode 1)"
+        },
+        "5": {
+          "name": "not implemented",
+          "arm": "falls to the error return at 0x1b5fa"
+        }
+      },
+      "manual_register_request": {
+        "primitive": "CI_MM_PRIM_MANUAL_REGISTER_REQ",
+        "prim_id": 36,
+        "size": 42,
+        "cnf": "CI_MM_PRIM_MANUAL_REGISTER_CNF (37, 2 bytes)",
+        "fields": [
+          {
+            "offset": "0x00",
+            "size": 1,
+            "value": "1 for mode 1/4; 0 when the command type is 1",
+            "site": "0x1b630 / 0x1b6fa"
+          },
+          {
+            "offset": "0x02",
+            "size": 1,
+            "value": "1",
+            "site": "0x1b654"
+          },
+          {
+            "offset": "0x03",
+            "size": 1,
+            "name": "format",
+            "values": "0 or 1 = alphanumeric, 2 = numeric"
+          },
+          {
+            "offset": "0x04",
+            "size": 1,
+            "name": "name length (alphanumeric formats only)"
+          },
+          {
+            "offset": "0x05",
+            "size": 35,
+            "name": "operator name (alphanumeric formats only)"
+          },
+          {
+            "offset": "0x04",
+            "size": 2,
+            "name": "MCC (numeric format only)",
+            "site": "0x1b74c"
+          },
+          {
+            "offset": "0x06",
+            "size": 2,
+            "name": "MNC (numeric format only)",
+            "site": "0x1b750"
+          },
+          {
+            "offset": "0x08",
+            "size": 1,
+            "name": "MNC digit count (numeric format only)",
+            "detail": "string length minus 3",
+            "site": "0x1b754"
+          },
+          {
+            "offset": "0x28",
+            "size": 1,
+            "name": "AcT",
+            "range": "0..11",
+            "site": "0x1b64c"
+          }
+        ],
+        "plmn_encoding": {
+          "question_closed": "Does the CP receive textual PLMN fields, numeric MCC/MNC, packed BCD, or another structure?",
+          "answer": "Numeric MCC and MNC as two separate little-endian 16-bit integers, plus an explicit MNC digit count. Not packed BCD, and not text.",
+          "parser": "0x5f280 accepts a 5- or 6-character numeric string (it requires length - 5 <= 1), converts characters 4.. to the MNC and characters 1-3 to the MCC via 0x5efc6, and returns them as two halfwords.",
+          "caveat": "In the two alphanumeric formats the operator NAME is sent instead, as a length-prefixed 35-byte string, and no MCC/MNC is present. The union is discriminated by the format byte at +0x03."
+        }
+      },
+      "act_to_ci_network_mode": {
+        "purpose": "Before manual registration the handler narrows the RAT by sending CI_DEV_PRIM_SET_BAND_MODE_REQ with a networkMode derived from the AT AcT value.",
+        "rule": "r8 = 1 << AcT, then: if (r8 & 0x574) -> networkMode 1; else if (r8 & 0x0b) -> networkMode 0; else if (r8 & 0x280) -> networkMode 3; else the band-mode step is skipped. AcT > 10 also skips it.",
+        "mapping": {
+          "AcT 0, 1, 3 (GSM family)": "CI networkMode 0 = GSM",
+          "AcT 2, 4, 5, 6, 8, 10": "CI networkMode 1 = UMTS",
+          "AcT 7, 9 (E-UTRAN)": "CI networkMode 3 = LTE"
+        },
+        "significance": "This is a third, fully independent confirmation of CI_DEV_NW_GSM = 0, CI_DEV_NW_UMTS = 1, CI_DEV_NW_LTE = 3, arrived at from 3GPP access-technology numbering rather than from the AT*BAND table or the CP tbb tables.",
+        "faithfulness_note": "AcT 8 and 10 are grouped with UMTS by the mask test order, which does not match 3GPP's meanings for those values. Recorded as the code behaves, not as the standard reads."
+      }
+    },
+    "cancellation": {
+      "at_trigger": "AT+CPLMNS, command type 4 (ABORT). Handler 0x18f4c, registered at command table entry 0x0dd2d8.",
+      "primitive": "CI_MM_PRIM_CANCEL_MANUAL_PLMN_SEARCH_REQ",
+      "prim_id": 114,
+      "req_size": 0,
+      "cnf": "CI_MM_PRIM_CANCEL_MANUAL_PLMN_SEARCH_CNF (115, 2 bytes)",
+      "sender": "0x1b7e4 (tail-calls the CI stub with a NULL payload)",
+      "aborts_by_req_handle": {
+        "answer": "No.",
+        "reasoning": "The request payload size is zero, so the primitive carries nothing that could identify a request. It is a global abort of whatever manual PLMN search is in progress. The handler does allocate a FRESH reqHandle for the cancel itself, so the cancel's own confirmation is routed independently of the search it aborts.",
+        "confidence": "CONFIRMED"
+      },
+      "related": "CI_MM_PRIM_ABORT_BANDS_SCAN_REQ (189, payload 0) and CI_MM_PRIM_CSG_SEARCH_STOP_REQ (135, payload 0) follow the same zero-payload global-abort shape.",
+      "record_76_restore": "UNKNOWN. The AP-side restoration of record 76's temporary overlay after a cancel was not traced in this pass."
+    },
+    "operator_info_structure": {
+      "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_CNF (23) and CI_MM_PRIM_GET_CURRENT_OPERATOR_INFO_CNF (33), both 80 bytes",
+      "status": "PARTIAL - offsets confirmed by use, semantics only partly recovered",
+      "consumer": "the formatter at atcmdsrv 0x1df00, inside the MM handler",
+      "fields_observed": [
+        {
+          "offset": "0x00",
+          "size": 2,
+          "role": "status / result word; the scan-count CNF uses the same shape and requires 0"
+        },
+        {
+          "offset": "0x02",
+          "size": 1,
+          "name": "operatorState candidate",
+          "detail": "bounded to <= 3 at 0x1df42, then used to index a 4-byte table at 0x85601 whose contents are 00 01 02 01",
+          "confidence": "CONFIRMED that a 0..3 field at +0x02 indexes that table; the meaning of the four states and of the mapped values is UNKNOWN. The mapping is notably NOT the identity and never emits 3, so it is not a straight pass-through to the AT +COPS <stat> field."
+        },
+        {
+          "offset": "0x04",
+          "size": null,
+          "role": "start of the name/identity block (taken as a base pointer at 0x1df3c)"
+        },
+        {
+          "offset": "0x24",
+          "size": 1,
+          "role": "read at 0x1df64 when a preceding byte equals 11"
+        },
+        {
+          "offset": "0x29",
+          "size": 1,
+          "role": "read at 0x1df34, compared against 2"
+        },
+        {
+          "offset": "0x2a",
+          "size": 1,
+          "role": "read at 0x1df2a, used as a presence flag"
+        },
+        {
+          "offset": "0x48",
+          "size": 2,
+          "role": "numeric field emitted by the +COPS formatter"
+        },
+        {
+          "offset": "0x4a",
+          "size": 2,
+          "role": "numeric field emitted by the +COPS formatter"
+        }
+      ],
+      "honest_limits": "The 80 bytes were not fully partitioned. In particular the long/short name extents and the access-technology field were not isolated, and no operatorState enum was recovered. Do not fill these in from 3GPP terminology; the firmware has not been shown to use it."
+    },
+    "safety": "Recovery only. No scan, registration, deregistration or cancellation was triggered."
+  },
+  "record_84_producers": {
+    "status": "CONFIRMED for 13 of 14 states; state 8 is a negative result",
+    "setter": "mobile VA 0x425ec (record write at 0x42618)",
+    "call_sites": 15,
+    "states": {
+      "0": {
+        "writer": "0x3b9a0",
+        "trigger": "workflow reset after a bulk copy of the selection context",
+        "kind": "terminal / idle"
+      },
+      "1": {
+        "writer": "0x3b620 (else branch)",
+        "trigger": "saved-selection check non-zero after 0x42578",
+        "kind": "transient"
+      },
+      "2": {
+        "writer": "0x370b8",
+        "trigger": "AT step succeeded and the pending workflow op at +0x2bc is 1",
+        "kind": "transient"
+      },
+      "3": {
+        "writer": "0x3b9c0",
+        "trigger": "0x4224c returned a value other than 4",
+        "kind": "transient"
+      },
+      "4": {
+        "writer": "0x36e68",
+        "kind": "transient"
+      },
+      "5": {
+        "writer": "0x36ebc",
+        "kind": "transient"
+      },
+      "6": {
+        "writer": "0x370dc (movne r1,#6)",
+        "trigger": "the workflow's AT response parser at 0x41110 returned a non-zero error code that is neither 6 nor 13",
+        "kind": "failure"
+      },
+      "7": {
+        "writer": "0x370dc (moveq r1,#7)",
+        "trigger": "the same parser returned error code 6 or 13 specifically",
+        "kind": "failure"
+      },
+      "8": {
+        "writer": null,
+        "status": "NEGATIVE EVIDENCE - none of the 15 setter call sites can produce 8, and no site passes a value that could evaluate to 8. The state is defined by the frontend enum but is not reachable from this daemon build."
+      },
+      "9": {
+        "writer": "0x3b620 (moveq r1,#9)",
+        "trigger": "after 0x42578 (a record-76 writer), the saved-selection value is zero",
+        "kind": "failure / empty-result"
+      },
+      "10": {
+        "writer": "0x370ac",
+        "trigger": "AT step succeeded and the pending workflow op at +0x2bc is 9",
+        "kind": "transient"
+      },
+      "11": {
+        "writer": "0x3bc9c",
+        "kind": "transient"
+      },
+      "12": {
+        "writer": "0x331ec, 0x3698c, 0x36d64, 0x36f2c, 0x3bc8c (five sites)",
+        "kind": "terminal / cleanup - the most common terminal write"
+      },
+      "13": {
+        "writer": "0x3bae0",
+        "trigger": "0x4224c returned 4",
+        "kind": "failure",
+        "label": "search_failure_sending_sms (previously confirmed)"
+      }
+    },
+    "error_code_namespace": {
+      "source": "mobile 0x41110",
+      "behaviour": "Returns 0 for a bare OK response, 1 for a bare ERROR, and for '+CME ERROR: <n>' maps the numeric code through a comparison chain (branching at `cmp r3,#0xf`) into a small internal enum.",
+      "status": "The codes 6 and 13 that select state 7 live in that internal enum, NOT in the 3GPP +CME numbering. The internal-to-CME mapping was not completed, so do not read them as CME 6 and CME 13.",
+      "confidence": "CONFIRMED that the enum is internal and normalized; UNKNOWN what 6 and 13 mean in it."
+    },
+    "previous_gap_closed": "States 6, 7 and 9 were previously attributed to 'two call sites passing a computed register'. Both are now resolved: 0x370dc is a conditional select between 6 and 7, and 0x3b620 between 1 and 9."
   }
 }
