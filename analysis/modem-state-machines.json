@@ -194,7 +194,7 @@
           8
         ]
       },
-      "failure_discrimination": "States 6 and 7 are produced by one conditional select at mobile 0x370dc, driven by the normalized AT-error enum returned by 0x41110: codes 6 or 13 give state 7, any other non-zero code gives state 6. States 1 and 9 are produced by a second select at 0x3b620 on whether the saved selection is zero.",
+      "failure_discrimination": "States 6 and 7 are produced by one conditional select at mobile 0x370dc, driven by the normalized AT-error enum returned by 0x41110. State 7 corresponds to internal code 13, which is reached only from CME 30 (no network service), CME 32 (network not allowed) or CMS 331 (network error) - so state 7 is the 'network unavailable' failure. State 6 covers every other non-zero code. The `cmpne r6,#6` half of the test is dead: 6 is not in the parser's return set. States 1 and 9 come from a second select at 0x3b620 on whether the staged selection value is zero.",
       "state_8": "NEGATIVE EVIDENCE. No setter call site can emit 8. The frontend enumerates the state but this daemon build cannot reach it."
     },
     "ci_layer": {
@@ -203,7 +203,8 @@
       "register_manual": "AT+COPS=1|4 -> SET_BAND_MODE with a networkMode derived from the AT AcT value, then CI_MM_PRIM_MANUAL_REGISTER_REQ (36, 42 bytes) carrying either a length-prefixed operator name or numeric MCC/MNC as two u16 fields.",
       "deregister": "AT+COPS=2 -> CI_MM_PRIM_DEREGISTER_REQ (38, payload 0). This is the CI primitive behind the internal MP_NetSel mode 2. Static documentation only; never invoked.",
       "cancel": "AT+CPLMNS (command type 4) -> CI_MM_PRIM_CANCEL_MANUAL_PLMN_SEARCH_REQ (114, payload 0). Zero payload means it cannot target a specific request; it is a global abort."
-    }
+    },
+    "record_76_writers": "Three writers, three meanings: 0x3389c persists the configured policy alongside records 447/448, 0x3b608 commits the staged workflow value with the persist flag CLEARED (the temporary overlay), and 0x4a350 booleanises the modem readback with the persist flag SET. There is no save-and-restore step; a stale overlay is superseded by the next modem readback."
   },
   "derived_call_failure": {
     "routine": "CMobileClient::GetCallFailReason, libmobile ELF VA 0xbc2c-0xbe10",
