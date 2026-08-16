@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "scope": "The AP-side transport that carries CI primitives from atcmdsrv to the CP, recovered statically from firmware 3.0.2 Build 241129 Rel.3n. Companion to analysis/ci-primitives.json, which owns the service-group and primitive-id namespace. No message was ever sent.",
+  "source": {
+    "ap_binary": "/bin/atcmdsrv (ARM, ET_EXEC, load base 0x10000, Thumb-2)",
+    "cp_binary": "ARBI, load base 0x06800000"
+  },
+  "send_path": {
+    "chain": [
+      "per-command builder, e.g. atcmdsrv 0x40cac for CI_DEV_PRIM_SET_BAND_MODE_REQ",
+      "0x7cd14  ciSendPrimitive(obj, primId, reqHandle, pPayload)",
+      "0x7e2c4  marshaller: sizes, allocates, fills the envelope, logs, hands off",
+      "0x7d060  framer: prepends the 12-byte outer envelope",
+      "0x7f178 -> 0x139d0 (PLT)  socket write on the msocket fd"
+    ],
+    "entry_signature": {
+      "function": "0x7cd14",
+      "args": "r0 = CI client object, r1 = numeric primId, r2 = reqHandle, r3 = pointer to the primitive payload (may be NULL for zero-length primitives)",
+      "guard": "`cmp.w r4, #0x11111111` at 0x7cd34 rejects a poisoned/uninitialised client object and returns 8."
+    }
+  },
+  "wire_format": {
+    "status": "CONFIRMED",
+    "total_length": "0x1c + payloadLen; the whole buffer is written to the socket",
+    "fields": [
+      { "offset": "0x00", "size": 4, "name": "envelope_tag", "value": "constant 1", "evidence": "0x7d090 `str r6,[r4]` with r6 = 1" },
+      { "offset": "0x04", "size": 4, "name": "envelope_type", "value": "constant 4 for CI primitives", "evidence": "0x7e33a `movs r0,#4` passed to 0x7d060, stored at 0x7d092" },
+      { "offset": "0x08", "size": 4, "name": "inner_length", "value": "0x10 + payloadLen", "evidence": "0x7e334 `add.w r2, r8, #0x10`, stored at 0x7d092" },
+      { "offset": "0x0c", "size": 4, "name": "service_group_id", "evidence": "0x7e312 `str r5,[r0,#0xc]`" },
+      { "offset": "0x10", "size": 2, "name": "primitive_id", "evidence": "0x7e316 `strh r6,[r0,#0x10]` - note the id is 16-bit on the wire, which is why the 0xF000 error range fits" },
+      { "offset": "0x12", "size": 2, "name": "pad", "evidence": "not written; implied by the 16-byte inner header" },
+      { "offset": "0x14", "size": 4, "name": "request_handle", "evidence": "0x7e31a `str r7,[r0,#0x14]`" },
+      { "offset": "0x18", "size": 4, "name": "reserved", "confidence": "UNKNOWN - inside the 16-byte inner header but never written on this path" },
+      { "offset": "0x1c", "size": "payloadLen", "name": "primitive payload", "evidence": "0x7e31e/0x7e320 memcpy into buf+0x1c" }
+    ],
+    "note": "The inner header is exactly 16 bytes (0x0c..0x1c), matching `inner_length = 0x10 + payloadLen`. The outer 12 bytes are the msocket envelope."
+  },
+  "payload_sizing": {
+    "function": "0x7efc8  ciGetPrimSize(svgId, primId, pPayload)",
+    "rule": "If primId - 0xF000 <= 7, the size comes from the global CI_ERR u16 table at 0x0bdc3a. Otherwise a tbb switch on svgId-1 selects the group's own u16 size table, bounds-checks primId, and reads size = table[primId].",
+    "size_table_root": "0x0e1084; per-group pointers at +0x04 CC, +0x08 SS, +0x0c MM, +0x10 PB, +0x14 SIM, +0x18 MSG, +0x1c PS, +0x24 DEV",
+    "special_cases": [
+      "DAT (svgId 8) has no size table; sizes are computed at run time by 0x7ef30 from the payload.",
+      "DEV primId 0x47 (CI_DEV_PRIM_ENABLE_HSDPA_REQ) is hardcoded to 9 at 0x7f05e.",
+      "PS primId 0x42 is hardcoded to 0x5c at 0x7f062."
+    ],
+    "confidence": "CONFIRMED - the table value for DEV/51 is 32, matching the `movs r2,#0x20` allocation in the SET_BAND_MODE builder."
+  },
+  "request_handle": {
+    "construction": "Built in the AT handler prologue (AT*BAND: atcmdsrv 0x38152-0x38174) from a 12-bit wrapping counter in a static halfword, an 8-bit field at bits 12-19, and 2 bits at 30-31. The counter wraps 0xfff -> 0x0b rather than to 0.",
+    "mutation_in_builder": "0x40cf8-0x40d08 clears bits 20-29 and 31, then reinserts a 4-bit field at bits 20-23. For SET_BAND_MODE that field is the CI networkMode; for the GET variants it is the literal primId (0x35 / 0x37). The purpose of overloading these bits is UNKNOWN.",
+    "confidence": "SUPPORTED INFERENCE for the field roles; the arithmetic itself is CONFIRMED."
+  },
+  "device_nodes": {
+    "note": "These three nodes are NOT interchangeable. Only msocket is on the CI request path.",
+    "/dev/msocket": {
+      "role": "CONFIRMED: the CI message transport. The fd used by 0x7d0aa is a global set up by the opener at 0x7f074, whose only device string is /dev/msocket (referenced from the literal pool at 0x7f158).",
+      "carries": "metadata and payload together, in one contiguous write"
+    },
+    "/dev/acipc": {
+      "role": "Referenced once, from 0x5ee4c, in a component unrelated to the CI send path.",
+      "assessment": "SUPPORTED INFERENCE: ACIPC is the underlying AP/CP doorbell/signalling substrate that msocket is layered on, not a separate message channel used by atcmdsrv. The CP side names ACIPCDHISR/ACIPCRDHISR/acipcTx.",
+      "confidence": "not proven from atcmdsrv alone"
+    },
+    "/dev/cpmem": {
+      "role": "Referenced from 0x72928 and 0x7f924, outside the CI send path.",
+      "assessment": "UNKNOWN whether CI payloads ever transit shared memory. On this path they do not: the payload is copied inline into the msocket write."
+    }
+  },
+  "receive_path": {
+    "dump_function": {
+      "va": "0x7ddec",
+      "role": "Debug decoder for (svgId, primId, reqHandle, payload, len). It is the structure that reveals the whole namespace: a tbb switch on svgId-1 selecting per-group name tables, preceded by the 0xF000 error-range test.",
+      "note": "Called on the send path at 0x7e330, so its argument order is the authoritative reading of the wire fields."
+    },
+    "confirmation_routing": "reqHandle is echoed by the CP and used AP-side to match a CNF to its REQ. The matching code was not traced in this pass.",
+    "confidence": "UNKNOWN for the AP-side CNF demultiplexer"
+  },
+  "cp_side": {
+    "dev_request_dispatch_table": {
+      "va": "0x06f394fc",
+      "form": "76 entries of {u32 primId, u32 handler|1}, 8-byte stride, extent 0x06f394fc .. 0x06f3977c",
+      "verification": "Every id resolves to a CI_DEV_PRIM_*_REQ name; primId 0x33 pairs with 0x068afdf1, independently proven to be the SET_BAND_MODE handler by its 0x34 CNF and 32-byte request validation.",
+      "confidence": "CONFIRMED"
+    },
+    "internal_signal_table": {
+      "va": "around 0x06f39840",
+      "form": "{u32 handler, u32 signalId} pairs with ids around 0x00090c1b-0x00090c21",
+      "assessment": "A distinct CP-internal signal namespace, not CI primitive ids. CI_DEV_PRIM_GET_BAND_MODE_CNF is built by 0x068b0156, which appears in this table rather than the CI table - consistent with the CNF being emitted asynchronously once lower layers respond.",
+      "confidence": "SUPPORTED INFERENCE"
+    }
+  },
+  "safety": "Recovery only. No CI primitive, AT command, or socket write was executed, and no device was contacted."
+}

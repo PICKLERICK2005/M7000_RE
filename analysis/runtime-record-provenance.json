@@ -670,5 +670,65 @@
     "Unknown fields are deliberately retained as unknown rather than inferred from numeric proximity.",
     "Consumers list confirmed native/web paths and important internal uses; it is not a proof that no additional inlined consumer exists.",
     "The map distinguishes AP persistent policy from CP-derived runtime state; it does not imply that any setter is safe to exercise live."
-  ]
+  ],
+  "rf_info_family_200_208": {
+    "status": "CONFIRMED",
+    "family": "mobile_status.rf_info.*",
+    "producer": "mobile 0x4a1a0 (records 200-205) and 0x4a464 (records 417, 206, 207), both entries of the modem-status handler table at 0x68b9c.",
+    "key_finding": "These records are stored RAW. Both producers are pure field-by-field copies out of an RF report structure into consecutive record ids, with no arithmetic of any kind between the load and the record write. Every engineering-unit conversion documented for this device happens elsewhere - upstream in the report producer, or downstream in the record-78 normalizers.",
+    "records": {
+      "200": {
+        "name": "mobile_status.rf_info.rat",
+        "source": "report +0x00",
+        "write_site": "0x4a1c8"
+      },
+      "201": {
+        "name": "mobile_status.rf_info.rssi",
+        "source": "report +0x04",
+        "write_site": "0x4a1d8"
+      },
+      "202": {
+        "name": "mobile_status.rf_info.rsrp",
+        "source": "report +0x08",
+        "write_site": "0x4a1e8"
+      },
+      "203": {
+        "name": "mobile_status.rf_info.rsrq",
+        "source": "report +0x0c",
+        "write_site": "0x4a1f8"
+      },
+      "204": {
+        "name": "mobile_status.rf_info.snr",
+        "source": "report +0x10",
+        "write_site": "0x4a208"
+      },
+      "205": {
+        "name": "mobile_status.rf_info.ecio",
+        "source": "report +0x14",
+        "write_site": "0x4a218"
+      },
+      "206": {
+        "name": "mobile_status.rf_info.band",
+        "source": "second report +0x04",
+        "write_site": "0x4a4a0"
+      },
+      "207": {
+        "name": "mobile_status.rf_info.channel",
+        "source": "second report +0x08",
+        "write_site": "0x4a4b0"
+      },
+      "208": {
+        "name": "mobile_status.rf_info.cell_id",
+        "status": "named in the tp_data table; no writer found in this pass"
+      },
+      "417": {
+        "name": "mobile_status.rf_info.radio_if",
+        "source": "second report +0x00",
+        "write_site": "0x4a490",
+        "note": "Written by the same producer as 206/207, so it belongs to this family despite its distant record id."
+      }
+    },
+    "relationship_to_record_78": "Record 78 (mobile_status.net_status.sig_lvl) is written by the adjacent handler at mobile 0x4a13c, also as a pure pass-through. The 0-4 normalization therefore happens before this handler, in the already-documented functions at 0x3a4c8 (CSQ thresholds), 0x3a50c (dBm) and 0x3a550 (LTE composite). Those firmware-specific thresholds remain canonical; do not substitute generic cellular formulas.",
+    "confidence": "CONFIRMED for the raw pass-through and the field offsets; UNKNOWN for the units of each raw field, which are set by the CP report producer and were not traced."
+  }
 }

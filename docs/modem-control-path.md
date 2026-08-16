@@ -516,3 +516,216 @@ failure message is literally *"Retriving sms sending status data failed."* So an
 in-flight SMS send blocking a network operation is not an inference — it is a
 condition the firmware models and names. `GetAvailableNet` gates on record 19
 only; the two setters gate on both 19 and 84.
+
+## The AT-to-CI translation, recovered
+
+The last gap in the AP-to-CP chain is closed. `atcmdsrv`'s `AT*BAND` handler at
+`0x3813c` — reached from the command table entry at `0x0db8ac`, which also
+records that the command takes nine parameters — converts the textual `NwMode`
+into the CI pair `(networkMode, preferredMode)` through a plain switch. Each arm
+falls into one of two builders that emit `CI_DEV_PRIM_SET_BAND_MODE_REQ`.
+
+| AT `NwMode` | CI `networkMode` | CI `preferredMode` | Meaning |
+| ---: | ---: | ---: | --- |
+| 0 | 0 | 0 | GSM only |
+| 1 | 1 | 1 | UMTS only |
+| 2 | 2 | 2 | GSM+UMTS, no preference |
+| 3 | 2 | 0 | GSM+UMTS, prefer GSM |
+| 4 | 2 | 1 | GSM+UMTS, prefer UMTS |
+| 5 | 3 | 3 | LTE only |
+| 6 | 4 | 4 | GSM+LTE, no preference |
+| 7 | 4 | 0 | GSM+LTE, prefer GSM |
+| 8 | 4 | 3 | GSM+LTE, prefer LTE |
+| 9 | 5 | 5 | UMTS+LTE, no preference |
+| 10 | 5 | 1 | UMTS+LTE, prefer UMTS |
+| 11 | 5 | 3 | UMTS+LTE, prefer LTE |
+| 12 | 6 | 6 | all, no preference |
+| 13 | 6 | 0 | all, prefer GSM |
+| 14 | 6 | 1 | all, prefer UMTS |
+| 15 | 6 | 3 | all, prefer LTE |
+| omitted (240) | 6 | 1 | all, prefer UMTS |
+
+The `NwMode` parameter is parsed with range `0..30` and default `240`. Values
+`16`–`30` pass the range check and then fall out of the switch into the CME error
+path, so the parser is more permissive than the dispatcher.
+
+### This settles the RAT enum by itself
+
+The table proves the individual assignment that the CP assertions could only
+constrain as a set. Read the multi-RAT rows: `preferredMode` 0 is offered for
+`networkMode` 2, 4 and 6; `preferredMode` 1 for 2, 5 and 6; `preferredMode` 3 for
+4, 5 and 6. Under the bitmask-minus-one reading those are exactly the
+combinations containing GSM, UMTS and LTE. The intersection is unique, so
+
+    CI_DEV_NW_GSM = 0,  CI_DEV_NW_UMTS = 1,  CI_DEV_NW_LTE = 3
+
+is now **confirmed**, not inferred, and `networkMode` is confirmed as the RAT
+bitmask minus one with GSM=1, UMTS=2, LTE=4.
+
+The four values the daemon actually sends read cleanly in this light:
+`AT*BAND=0` is GSM only, `=1` UMTS only, `=5` LTE only, and `=11` UMTS+LTE
+preferring LTE — the "auto" policy.
+
+### The remaining eight parameters
+
+Parameters 1–4 are the four band masks and 5–8 are selectors. Their AT-side
+bounds were recovered independently of the CP, and they match its validation
+exactly: parameter 5 has range `0..2` against the CP's `< 3`, parameter 6 has
+`0..4` against `< 5`, and parameter 7 has `0..2` against `< 3`. Two independently
+recovered sides of a boundary agreeing on three arbitrary bounds is about as
+strong as static evidence gets.
+
+Parameter 7 is only forwarded when the requested mode includes LTE; for
+`NwMode` 0–4 the builder substitutes 0.
+
+## The numeric CI primitive encoding
+
+The wire encoding is confirmed, and it is simpler than the hypothesis that was
+refuted last phase. There is no packing at all: `(service group, primitive id)`
+travel as two separate wire fields, and
+
+> the numeric primitive id is the 1-based index into that service group's own
+> name table.
+
+The tell is that every group table's slot 0 holds the same pointer — a shared
+empty string — and the dispatcher at `0x7ddec` loads each table from a base
+biased by −4 and indexes it with the raw primitive id. A previous revision of
+the catalogue counted that placeholder as entry 0, which is why the indices
+recorded there were all one too low.
+
+`CI_ERR` is a separate global range, not part of DEV as previously recorded.
+The dispatcher tests `primId <= 0xF007` before it ever looks at the service
+group, and indexes a table of its own. That also explains a loose end from the
+CP side: the handler's `0xF001` failure code is not an ad-hoc error number, it
+is `CI_ERR_PRIM_HASINVALIDPARAS_CNF`.
+
+Service groups are numbered from 1: CC=1, SS=2, MM=3, PB=4, SIM=5, MSG=6, PS=7,
+DAT=8, DEV=9, HSCSD=10, DEB=11, ATPI=12, PL=13, OAM=14.
+
+The anchor resolves to:
+
+| Primitive | Group | Id | Payload |
+| --- | ---: | ---: | ---: |
+| `CI_DEV_PRIM_SET_BAND_MODE_REQ` | DEV = 9 | 51 (`0x33`) | 32 |
+| `CI_DEV_PRIM_SET_BAND_MODE_CNF` | DEV = 9 | 52 (`0x34`) | 4 |
+| `CI_DEV_PRIM_GET_BAND_MODE_REQ` | DEV = 9 | 53 (`0x35`) | 0 |
+| `CI_DEV_PRIM_GET_BAND_MODE_CNF` | DEV = 9 | 54 (`0x36`) | 28 |
+| `CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ` | DEV = 9 | 55 (`0x37`) | 0 |
+| `CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_CNF` | DEV = 9 | 56 (`0x38`) | 28 |
+
+Five of those numbers appear as literal immediates in code on both sides of the
+boundary — `0x33`, `0x35` and `0x37` emitted by AP builders, `0x34` and `0xF001`
+emitted by the CP handler — and the payload sizes come from a separate set of
+per-group `u16` tables that the AP consults when allocating. The size table says
+32 for primitive 51; the builder allocates `0x20`. Nothing here rests on a single
+coincidence.
+
+One trap worth naming: `CI_DEV_PRIM_SET_BAND_MODE_REQ` is primitive `0x33` and
+the AP's preferred-RAT `CMobileEvent` is also `0x33`. They are unrelated numbers
+in unrelated namespaces.
+
+## How a CI primitive actually reaches the CP
+
+`/dev/msocket` is the message transport. `/dev/acipc` and `/dev/cpmem` are
+referenced by `atcmdsrv` but not from this path, and are not interchangeable
+with it. The payload is copied inline into a single socket write; nothing on
+this path hands the CP a shared-memory pointer.
+
+The buffer that gets written is:
+
+| Offset | Size | Field |
+| --- | ---: | --- |
+| `0x00` | 4 | envelope tag, constant 1 |
+| `0x04` | 4 | envelope type, constant 4 for CI primitives |
+| `0x08` | 4 | inner length, `0x10 + payloadLen` |
+| `0x0c` | 4 | service group id |
+| `0x10` | 2 | primitive id |
+| `0x12` | 2 | pad |
+| `0x14` | 4 | request handle |
+| `0x18` | 4 | reserved, never written on this path |
+| `0x1c` | … | primitive payload |
+
+The primitive id is 16-bit on the wire, which is what makes the `0xF000` error
+range representable alongside small per-group ids.
+
+The request handle is built in the AT handler prologue from a wrapping 12-bit
+counter — which wraps `0xfff` to `0x0b`, not to 0 — and the builder then
+overwrites bits 20–23 with the CI `networkMode` for the setter, or with the
+literal primitive id for the two getters. Why those bits are overloaded is
+unresolved.
+
+## The CP dispatch table
+
+With the base fixed, the CP side resolves cleanly. The DEV request dispatcher is
+a flat table at ARBI `0x06f394fc`: 76 entries of `{u32 primId, u32 handler|1}`.
+Primitive `0x33` pairs with `0x068afdf1`, and every one of the 76 ids resolves to
+a `CI_DEV_PRIM_*_REQ` name under the confirmed numbering — including `0x47`,
+`CI_DEV_PRIM_ENABLE_HSDPA_REQ`, which is precisely the primitive the AP's size
+function special-cases.
+
+Confirmations are emitted from a second, separate table around `0x06f39840`
+whose ids are CP-internal signal numbers near `0x00090c1b`, not CI primitive ids.
+`CI_DEV_PRIM_GET_BAND_MODE_CNF` is built there, which fits a request that has to
+wait on lower layers before it can answer.
+
+## A correction to the SET_BAND_MODE handler reading
+
+The handler validates `networkMode < 7`, `preferredMode < 7`, and the three
+selectors at `+0x14`, `+0x15`, `+0x16`, then branches on the operation selector
+at `+0x18`. The earlier description of that branch was incomplete in a way that
+matters:
+
+- `0` or `5` → GSM band branch
+- `1` or `2` → UMTS band branch
+- `3` → the RAT mode-change branch, and **only** this branch contains the
+  `networkMode`/`preferredMode` assertions at lines 3760 and 3767
+- anything else → assertion failure at line 3789
+
+The AT`*`BAND path always sends `0`. So the assertions that were previously
+treated as the primary evidence for the CI RAT enum are not on the AT`*`BAND path
+at all; they corroborate the enum rather than establishing it. The enum now rests
+on the AP-side translation table instead, which is stronger.
+
+Two further field results: `+0x17` is **never read** by the CP handler and is
+always sent as 0 by the AP, yet the AT read response reports it — so the field
+exists in the structure but nothing in this firmware assigns it meaning. `+0x18`
+is likewise always 0 from AT, meaning the RAT-change branch is reachable only
+from some other CI sender that was not located.
+
+## The readback path, and a sixth numeric space
+
+`CI_DEV_PRIM_GET_BAND_MODE_CNF` is built at ARBI `0x068b0156`, and it contains an
+explicit translation table — `tbb` bytes `03 05 07 09 0f 0d` at `0x068b0192` and
+again at `0x068b01c2` — that converts a CP-internal RAT state into the CI value:
+
+    internal 0→0, 1→1, 2→3, 3→2, 4→4, 5→5, ≥6→6
+
+Internal 2 and 3 swap places relative to CI. Combined with the CI encoding, that
+fixes the CP internal ordering as singletons first and then pairs: GSM, UMTS,
+LTE, GSM+UMTS, GSM+LTE, UMTS+LTE, all. Every pair position agrees with the
+bitmask reading, which is a fully independent corroboration of the CI
+assignment.
+
+This is a sixth distinct numeric space for the same concept, and it differs from
+the CI space only in where LTE sits — the kind of difference that would be very
+easy to conflate silently.
+
+## `0x3081`, closed
+
+The constant lives in the AP readback normalizer at `mobile 0x4a254`, entry 11 of
+the modem-status handler table at `0x68b9c`, which writes record 75. The whole
+normalizer is:
+
+    modem 1 → 0,  2 → 1,  3 → 2,  0 → 3,  0x3081 → 3,  anything else → 3
+
+The `0x3081` branch produces the same result as the default branch, so deleting
+the comparison would not change behaviour. The constant is never masked, shifted
+or added to — only compared for equality, exactly once. A sweep of the whole
+userspace stack finds a single ARM `movw` in `mobile` and zero occurrences in
+`atcmdsrv`, `libmobile` or `libdata_management`; it is absent from the CP image
+too.
+
+So the honest answer is that `0x3081` encodes nothing this firmware acts on. Its
+bit structure cannot be recovered because no code decomposes it, and its meaning
+cannot be recovered because no code distinguishes it. It is recorded as a closed
+negative result rather than an open question.

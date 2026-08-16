@@ -16,22 +16,113 @@
       "inodes": 1383
     },
     "other_observed_regions": [
-      { "offset": 10823832, "signature": "device-tree blob", "component": "GMIZ/ZIMG" },
-      { "offset": 10842980, "signature": "gzip stream", "component": "GMIZ/ZIMG" },
-      { "offset": 14712872, "signature": "device-tree blob", "component": "GMIZ/ZIMG" },
-      { "offset": 15116251, "signature": "ELF", "component": "OLSO/OSLO", "qualification": "false-positive signature inside U-Boot ramdump error strings; not an ELF image" }
+      {
+        "offset": 10823832,
+        "signature": "device-tree blob",
+        "component": "GMIZ/ZIMG"
+      },
+      {
+        "offset": 10842980,
+        "signature": "gzip stream",
+        "component": "GMIZ/ZIMG"
+      },
+      {
+        "offset": 14712872,
+        "signature": "device-tree blob",
+        "component": "GMIZ/ZIMG"
+      },
+      {
+        "offset": 15116251,
+        "signature": "ELF",
+        "component": "OLSO/OSLO",
+        "qualification": "false-positive signature inside U-Boot ramdump error strings; not an ELF image"
+      }
     ],
     "fbf_components": [
-      { "raw_id": "JSYS", "numeric_id": "SYSJ", "offset": 8192, "size": 10806548, "classification": "SquashFS root filesystem", "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8" },
-      { "raw_id": "GMIZ", "numeric_id": "ZIMG", "offset": 10821632, "size": 3928872, "classification": "Linux zImage with appended device trees", "sha256": "02b23a6e42bdbdc6e5a6e4abd3c433cd3f14589937597d02cfa179d5834d9164" },
-      { "raw_id": "OLSO", "numeric_id": "OSLO", "offset": 14753792, "size": 459168, "classification": "U-Boot 2014.01 / OS loader", "sha256": "6fdf944699124c481db00526329565eb6669a6676c200f62644b11013afb26f7" },
-      { "raw_id": "IBFR", "numeric_id": "RFBI", "offset": 15220736, "size": 32768, "classification": "Quectel/ASR RF material", "sha256": "4ea1ec20df4d9d4a7a8f1d03f75f71d455cd335202a02339718cb8355c283ead" },
-      { "raw_id": "IBRG", "numeric_id": "GRBI", "offset": 15253504, "size": 2621440, "classification": "ASR Falcon LTE Layer-1/baseband image", "sha256": "02e13a743e6405e8f98d4a56e6cc367f236a13ecc219319d568f797d5fae8c80" },
-      { "raw_id": "IBRA", "numeric_id": "ARBI", "offset": 17874944, "size": 7707288, "classification": "CP/RTOS cellular image", "sha256": "a0584601d94f97c77368463d7e886926bc5b6f6d948f2901c02af23b648ff064", "load_base": "0x06800000", "va_range": "0x06800000-0x06f59a98", "load_base_confidence": "CONFIRMED", "load_base_evidence": "see cp_load_base" },
-      { "raw_id": "1MIT", "numeric_id": "TIM1", "offset": 25583616, "size": 2436, "classification": "image-chain metadata", "sha256": "c7e693b00fb2e2335d2e9ea74bec8877d012559e4e5555e483cd9fcf8c5422db" },
-      { "raw_id": "VTOF", "numeric_id": "FOTV", "offset": 25591808, "size": 51, "classification": "modem build/version string", "sha256": "4d8bb1ce28bd8557cae3de6da9ecffb5c9d80f7cfedd55dc0c977a0696a3f447" },
-      { "raw_id": "IASR", "numeric_id": "RSAI", "offset": 25600000, "size": 256, "classification": "signature-sized high-entropy material; verification unresolved", "sha256": "c415c84d150996ddff42fcc8a1d188758b6a8bb0996b9ff2c2e1e1fa63412110" },
-      { "raw_id": "I5DM", "numeric_id": "MD5I", "offset": 25608192, "size": 16, "classification": "digest-sized material; covered range unresolved", "sha256": "1eb764c9968dff26dceb9c94e8cc8d9c9a9dd458805d98b5766e28958152ed9b" }
+      {
+        "raw_id": "JSYS",
+        "numeric_id": "SYSJ",
+        "offset": 8192,
+        "size": 10806548,
+        "classification": "SquashFS root filesystem",
+        "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8"
+      },
+      {
+        "raw_id": "GMIZ",
+        "numeric_id": "ZIMG",
+        "offset": 10821632,
+        "size": 3928872,
+        "classification": "Linux zImage with appended device trees",
+        "sha256": "02b23a6e42bdbdc6e5a6e4abd3c433cd3f14589937597d02cfa179d5834d9164"
+      },
+      {
+        "raw_id": "OLSO",
+        "numeric_id": "OSLO",
+        "offset": 14753792,
+        "size": 459168,
+        "classification": "U-Boot 2014.01 / OS loader",
+        "sha256": "6fdf944699124c481db00526329565eb6669a6676c200f62644b11013afb26f7"
+      },
+      {
+        "raw_id": "IBFR",
+        "numeric_id": "RFBI",
+        "offset": 15220736,
+        "size": 32768,
+        "classification": "Quectel/ASR RF material",
+        "sha256": "4ea1ec20df4d9d4a7a8f1d03f75f71d455cd335202a02339718cb8355c283ead"
+      },
+      {
+        "raw_id": "IBRG",
+        "numeric_id": "GRBI",
+        "offset": 15253504,
+        "size": 2621440,
+        "classification": "ASR Falcon LTE Layer-1/baseband image",
+        "sha256": "02e13a743e6405e8f98d4a56e6cc367f236a13ecc219319d568f797d5fae8c80"
+      },
+      {
+        "raw_id": "IBRA",
+        "numeric_id": "ARBI",
+        "offset": 17874944,
+        "size": 7707288,
+        "classification": "CP/RTOS cellular image",
+        "sha256": "a0584601d94f97c77368463d7e886926bc5b6f6d948f2901c02af23b648ff064",
+        "load_base": "0x06800000",
+        "va_range": "0x06800000-0x06f59a98",
+        "load_base_confidence": "CONFIRMED",
+        "load_base_evidence": "see cp_load_base"
+      },
+      {
+        "raw_id": "1MIT",
+        "numeric_id": "TIM1",
+        "offset": 25583616,
+        "size": 2436,
+        "classification": "image-chain metadata",
+        "sha256": "c7e693b00fb2e2335d2e9ea74bec8877d012559e4e5555e483cd9fcf8c5422db"
+      },
+      {
+        "raw_id": "VTOF",
+        "numeric_id": "FOTV",
+        "offset": 25591808,
+        "size": 51,
+        "classification": "modem build/version string",
+        "sha256": "4d8bb1ce28bd8557cae3de6da9ecffb5c9d80f7cfedd55dc0c977a0696a3f447"
+      },
+      {
+        "raw_id": "IASR",
+        "numeric_id": "RSAI",
+        "offset": 25600000,
+        "size": 256,
+        "classification": "signature-sized high-entropy material; verification unresolved",
+        "sha256": "c415c84d150996ddff42fcc8a1d188758b6a8bb0996b9ff2c2e1e1fa63412110"
+      },
+      {
+        "raw_id": "I5DM",
+        "numeric_id": "MD5I",
+        "offset": 25608192,
+        "size": 16,
+        "classification": "digest-sized material; covered range unresolved",
+        "sha256": "1eb764c9968dff26dceb9c94e8cc8d9c9a9dd458805d98b5766e28958152ed9b"
+      }
     ]
   },
   "cp_load_base": {
@@ -58,15 +149,61 @@
     "tim_descriptor": {
       "format": "Marvell TIM v3.4.0, identifier TIMH, 7 images, 96-byte image descriptors",
       "arbi_descriptor_offset": "0x98",
-      "fields": {"ImageID": "ARBI", "NextImageID": "GRBI", "FlashEntryAddr": "0x005c0000", "LoadAddr": "0xffffffff", "ImageSize": "0x759a98", "ImageSizeToHash": "0x759a98"},
-      "other_flash_entries": {"TIM1": "0x00100000", "GRBI": "0x001c0000", "RFBI": "0x00180000"},
+      "fields": {
+        "ImageID": "ARBI",
+        "NextImageID": "GRBI",
+        "FlashEntryAddr": "0x005c0000",
+        "LoadAddr": "0xffffffff",
+        "ImageSize": "0x759a98",
+        "ImageSizeToHash": "0x759a98"
+      },
+      "other_flash_entries": {
+        "TIM1": "0x00100000",
+        "GRBI": "0x001c0000",
+        "RFBI": "0x00180000"
+      },
       "note": "Only the descriptors read directly are listed. LoadAddr is 0xffffffff for TIM1, ARBI, GRBI and RFBI alike."
     }
   },
   "rootfs_comparison": {
-    "3.0.1": { "size": 10805836, "sha256": "4579e69045105845be8272604c68c33f6be9da781a349ee8c841bfadd620f6c8", "inodes": 1383 },
-    "3.0.2": { "size": 10806548, "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8", "inodes": 1383 },
-    "3.0.4": { "size": 11220382, "sha256": "c2ff6649d7eff4bbb90c25fdc4920960dccf5588b4b524106eee631ba9c07793", "inodes": 1439 }
+    "3.0.1": {
+      "size": 10805836,
+      "sha256": "4579e69045105845be8272604c68c33f6be9da781a349ee8c841bfadd620f6c8",
+      "inodes": 1383
+    },
+    "3.0.2": {
+      "size": 10806548,
+      "sha256": "5dfddb34e9db5d7be3a82878d4a58d888d62012ebd8e4fb4db957c0564c02af8",
+      "inodes": 1383
+    },
+    "3.0.4": {
+      "size": 11220382,
+      "sha256": "c2ff6649d7eff4bbb90c25fdc4920960dccf5588b4b524106eee631ba9c07793",
+      "inodes": 1439
+    }
   },
-  "caution": "Additional FBF descriptor names and boundaries remain provisional and are not asserted here. Signature hits after the rootfs are observations, not complete partition identification."
+  "caution": "Additional FBF descriptor names and boundaries remain provisional and are not asserted here. Signature hits after the rootfs are observations, not complete partition identification.",
+  "grbi_isa": {
+    "status": "UNKNOWN - candidates recorded with evidence, none promoted",
+    "objective": "Identify the target instruction set of the GRBI Layer-1/baseband image. No load base is claimed or attempted.",
+    "positive_measurements": [
+      "Instruction granularity is 16-bit. A byte-position frequency analysis over the code region (0x0000-0x260000) shows a clear period-2 signature: odd byte positions are strongly enriched in 0xe1 (82,107 occurrences) while even positions are not, and positions 1 and 3 behave identically, as do 0 and 2. There is no period-3 or period-4 differentiation.",
+      "The opcode field sits in the high byte of each little-endian halfword. Dominant families are 0xe1 (82,107), 0x60 (47,314), 0x30 (27,925), 0xe4 (26,572), 0xe6 (24,101), 0x0c (23,327), 0x32 (19,727), 0x18 (19,663), 0xd1 (19,256), 0xe3 (16,699).",
+      "The most common individual halfwords after 0x0000 and 0xffff are 0xe148, 0xe108, 0xe149, 0xe109, 0xe180 - a tight cluster differing in low bits, consistent with one opcode taking a small register/immediate field.",
+      "Entropy is 5.84 overall with a zero-filled tail from 0x260000, ruling out encryption or whole-image compression."
+    ],
+    "refuted": [
+      "ARM and Thumb: approximately 5% decode density against ARBI's approximately 70% on the same measurement.",
+      "32-bit fixed-width VLIW with a per-word parallel bit (the TI C6x family shape): that would produce a period-4 byte-position signature and an LSB skew. Neither is present; the signature is period-2."
+    ],
+    "tested_but_not_confirmed": {
+      "hypothesis": "ARCompact-style mixed 16/32-bit encoding, where the major opcode is the top 5 bits of the first halfword and instructions are 16-bit when that field is >= 0x0C.",
+      "why_it_looked_plausible": "The observed high-byte families map onto plausible ARCompact major opcodes, and the dominant 0xe1 family would fall in the immediate-arithmetic group.",
+      "test": "A linear length-walk under that rule was compared against the unconditional halfword distribution. If the hypothesis were right, the major-opcode distribution at instruction boundaries should be markedly more concentrated than at arbitrary halfword positions.",
+      "result": "Entropy at walked boundaries was 3.485 bits against a 3.823-bit baseline - only a marginal concentration. Self-synchronisation from misaligned starts was immediate, but that happens for any variable-length rule on any data and is not discriminating.",
+      "verdict": "NOT CONFIRMED. Recorded as a candidate only. Do not promote it without a real decoder."
+    },
+    "next_step": "Identification needs an actual decoder for a candidate ISA, not further statistics. The measurements above are sufficient to reject any fixed 32-bit encoding and to require a 16-bit-granular instruction set with the opcode in the halfword high byte.",
+    "caution": "Do not infer the architecture from vendor lineage or product-family resemblance. The classification of GRBI as an ASR Falcon LTE Layer-1 image rests on strings and structure elsewhere in the container, not on any decoded instruction."
+  }
 }

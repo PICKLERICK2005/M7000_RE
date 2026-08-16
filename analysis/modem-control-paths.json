@@ -31,22 +31,57 @@
   },
   "preflight_gate": {
     "description": "A shared pre-flight check performed by the two network-touching setters only. It batch-reads two records through CCfgHelper and refuses the request before any event is constructed.",
-    "records_read": [19, 84],
+    "records_read": [
+      19,
+      84
+    ],
     "record_19_identity": {
       "resolved": "Record 19 is the SMS send status. CMobileClient::GetAvailableNet reads record 19 alone and its failure message is literally 'Retriving sms sending status data failed.', which names the record.",
       "corroboration": "Record 84 value 13 is search_failure_sending_sms in the shipped frontend enum, so an in-flight SMS send causing a network-scan failure is an explicitly modelled condition in this firmware.",
       "meaning_of_4": "SUPPORTED INFERENCE that value 4 is the send-in-progress state. The blocking comparison is confirmed; the label for 4 is not independently proven.",
       "confidence": "CONFIRMED for identity and role; SUPPORTED INFERENCE for the value label"
     },
-    "also_gated": {"GetAvailableNet (event 0x23)": "reads record 19 only, not record 84"},
+    "also_gated": {
+      "GetAvailableNet (event 0x23)": "reads record 19 only, not record 84"
+    },
     "rules": [
-      {"record": 19, "name": "sms.sms_send_result.result", "blocking_value": 4, "mp_ret": 14, "log": "(no dedicated message; MP_Ret 0xe returned)"},
-      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 3, "mp_ret": 15, "log": "Now searching network, operation blocked."},
-      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 11, "mp_ret": 16, "log": "Now canceling cops, operation blocked."},
-      {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 1, "mp_ret": 17, "log": "Now registering, operation blocked."}
+      {
+        "record": 19,
+        "name": "sms.sms_send_result.result",
+        "blocking_value": 4,
+        "mp_ret": 14,
+        "log": "(no dedicated message; MP_Ret 0xe returned)"
+      },
+      {
+        "record": 84,
+        "name": "mobile_status.net_status.net_sel_stat",
+        "blocking_value": 3,
+        "mp_ret": 15,
+        "log": "Now searching network, operation blocked."
+      },
+      {
+        "record": 84,
+        "name": "mobile_status.net_status.net_sel_stat",
+        "blocking_value": 11,
+        "mp_ret": 16,
+        "log": "Now canceling cops, operation blocked."
+      },
+      {
+        "record": 84,
+        "name": "mobile_status.net_status.net_sel_stat",
+        "blocking_value": 1,
+        "mp_ret": 17,
+        "log": "Now registering, operation blocked."
+      }
     ],
-    "applies_to": ["SetPrefNetType (event 0x33)", "SetNetSel (event 0x34)"],
-    "does_not_apply_to": ["SetDataSwitch (event 0x31)", "SetRoamSwitch (event 0x32)"],
+    "applies_to": [
+      "SetPrefNetType (event 0x33)",
+      "SetNetSel (event 0x34)"
+    ],
+    "does_not_apply_to": [
+      "SetDataSwitch (event 0x31)",
+      "SetRoamSwitch (event 0x32)"
+    ],
     "derived_enum_net_sel_stat": {
       "1": "registering",
       "3": "searching network",
@@ -60,7 +95,12 @@
       "name": "preferred_rat",
       "policy_record": 75,
       "policy_record_name": "mobile_config.net_config.pref_net",
-      "frontend_enum": {"1": "3G only", "2": "4G only", "3": "4G/LTE preferred", "0": "not offered by the stock UI"},
+      "frontend_enum": {
+        "1": "3G only",
+        "2": "4G only",
+        "3": "4G/LTE preferred",
+        "0": "not offered by the stock UI"
+      },
       "rpc_action": "wan configured preferred-network policy (networkMode.html)",
       "libmobile_api": {
         "setter": "CMobileClient::SetPrefNetType(MP_PrefNet, MP_Ret*, int, callback) at libmobile 0xa114",
@@ -72,12 +112,26 @@
       "event_payload": {
         "request": {
           "size_bytes": 4,
-          "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested MP_PrefNet policy value"}],
+          "fields": [
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32 little-endian",
+              "meaning": "requested MP_PrefNet policy value"
+            }
+          ],
           "endianness": "little-endian (native ARM store of the scalar into the payload buffer)"
         },
         "response": {
           "size_bytes": 4,
-          "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "MP_Ret result code"}],
+          "fields": [
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32 little-endian",
+              "meaning": "MP_Ret result code"
+            }
+          ],
           "strict_length_check": "A response whose length is not exactly 4 is rejected as 'Received corrupted data from mobile.'"
         },
         "validation_before_send": [
@@ -93,8 +147,21 @@
         }
       },
       "readback_payload": {
-        "request": {"size_bytes": 0, "note": "GetModemPrefNetType allocates no request payload; only the 12-byte header is sent."},
-        "response": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "raw modem preferred-mode value"}]}
+        "request": {
+          "size_bytes": 0,
+          "note": "GetModemPrefNetType allocates no request payload; only the 12-byte header is sent."
+        },
+        "response": {
+          "size_bytes": 4,
+          "fields": [
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32 little-endian",
+              "meaning": "raw modem preferred-mode value"
+            }
+          ]
+        }
       },
       "mobile_handler": {
         "event_handler": "ProcUserEventComm, src/comm/process_comm.cpp, mobile VA 0x3b038-0x3b0a0",
@@ -117,7 +184,13 @@
             "template": "AT*BAND=<NwMode>",
             "construction": "Copies the literal \"AT*BAND=\" inline, then appends a decimal literal chosen by a jump table on the function's second argument.",
             "at_command_id_passed_to_sender": "0x33",
-            "mapping": {"0": "0", "1": "1", "2": "5", "3": "11", "default": "99"},
+            "mapping": {
+              "0": "0",
+              "1": "1",
+              "2": "5",
+              "3": "11",
+              "default": "99"
+            },
             "argument_source": "the function's second argument",
             "live_path_assessment": "SUPPORTED INFERENCE that this is the live setter: its (this, value, correlation-ID) signature matches exactly how the event handler invokes virtual slot +0x24."
           },
@@ -127,8 +200,17 @@
             "template": "AT*BAND=%d,,,,,%d",
             "construction": "snprintf into a 0x200-byte stack buffer.",
             "at_command_id_passed_to_sender": "0x32",
-            "mapping_first_field": {"0": 0, "1": 1, "2": 5, "3": 14, "default": "no command is emitted; the function returns 1"},
-            "mapping_second_field": {"0": "when the second argument is not 1", "1": "when the second argument is 1"},
+            "mapping_first_field": {
+              "0": 0,
+              "1": 1,
+              "2": 5,
+              "3": 14,
+              "default": "no command is emitted; the function returns 1"
+            },
+            "mapping_second_field": {
+              "0": "when the second argument is not 1",
+              "1": "when the second argument is 1"
+            },
             "argument_source": "first field from the staged status-object value at +0x194; second field from the function's second argument",
             "anomaly": {
               "description": "Between loading the format-string address into r1 and calling snprintf, the function executes `cmp r1,#0x200` followed by `bhi` to a `udf #0` trap. Byte-exact decoding confirms r1 holds the format-string address at that point, so the compare is against a pointer and the trap branch would always be taken.",
@@ -150,7 +232,10 @@
         "query": "AT*BAND? at mobile VA 0x33b54 / 0x33cbc",
         "response_syntax": "*BAND: <NwMode>, <f2>, <f3>, <f4>, <f5>, <PreferMode>",
         "response_parser": {
-          "addresses": ["mobile VA 0x34b84", "mobile VA 0x38a98"],
+          "addresses": [
+            "mobile VA 0x34b84",
+            "mobile VA 0x38a98"
+          ],
           "sscanf_format": "*BAND: %d, %*d, %*d, %*d, %*d, %d",
           "fields_consumed": "field 1 (NwMode) and field 6 (PreferMode) only; fields 2-5 are parsed and discarded",
           "failure": "A return value other than 2 logs 'The modem configuration info parse error.'",
@@ -167,8 +252,21 @@
           }
         },
         "set_vs_get_value_sets": {
-          "sent_by_builder_A": [0, 1, 5, 11, 99],
-          "recognised_by_parser": [0, 4, 5, 8, 11, 15],
+          "sent_by_builder_A": [
+            0,
+            1,
+            5,
+            11,
+            99
+          ],
+          "recognised_by_parser": [
+            0,
+            4,
+            5,
+            8,
+            11,
+            15
+          ],
           "round_trip": {
             "policy 0": "sends NwMode 0, parser maps 0 -> 0. consistent",
             "policy 1": "sends NwMode 1, parser does not recognise 1 (maps to -1). NOT round-trip consistent",
@@ -188,14 +286,28 @@
         "validation": "networkMode (byte at +0x00) and preferredMode (byte at +0x01) must each be < 7; three further byte selectors are bounded by 3, 5 and 3. Failures return code 0xf001 at VA 0x068afe7a.",
         "enum_result": "Single-RAT networkMode values are exactly {0, 1, 3}: for those the handler requires preferredMode == networkMode. For networkMode 2 or >= 4 it requires preferredMode in {0, 1, 3}. CI_DEV_NW_GSM/UMTS/LTE are therefore {0, 1, 3}.",
         "space_warning": "This 0-6 CI enum is NOT the AT*BAND textual NwMode space (0/1/5/11 sent, 0/4/5/8/11/15 parsed). atcmdsrv translates between them and that translation is not recovered.",
-        "rat_vocabulary": ["NMODE_GSM", "NMODE_UMTS", "NMODE_LTE", "SM_RAT_MODE_NULL", "SM_RAT_MODE_LTE", "GSM_RAT"],
+        "rat_vocabulary": [
+          "NMODE_GSM",
+          "NMODE_UMTS",
+          "NMODE_LTE",
+          "SM_RAT_MODE_NULL",
+          "SM_RAT_MODE_LTE",
+          "GSM_RAT"
+        ],
         "cp_function": "L1CSetRat, evidenced by the assertion '\"invalid RAT mode using the function L1CSetRat\"' at VA 0x06905cbc, referenced by an ADR at VA 0x06905a6c, line 2257",
         "confidence": "CONFIRMED for the handler entry, request-field validation and the singleton/combination split; SUPPORTED INFERENCE for the individual GSM/UMTS/LTE value assignment."
       },
       "readback_normalizer": {
         "address": "mobile VA 0x4a254-0x4a31c",
         "input": "a pointer to a 32-bit raw modem preferred-mode value",
-        "mapping": {"0": 3, "1": 0, "2": 1, "3": 2, "0x3081": 3, "other": 3},
+        "mapping": {
+          "0": 3,
+          "1": 0,
+          "2": 1,
+          "3": 2,
+          "0x3081": 3,
+          "other": 3
+        },
         "output": "record 75 written with mode=temporary (commit at mobile VA 0x4a2b0)",
         "numeric_space_identification": {
           "claim": "The raw values 1, 2 and 3 correspond to CI_DEV_NW_GSM, CI_DEV_NW_UMTS and CI_DEV_NW_LTE.",
@@ -215,15 +327,33 @@
       "persistence_owner": {
         "confirmed": "AP record 75 (mobile_config.net_config.pref_net), written permanently only by mobile VA 0x42504 (commit at 0x4256c, mode=permanent).",
         "permanent_writer_callers": [
-          {"address": "mobile VA 0x3b070", "context": "ProcUserEventComm, after the modem-manager operation returns 0"},
-          {"address": "mobile VA 0x36f84", "context": "manager_comm_at.cpp, after the AT transaction completes"},
-          {"address": "mobile VA 0x3b4bc", "context": "a second process_comm.cpp path, not further characterised"},
-          {"address": "mobile VA 0x42f34", "context": "src/base/mobile_status.cpp GetNetModePref: when the stored preference is not 2 or 3, logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3"}
+          {
+            "address": "mobile VA 0x3b070",
+            "context": "ProcUserEventComm, after the modem-manager operation returns 0"
+          },
+          {
+            "address": "mobile VA 0x36f84",
+            "context": "manager_comm_at.cpp, after the AT transaction completes"
+          },
+          {
+            "address": "mobile VA 0x3b4bc",
+            "context": "a second process_comm.cpp path, not further characterised"
+          },
+          {
+            "address": "mobile VA 0x42f34",
+            "context": "src/base/mobile_status.cpp GetNetModePref: when the stored preference is not 2 or 3, logs 'Insert 3GPP2 card, net change net type to 4G prefered.' and forces the policy to 3"
+          }
         ],
         "cp_nvm": {
           "result": "NEGATIVE EVIDENCE / UNPROVEN",
           "statement": "No CP .nvm record is shown to store the preferred RAT. The CP contains a full NVM client and 132 distinct .nvm file names, none of which is named for RAT or network-mode selection.",
-          "nearest_candidates": ["SystemControl.nvm", "LTE_Cfg.nvm", "comBasicCfg.nvm", "ipcfg.nvm", "atStubCfg.nvm"],
+          "nearest_candidates": [
+            "SystemControl.nvm",
+            "LTE_Cfg.nvm",
+            "comBasicCfg.nvm",
+            "ipcfg.nvm",
+            "atStubCfg.nvm"
+          ],
           "caution": "None of these is tied to preferred RAT by any recovered reference. Do not assign CP persistence on the basis that the CP implements RAT control."
         }
       },
@@ -238,10 +368,16 @@
       "policy_record_name": "mobile_config.net_config.net_sel_mode",
       "workflow_record": 84,
       "workflow_record_name": "mobile_status.net_status.net_sel_stat",
-      "frontend_enum": {"0": "automatic", "1": "manual"},
+      "frontend_enum": {
+        "0": "automatic",
+        "1": "manual"
+      },
       "libmobile_api": {
         "setter": "CMobileClient::SetNetSel(MP_NetSel, MP_Ret*, int, callback) at libmobile 0xa4d4",
-        "readers": ["GetNetSelMode at libmobile 0xc9d0 (record 76)", "GetNetSelStat at libmobile 0xb9a8 (record 84)"],
+        "readers": [
+          "GetNetSelMode at libmobile 0xc9d0 (record 76)",
+          "GetNetSelStat at libmobile 0xb9a8 (record 84)"
+        ],
         "scan": "GetAvailableNet (event 0x23), AbortScanNet (event 0x24)",
         "direct_modem_reader": "GetModemNetSel at libmobile 0xdbd0 (event 0x44)"
       },
@@ -251,16 +387,52 @@
           "size_bytes": 56,
           "marshalling": "MP_NetSel is passed by value: libmobile spills r1-r3 to sp+0x94 and the caller supplies bytes 12-55 contiguously above that, then copies all 0x38 bytes verbatim into the payload buffer with four ldm/stm pairs. There is no transformation between MP_NetSel and the wire payload.",
           "fields": [
-            {"offset": 0, "size": 4, "type": "uint32", "name": "mode", "values": {"0": "automatic", "1": "manual", "2": "deregister"}, "note": "The libmobile client range-checks this against 1, so mode 2 is rejected by the public API and is reachable only inside the daemon, which emits AT+COPS=2 for it.", "confidence": "CONFIRMED"},
-            {"offset": 4, "size": 4, "type": "uint32", "name": "mcc", "note": "formatted with %u into AT+COPS=1,2,\"%u%02u\" and persisted to record 447 (mobile_config.net_config.net_isp_mcc)", "confidence": "CONFIRMED"},
-            {"offset": 8, "size": 4, "type": "uint32", "name": "mnc", "note": "formatted with %02u and persisted to record 448 (mobile_config.net_config.net_isp_mnc)", "confidence": "CONFIRMED"},
-            {"offset": 12, "size": 44, "type": "char[]", "name": "operator_name", "note": "passed as a string pointer (struct+0xC) to the string record setter and persisted to record 446 (mobile_config.net_config.net_isp_name). The 44-byte extent is the remainder of the 56-byte structure; the declared array length is not independently proven.", "confidence": "CONFIRMED for identity and offset; SUPPORTED INFERENCE for the 44-byte extent"}
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32",
+              "name": "mode",
+              "values": {
+                "0": "automatic",
+                "1": "manual",
+                "2": "deregister"
+              },
+              "note": "The libmobile client range-checks this against 1, so mode 2 is rejected by the public API and is reachable only inside the daemon, which emits AT+COPS=2 for it.",
+              "confidence": "CONFIRMED"
+            },
+            {
+              "offset": 4,
+              "size": 4,
+              "type": "uint32",
+              "name": "mcc",
+              "note": "formatted with %u into AT+COPS=1,2,\"%u%02u\" and persisted to record 447 (mobile_config.net_config.net_isp_mcc)",
+              "confidence": "CONFIRMED"
+            },
+            {
+              "offset": 8,
+              "size": 4,
+              "type": "uint32",
+              "name": "mnc",
+              "note": "formatted with %02u and persisted to record 448 (mobile_config.net_config.net_isp_mnc)",
+              "confidence": "CONFIRMED"
+            },
+            {
+              "offset": 12,
+              "size": 44,
+              "type": "char[]",
+              "name": "operator_name",
+              "note": "passed as a string pointer (struct+0xC) to the string record setter and persisted to record 446 (mobile_config.net_config.net_isp_name). The 44-byte extent is the remainder of the 56-byte structure; the declared array length is not independently proven.",
+              "confidence": "CONFIRMED for identity and offset; SUPPORTED INFERENCE for the 44-byte extent"
+            }
           ],
           "unknown_fields": "None remain unaccounted for: 4 + 4 + 4 + 44 = 56. No separate RAT / access-technology field is present, which is consistent with the daemon never emitting an <AcT> argument in AT+COPS.",
           "frontend_correlation": "The shipped frontend uses networkSelectionMode, networkSelectionStatus, and an operatorList whose entries carry operatorNumeric, operatorAlphaShort and operatorState (with a 'forbidden' state). operatorNumeric corresponds to the mcc/mnc pair and operatorAlphaShort to the name field.",
           "confidence": "CONFIRMED"
         },
-        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
+        "response": {
+          "size_bytes": 4,
+          "meaning": "MP_Ret result code"
+        },
         "validation_before_send": [
           "The first word of MP_NetSel is range-checked against 1.",
           "The MP_Ret output pointer must be non-NULL.",
@@ -268,11 +440,27 @@
         ]
       },
       "record_76_writers": [
-        {"commit": "mobile VA 0x338a8", "mode": "permanent", "context": "src/comm/manager_comm_at.cpp, i.e. persisted from the AT layer after the selection transaction"},
-        {"commit": "mobile VA 0x425e0", "mode": "temporary", "context": "runtime overlay"},
-        {"commit": "mobile VA 0x4a35c", "mode": "permanent", "context": "status handler at mobile VA 0x4a320, which maps any non-zero raw input to 1"}
+        {
+          "commit": "mobile VA 0x338a8",
+          "mode": "permanent",
+          "context": "src/comm/manager_comm_at.cpp, i.e. persisted from the AT layer after the selection transaction"
+        },
+        {
+          "commit": "mobile VA 0x425e0",
+          "mode": "temporary",
+          "context": "runtime overlay"
+        },
+        {
+          "commit": "mobile VA 0x4a35c",
+          "mode": "permanent",
+          "context": "status handler at mobile VA 0x4a320, which maps any non-zero raw input to 1"
+        }
       ],
-      "record_84_writer": {"commit": "mobile VA 0x42658", "mode": "temporary", "also_stores": "status object +0x2bc"},
+      "record_84_writer": {
+        "commit": "mobile VA 0x42658",
+        "mode": "temporary",
+        "also_stores": "status object +0x2bc"
+      },
       "modem_representation": {
         "commands": {
           "automatic": "AT+COPS=0 (mode 0), built at mobile VA 0x33950",
@@ -282,7 +470,10 @@
           "query": "AT+COPS?",
           "scan": "AT+COPS=?"
         },
-        "response_parsers": ["'+COPS:%d,%*d,\"%d\"' at mobile VA 0x34c0c", "'+COPS: %*d,%*d,\"%d\",' at mobile VA 0x34ccc"],
+        "response_parsers": [
+          "'+COPS:%d,%*d,\"%d\"' at mobile VA 0x34c0c",
+          "'+COPS: %*d,%*d,\"%d\",' at mobile VA 0x34ccc"
+        ],
         "at_command_id_passed_to_sender": "0x34"
       },
       "persistence_sequence": "After building the manual-selection command the same routine writes record 446 (operator name, string setter), record 447 (mcc), record 448 (mnc) and record 76 (mode), then commits all four permanently in one call at mobile VA 0x338a8. Network selection therefore persists four records atomically from the AT layer, which is the opposite arrangement from preferred RAT, where the event handler persists a single record.",
@@ -300,18 +491,48 @@
       "policy_record_name": "mobile_config.mobile_switch.data_switch",
       "effective_record": 79,
       "effective_record_name": "mobile_status.net_status.conn_stat",
-      "libmobile_api": {"setter": "CMobileClient::SetDataSwitch at libmobile 0xccf8", "reader": "GetDataSwitch at libmobile 0xc8dc"},
+      "libmobile_api": {
+        "setter": "CMobileClient::SetDataSwitch at libmobile 0xccf8",
+        "reader": "GetDataSwitch at libmobile 0xc8dc"
+      },
       "mobile_event": "0x31",
       "event_payload": {
-        "request": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested switch value"}]},
-        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
-        "validation_before_send": ["value range-checked against 1", "MP_Ret pointer non-NULL"],
+        "request": {
+          "size_bytes": 4,
+          "fields": [
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32 little-endian",
+              "meaning": "requested switch value"
+            }
+          ]
+        },
+        "response": {
+          "size_bytes": 4,
+          "meaning": "MP_Ret result code"
+        },
+        "validation_before_send": [
+          "value range-checked against 1",
+          "MP_Ret pointer non-NULL"
+        ],
         "preflight_gate": "NONE. Unlike the RAT and network-selection setters, this setter performs no records-19/84 check."
       },
-      "record_73_writer": {"commit": "mobile VA 0x4238c", "mode": "permanent"},
+      "record_73_writer": {
+        "commit": "mobile VA 0x4238c",
+        "mode": "permanent"
+      },
       "record_79_writers": [
-        {"commit": "mobile VA 0x374c0", "mode": "temporary", "context": "AT layer"},
-        {"commit": "mobile VA 0x4a10c", "mode": "temporary", "context": "status handler"}
+        {
+          "commit": "mobile VA 0x374c0",
+          "mode": "temporary",
+          "context": "AT layer"
+        },
+        {
+          "commit": "mobile VA 0x4a10c",
+          "mode": "temporary",
+          "context": "status handler"
+        }
       ],
       "backhaul_fsm": "BackHaulFsm, see modem-state-machines.json.",
       "flow_limit_interaction": "See the flow_limit_gate block below; the gate is evaluated by CMobileClient::GetCallFailReason and by an internal mobile decision routine, not by this setter.",
@@ -326,23 +547,52 @@
       "name": "roaming_switch",
       "policy_record": 74,
       "policy_record_name": "mobile_config.mobile_switch.roam_switch",
-      "libmobile_api": {"setter": "CMobileClient::SetRoamSwitch at libmobile 0xcef8", "reader": "GetRoamSwitch at libmobile 0xc7e8"},
+      "libmobile_api": {
+        "setter": "CMobileClient::SetRoamSwitch at libmobile 0xcef8",
+        "reader": "GetRoamSwitch at libmobile 0xc7e8"
+      },
       "mobile_event": "0x32",
       "event_payload": {
-        "request": {"size_bytes": 4, "fields": [{"offset": 0, "size": 4, "type": "uint32 little-endian", "meaning": "requested switch value"}]},
-        "response": {"size_bytes": 4, "meaning": "MP_Ret result code"},
-        "validation_before_send": ["value range-checked against 1", "MP_Ret pointer non-NULL"],
+        "request": {
+          "size_bytes": 4,
+          "fields": [
+            {
+              "offset": 0,
+              "size": 4,
+              "type": "uint32 little-endian",
+              "meaning": "requested switch value"
+            }
+          ]
+        },
+        "response": {
+          "size_bytes": 4,
+          "meaning": "MP_Ret result code"
+        },
+        "validation_before_send": [
+          "value range-checked against 1",
+          "MP_Ret pointer non-NULL"
+        ],
         "preflight_gate": "NONE"
       },
-      "record_74_writer": {"commit": "mobile VA 0x4243c", "mode": "permanent"},
+      "record_74_writer": {
+        "commit": "mobile VA 0x4243c",
+        "mode": "permanent"
+      },
       "mutation_status": "NOT EXECUTED",
       "confidence": "CONFIRMED"
     }
   ],
   "flow_limit_gate": {
-    "records": {"30": "flowstat.property.limit_enabled", "39": "flowstat.property.limit_reached", "44": "flowstat_current_boot_up.property.allow_dial_once"},
+    "records": {
+      "30": "flowstat.property.limit_enabled",
+      "39": "flowstat.property.limit_reached",
+      "44": "flowstat_current_boot_up.property.allow_dial_once"
+    },
     "condition": "record 30 == 1 AND record 39 == 2 AND record 44 == 0 yields call-fail reason 2 (wan:11 = 2), after the registration/connection gate and the roaming-policy precedence check.",
-    "evaluators": ["CMobileClient::GetCallFailReason at libmobile 0xbc2c", "internal mobile decision routine at mobile VA 0x42068-0x42118"],
+    "evaluators": [
+      "CMobileClient::GetCallFailReason at libmobile 0xbc2c",
+      "internal mobile decision routine at mobile VA 0x42068-0x42118"
+    ],
     "ownership": "All three records are written by libflowstat.so, not by mobile and not by the modem. See runtime-record-provenance.json.",
     "note": "mobile itself writes only records 40 and 41 (flowstat_current_boot_up tx_speed/rx_speed), both temporary. It never writes 30, 39 or 44.",
     "confidence": "CONFIRMED"
@@ -350,18 +600,30 @@
   "signal_and_service": {
     "record_78": {
       "name": "mobile_status.net_status.sig_lvl",
-      "writer": {"commit": "mobile VA 0x4a170", "mode": "temporary"},
+      "writer": {
+        "commit": "mobile VA 0x4a170",
+        "mode": "temporary"
+      },
       "transformation": "The handler at mobile VA 0x4a13c copies the incoming 32-bit value straight into record 78. The normalization happens upstream, in the AT response layer, and is now located.",
       "normalization": {
         "location": "src/comm/manager_comm_at.cpp parses the signal response, converts raw fields to engineering units, calls a RAT-specific level function, and passes the resulting level to the status object through a virtual call that reaches the record-78 handler.",
         "rat_selector": "The current network type staged at status-object offset 0x190 selects the path: value 2 takes the +CSQ/WCDMA path, value 3 takes the *CESQ/LTE path.",
-        "commands": {"AT+CSQ": "'+CSQ: %d,%d' and '+CSQ: %d' parsers", "AT*CESQ": "'*CESQ: %d,%d,%d,%d,%d,%d,%d' parser at mobile VA 0x35258"},
+        "commands": {
+          "AT+CSQ": "'+CSQ: %d,%d' and '+CSQ: %d' parsers",
+          "AT*CESQ": "'*CESQ: %d,%d,%d,%d,%d,%d,%d' parser at mobile VA 0x35258"
+        },
         "functions": [
           {
             "address": "mobile VA 0x3a4c8",
             "name": "CSQ-to-level",
             "input": "raw +CSQ first field",
-            "table": {"0-2 or 99": 0, "3-4": 1, "5-7": 2, "8-11": 3, "12 and above": 4},
+            "table": {
+              "0-2 or 99": 0,
+              "3-4": 1,
+              "5-7": 2,
+              "8-11": 3,
+              "12 and above": 4
+            },
             "note": "99 is the 3GPP 'not known or not detectable' value and is folded into level 0. This is NOT the generic CSQ-to-bars mapping; the breakpoints are firmware-specific.",
             "confidence": "CONFIRMED"
           },
@@ -369,16 +631,39 @@
             "address": "mobile VA 0x3a50c",
             "name": "dBm-to-level",
             "input": "a signed dBm value",
-            "table": {"outside -120..-25": 0, "-48 and above": 4, "-72 and above": 3, "-96..-73": 2, "-97 and below": 1},
+            "table": {
+              "outside -120..-25": 0,
+              "-48 and above": 4,
+              "-72 and above": 3,
+              "-96..-73": 2,
+              "-97 and below": 1
+            },
             "note": "No direct call site was found for this function, so it may be reached by tail-call or be unused in this build.",
             "confidence": "CONFIRMED for the table; UNKNOWN for reachability"
           },
           {
             "address": "mobile VA 0x3a550",
             "name": "LTE composite level",
-            "inputs": {"r0": "raw *CESQ field 1", "r1": "RSRP in dBm", "r2": "SNR scaled by 10"},
-            "rsrp_table": {"-43 and above": "invalid marker -1", "-98 and above": 4, "-108 and above": 3, "-118 and above": 2, "-128 and above": 1, "below -128": 0},
-            "snr_table_scaled_by_10": {"above 400": "out of range, fall back", "above 129": 4, "above 44": 3, "above 9": 2, "-30 and above": 1},
+            "inputs": {
+              "r0": "raw *CESQ field 1",
+              "r1": "RSRP in dBm",
+              "r2": "SNR scaled by 10"
+            },
+            "rsrp_table": {
+              "-43 and above": "invalid marker -1",
+              "-98 and above": 4,
+              "-108 and above": 3,
+              "-118 and above": 2,
+              "-128 and above": 1,
+              "below -128": 0
+            },
+            "snr_table_scaled_by_10": {
+              "above 400": "out of range, fall back",
+              "above 129": 4,
+              "above 44": 3,
+              "above 9": 2,
+              "-30 and above": 1
+            },
             "combination": "The returned level is the minimum of the SNR-derived and RSRP-derived levels when both are valid. If the RSRP level is the invalid marker the SNR level is used alone. If SNR is out of range the function falls back to a CSQ-style table on the raw first field with breakpoints 63, 11, 7 and 4.",
             "confidence": "CONFIRMED"
           }
@@ -410,11 +695,24 @@
     "record_83": {
       "name": "mobile_status.net_status.srv_stat",
       "writers": [
-        {"commit": "mobile VA 0x49a50", "mode": "temporary", "context": "dedicated handler at mobile VA 0x499f4"},
-        {"commit": "mobile VA 0x49ef8", "mode": "temporary", "context": "batched update together with records 80 and 81"}
+        {
+          "commit": "mobile VA 0x49a50",
+          "mode": "temporary",
+          "context": "dedicated handler at mobile VA 0x499f4"
+        },
+        {
+          "commit": "mobile VA 0x49ef8",
+          "mode": "temporary",
+          "context": "batched update together with records 80 and 81"
+        }
       ],
       "handler_shape": "The dedicated handler switches on an input restricted to 0-3 via a four-entry jump table, stages the result at status-object +0x17c, and writes record 83.",
-      "enum": {"0": "no service", "1": "limited service", "2": "available", "3": "limited area"},
+      "enum": {
+        "0": "no service",
+        "1": "limited service",
+        "2": "available",
+        "3": "limited area"
+      },
       "enum_basis": "Carried forward from the previously validated branch analysis and the tp_data binding of record 83 to srv_stat. The 0-3 value range is independently confirmed here by the jump table.",
       "unknowns": [
         "Whether 'limited area' is an emergency-service concept or a TP-Link abstraction.",
@@ -427,17 +725,48 @@
   "ap_cp_boundary": {
     "resolved_question": "AT*BAND does NOT remain textual across the AP/CP boundary. It is parsed on the AP and converted into a binary CI (Common Interface) primitive carried over the Marvell shared-memory/ACIPC transport. The CP receives a structure, not a string.",
     "chain": [
-      {"stage": "mobile", "form": "ASCII AT text", "detail": "builds the command into a 0x200-byte buffer and calls the sender at mobile VA 0x3f6a4 with a numeric AT command ID and a correlation cookie"},
-      {"stage": "/tmp/atcmd", "form": "ASCII AT text", "detail": "AF_UNIX stream, carriage-return terminated; see atcmd-ipc.json"},
-      {"stage": "atcmdsrv", "form": "AT parser and command server", "detail": "owns the AT command dispatch table; the '*BAND' token at VA 0x98eea has a table entry at VA 0xdb8ac whose handler is the Thumb function at VA 0x3813c. atcmdsrv also generates the '*BAND:' and '*BANDIND:' response text."},
-      {"stage": "NECCI / CCI client stub", "form": "binary CI primitive", "detail": "atcmdsrv contains ciClientStubInit, ciStubEventHandler and 'clientCiConfirmCallback_transfer: primId:%d;tem->reqHandle:0x%x;tem->cci_confirm:%d', i.e. a request-handle plus primitive-ID request/confirm model"},
-      {"stage": "transport devices", "form": "shared memory / IPC", "detail": "/dev/msocket, /dev/acipc, /dev/cpmem, plus /dev/ccidatastub, /dev/psdatastub, /dev/cctdev0 and /dev/cctdatadev0-1"},
-      {"stage": "CP", "form": "CI primitive struct", "detail": "the CP AT*BAND handler works on pSig->networkMode and pSig->preferredMode and logs 'AT*BAND, NwMode=%d, PreferMode=%d'"}
+      {
+        "stage": "mobile",
+        "form": "ASCII AT text",
+        "detail": "builds the command into a 0x200-byte buffer and calls the sender at mobile VA 0x3f6a4 with a numeric AT command ID and a correlation cookie"
+      },
+      {
+        "stage": "/tmp/atcmd",
+        "form": "ASCII AT text",
+        "detail": "AF_UNIX stream, carriage-return terminated; see atcmd-ipc.json"
+      },
+      {
+        "stage": "atcmdsrv",
+        "form": "AT parser and command server",
+        "detail": "owns the AT command dispatch table; the '*BAND' token at VA 0x98eea has a table entry at VA 0xdb8ac whose handler is the Thumb function at VA 0x3813c. atcmdsrv also generates the '*BAND:' and '*BANDIND:' response text."
+      },
+      {
+        "stage": "NECCI / CCI client stub",
+        "form": "binary CI primitive",
+        "detail": "atcmdsrv contains ciClientStubInit, ciStubEventHandler and 'clientCiConfirmCallback_transfer: primId:%d;tem->reqHandle:0x%x;tem->cci_confirm:%d', i.e. a request-handle plus primitive-ID request/confirm model"
+      },
+      {
+        "stage": "transport devices",
+        "form": "shared memory / IPC",
+        "detail": "/dev/msocket, /dev/acipc, /dev/cpmem, plus /dev/ccidatastub, /dev/psdatastub, /dev/cctdev0 and /dev/cctdatadev0-1"
+      },
+      {
+        "stage": "CP",
+        "form": "CI primitive struct",
+        "detail": "the CP AT*BAND handler works on pSig->networkMode and pSig->preferredMode and logs 'AT*BAND, NwMode=%d, PreferMode=%d'"
+      }
     ],
     "ci_primitive": {
       "family": "CI_DEV_PRIM_SET_BAND_MODE_REQ / _CNF, with CI_DEV_PRIM_GET_BAND_MODE_REQ / _CNF and CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ / _CNF",
       "name_table": "atcmdsrv VA 0xb2068, 255 entries, index 0 = CI_DEV_PRIM_STATUS_IND, spanning the CI_DEV group and ending in the CI_ERR group",
-      "table_indices": {"SET_BAND_MODE_REQ": 50, "SET_BAND_MODE_CNF": 51, "GET_BAND_MODE_REQ": 52, "GET_BAND_MODE_CNF": 53, "GET_SUPPORTED_BAND_MODE_REQ": 54, "GET_SUPPORTED_BAND_MODE_CNF": 55},
+      "table_indices": {
+        "SET_BAND_MODE_REQ": 50,
+        "SET_BAND_MODE_CNF": 51,
+        "GET_BAND_MODE_REQ": 52,
+        "GET_BAND_MODE_CNF": 53,
+        "GET_SUPPORTED_BAND_MODE_REQ": 54,
+        "GET_SUPPORTED_BAND_MODE_CNF": 55
+      },
       "numeric_wire_id": "UNKNOWN. The name-table index is recovered, but the code that indexes the table was not located (no absolute, PIC or Thumb movw/movt reference to 0xb2068 was found), so the numeric primitive ID and any group encoding are not established."
     },
     "decisive_evidence": [
@@ -452,10 +781,396 @@
       "caution": "rild and atcmdsrv are separate processes started by /etc/telinit. Which of them serves /tmp/atcmd for the mobile daemon in the running system is supported by the atcmdsrv AT-server evidence but was not confirmed by live observation."
     },
     "targeting_guidance": "Future modem-control analysis should target, in order: the libmobile event API (typed, validated, gated); the mobile AT builder/parser layer (textual and well symbolized through log strings and __FILE__ paths); then atcmdsrv, which is where AT text becomes a CI primitive and is the real AP/CP semantic boundary. Raw ACIPC framing is the least productive layer because the CI primitive layer above it is fully symbolized.",
-    "confidence": "CONFIRMED that the boundary is a binary CI primitive rather than textual AT; CONFIRMED for the component chain and transport device set; UNKNOWN for the numeric primitive ID and the on-wire ACIPC framing."
+    "confidence": "CONFIRMED that the boundary is a binary CI primitive rather than textual AT; CONFIRMED for the component chain and transport device set; UNKNOWN for the numeric primitive ID and the on-wire ACIPC framing.",
+    "cp_handler": {
+      "va": "0x068afdf0",
+      "reached_from": "CP DEV request dispatch table at 0x06f394fc, entry {primId 0x33, handler 0x068afdf1}",
+      "request_size": "32 bytes (0x20)",
+      "request_fields": [
+        {
+          "offset": "0x00",
+          "size": 1,
+          "name": "networkMode",
+          "check": "< 7",
+          "site": "0x068afe54"
+        },
+        {
+          "offset": "0x01",
+          "size": 1,
+          "name": "preferredMode",
+          "check": "< 7",
+          "site": "0x068afe5e"
+        },
+        {
+          "offset": "0x04",
+          "size": 4,
+          "name": "GSM band mask",
+          "check": "masked against capability +0x2a (u16)"
+        },
+        {
+          "offset": "0x08",
+          "size": 4,
+          "name": "UMTS band mask",
+          "check": "masked against capability +0x40"
+        },
+        {
+          "offset": "0x0c",
+          "size": 4,
+          "name": "LTE band mask low",
+          "check": "masked against capability +0x44"
+        },
+        {
+          "offset": "0x10",
+          "size": 4,
+          "name": "LTE band mask high",
+          "check": "masked against capability +0x48"
+        },
+        {
+          "offset": "0x14",
+          "size": 1,
+          "name": "selector_1",
+          "check": "< 3",
+          "site": "0x068afe68",
+          "ap_bounds": "AT parameter 5, range 0..2, default 2"
+        },
+        {
+          "offset": "0x15",
+          "size": 1,
+          "name": "selector_2",
+          "check": "< 5",
+          "site": "0x068afe6e",
+          "ap_bounds": "AT parameter 6, range 0..4, default 4"
+        },
+        {
+          "offset": "0x16",
+          "size": 1,
+          "name": "selector_3",
+          "check": "< 3",
+          "site": "0x068afe74",
+          "ap_bounds": "AT parameter 7, range 0..2, default 0; only forwarded for LTE-bearing NwModes"
+        },
+        {
+          "offset": "0x17",
+          "size": 1,
+          "name": "unnamed",
+          "status": "NEGATIVE EVIDENCE - never read by the CP handler and always sent as 0 by the AP. It is nonetheless reported back by the AT read response, so it exists in the structure; nothing in this firmware gives it a value or a meaning."
+        },
+        {
+          "offset": "0x18",
+          "size": 1,
+          "name": "operation selector",
+          "branches": {
+            "0 or 5": "GSM band branch (0x068afe8e)",
+            "1 or 2": "UMTS band branch (0x068afee0)",
+            "3": "RAT mode-change branch (0x068b005c)",
+            "other": "assertion failure at line 3789"
+          },
+          "note": "IMPORTANT: the AT*BAND path always sends 0, so AT*BAND only ever exercises the GSM band branch of this handler. The RAT-change branch (3) is reachable only from a different CI sender, which was not located."
+        },
+        {
+          "offset": "0x1c",
+          "size": 4,
+          "name": "unnamed u32",
+          "status": "copied to local state; AT parameter 8"
+        }
+      ],
+      "error_path": "0x068afe7a emits service group 9 (DEV) with primId 0xF001 = CI_ERR_PRIM_HASINVALIDPARAS_CNF. This is a primitive id, not an ad-hoc error code.",
+      "success_path": "0x068b0108 allocates DEV primId 0x34 (SET_BAND_MODE_CNF), writes halfword 1 at +0x00 and byte 0 at +0x02, and sends it. The CNF payload size table says 4 bytes, matching.",
+      "correction": "A previous revision described +0x18 as branching on 0/5, 1/2 'else', and implied the networkMode/preferredMode assertions were on the AT*BAND path. They are not: that block sits behind `[+0x18] == 3`."
+    },
+    "cp_readback_handler": {
+      "va": "0x068b0156",
+      "emits": "DEV primId 0x36 = CI_DEV_PRIM_GET_BAND_MODE_CNF, payload 28 bytes",
+      "cnf_fields": [
+        {
+          "offset": "0x00",
+          "size": 2,
+          "name": "flag",
+          "source": "boolean of internal [r5+0x02]"
+        },
+        {
+          "offset": "0x02",
+          "size": 1,
+          "name": "networkMode",
+          "source": "internal RAT state [r5+0x0a], translated"
+        },
+        {
+          "offset": "0x03",
+          "size": 1,
+          "name": "preferredMode",
+          "source": "internal RAT state [r5+0x0c], translated"
+        },
+        {
+          "offset": "0x14",
+          "size": 1,
+          "name": "selector",
+          "source": "internal [r5+0x36]"
+        },
+        {
+          "offset": "0x15",
+          "size": 1,
+          "name": "selector",
+          "source": "internal [r5+0x34]"
+        }
+      ],
+      "internal_to_ci_translation": {
+        "tables": [
+          "ARBI 0x068b0192 (networkMode)",
+          "ARBI 0x068b01c2 (preferredMode)"
+        ],
+        "form": "tbb byte tables, identical content: 03 05 07 09 0f 0d",
+        "map": {
+          "0": 0,
+          "1": 1,
+          "2": 3,
+          "3": 2,
+          "4": 4,
+          "5": 5,
+          ">=6": 6
+        },
+        "significance": "Internal state 2 maps to CI 3 and internal 3 maps to CI 2. Reading this together with the CI bitmask encoding fixes the CP internal ordering as GSM, UMTS, LTE, GSM+UMTS, GSM+LTE, UMTS+LTE, all - which is exactly the 'singletons then pairs' ordering, and independently corroborates the CI assignment GSM=0, UMTS=1, LTE=3."
+      }
+    }
   },
   "safety": {
     "execution": "Nothing in this file was executed. No mobile event was sent, no AT command issued, no RPC invoked, no NVM read or written, no diagnostic mode enabled, and the physical router was not touched.",
     "hidden_modes": "Static discovery that a parser accepts a value is recorded as such. It is not evidence that the value is exposed, supported, or safe to apply."
+  },
+  "at_to_ci_translation": {
+    "status": "CONFIRMED",
+    "question_closed": "How atcmdsrv converts the textual AT*BAND NwMode into the CP CI networkMode / preferredMode pair. This was the last unresolved link in the AP-to-CP chain.",
+    "handler": {
+      "va": "atcmdsrv 0x3813c (Thumb)",
+      "command_table_entry": "0x0db8ac, entry {name=0x98eea '*BAND', ctx=0x0ed844, nparams=9, test/read/set handlers all 0x3813d}",
+      "command_type_dispatch": "r7 = 3 -> SET (parses 9 parameters); r7 = 5 -> TEST via 0x40c74 (GET_SUPPORTED_BAND_MODE_REQ); r7 = 2 -> READ via 0x40c90 (GET_BAND_MODE_REQ)"
+    },
+    "parameter_map": {
+      "note": "AT*BAND takes 9 parameters. Signed integers are parsed by 0x5f04c, unsigned by 0x5f0e0; both take (ctx, index, pOut, min, max, default) and reject out-of-range values.",
+      "params": [
+        {
+          "index": 0,
+          "name": "NwMode",
+          "min": 0,
+          "max": 30,
+          "default": 240,
+          "note": "Only 0..15 and the default 240 are handled; 16..30 pass the range check but fall through to the CME error path at 0x3828e."
+        },
+        {
+          "index": 1,
+          "name": "GSM band mask",
+          "type": "u32",
+          "min": 0,
+          "max": 4294967295,
+          "default": 0,
+          "ci_offset": "0x04"
+        },
+        {
+          "index": 2,
+          "name": "UMTS band mask",
+          "type": "u32",
+          "min": 0,
+          "max": 4294967295,
+          "default": 0,
+          "ci_offset": "0x08"
+        },
+        {
+          "index": 3,
+          "name": "LTE band mask low",
+          "type": "u32",
+          "min": 0,
+          "max": 4294967295,
+          "default": 0,
+          "ci_offset": "0x0c"
+        },
+        {
+          "index": 4,
+          "name": "LTE band mask high",
+          "type": "u32",
+          "min": 0,
+          "max": 4294967295,
+          "default": 0,
+          "ci_offset": "0x10"
+        },
+        {
+          "index": 5,
+          "name": "selector_1",
+          "min": 0,
+          "max": 2,
+          "default": 2,
+          "ci_offset": "0x14"
+        },
+        {
+          "index": 6,
+          "name": "selector_2",
+          "min": 0,
+          "max": 4,
+          "default": 4,
+          "ci_offset": "0x15"
+        },
+        {
+          "index": 7,
+          "name": "selector_3",
+          "min": 0,
+          "max": 2,
+          "default": 0,
+          "ci_offset": "0x16",
+          "note": "Only forwarded when the requested NwMode includes LTE (5..15); for NwMode 0..4 the builder passes 0 instead."
+        },
+        {
+          "index": 8,
+          "name": "unnamed u32",
+          "type": "u32",
+          "min": 0,
+          "max": 4294967295,
+          "default": 0,
+          "ci_offset": "0x1c"
+        }
+      ],
+      "cross_check": "The AT-side bounds for parameters 5, 6 and 7 (max 2, 4, 2) are exactly the CP handler's `< 3`, `< 5`, `< 3` checks on CI offsets 0x14, 0x15, 0x16. The two sides were recovered independently and agree."
+    },
+    "table": [
+      {
+        "at_nwmode": 0,
+        "ci_network_mode": 0,
+        "ci_preferred_mode": 0,
+        "meaning": "GSM only",
+        "case_va": "0x3835c"
+      },
+      {
+        "at_nwmode": 1,
+        "ci_network_mode": 1,
+        "ci_preferred_mode": 1,
+        "meaning": "UMTS only",
+        "case_va": "0x38388"
+      },
+      {
+        "at_nwmode": 2,
+        "ci_network_mode": 2,
+        "ci_preferred_mode": 2,
+        "meaning": "GSM+UMTS, no RAT preference",
+        "case_va": "0x383ee"
+      },
+      {
+        "at_nwmode": 3,
+        "ci_network_mode": 2,
+        "ci_preferred_mode": 0,
+        "meaning": "GSM+UMTS, prefer GSM",
+        "case_va": "0x3841c"
+      },
+      {
+        "at_nwmode": 4,
+        "ci_network_mode": 2,
+        "ci_preferred_mode": 1,
+        "meaning": "GSM+UMTS, prefer UMTS",
+        "case_va": "0x38444"
+      },
+      {
+        "at_nwmode": 5,
+        "ci_network_mode": 3,
+        "ci_preferred_mode": 3,
+        "meaning": "LTE only",
+        "case_va": "0x38394"
+      },
+      {
+        "at_nwmode": 6,
+        "ci_network_mode": 4,
+        "ci_preferred_mode": 4,
+        "meaning": "GSM+LTE, no RAT preference",
+        "case_va": "0x3846c"
+      },
+      {
+        "at_nwmode": 7,
+        "ci_network_mode": 4,
+        "ci_preferred_mode": 0,
+        "meaning": "GSM+LTE, prefer GSM",
+        "case_va": "0x382a6"
+      },
+      {
+        "at_nwmode": 8,
+        "ci_network_mode": 4,
+        "ci_preferred_mode": 3,
+        "meaning": "GSM+LTE, prefer LTE",
+        "case_va": "0x38498"
+      },
+      {
+        "at_nwmode": 9,
+        "ci_network_mode": 5,
+        "ci_preferred_mode": 5,
+        "meaning": "UMTS+LTE, no RAT preference",
+        "case_va": "0x384c4"
+      },
+      {
+        "at_nwmode": 10,
+        "ci_network_mode": 5,
+        "ci_preferred_mode": 1,
+        "meaning": "UMTS+LTE, prefer UMTS",
+        "case_va": "0x384e4"
+      },
+      {
+        "at_nwmode": 11,
+        "ci_network_mode": 5,
+        "ci_preferred_mode": 3,
+        "meaning": "UMTS+LTE, prefer LTE",
+        "case_va": "0x382f6"
+      },
+      {
+        "at_nwmode": 12,
+        "ci_network_mode": 6,
+        "ci_preferred_mode": 6,
+        "meaning": "GSM+UMTS+LTE, no RAT preference",
+        "case_va": "0x383c0"
+      },
+      {
+        "at_nwmode": 13,
+        "ci_network_mode": 6,
+        "ci_preferred_mode": 0,
+        "meaning": "GSM+UMTS+LTE, prefer GSM",
+        "case_va": "0x38502"
+      },
+      {
+        "at_nwmode": 14,
+        "ci_network_mode": 6,
+        "ci_preferred_mode": 1,
+        "meaning": "GSM+UMTS+LTE, prefer UMTS",
+        "case_va": "0x3852c"
+      },
+      {
+        "at_nwmode": 15,
+        "ci_network_mode": 6,
+        "ci_preferred_mode": 3,
+        "meaning": "GSM+UMTS+LTE, prefer LTE",
+        "case_va": "0x38558"
+      }
+    ],
+    "default_case": {
+      "at_nwmode": 240,
+      "ci_network_mode": 6,
+      "ci_preferred_mode": 1,
+      "meaning": "GSM+UMTS+LTE, prefer UMTS",
+      "case_va": "0x3832a",
+      "note": "Reached when the NwMode parameter is omitted. It calls a second builder at 0x462a4 that is instruction-for-instruction the same as 0x40cac (same primId 0x33, same 32-byte layout, different debug line number) - a duplicated copy, not a different primitive."
+    },
+    "band_masks": {
+      "note": "Which mask is which RAT is fixed by the CP handler's capability masking, not by naming.",
+      "evidence": [
+        "CI +0x04 is masked against a 16-bit capability halfword (`ldrh [r1,#0x2a]`) at ARBI 0x068afeea -> GSM",
+        "CI +0x08 is masked against the 32-bit word at capability +0x40 (ARBI 0x068aff30) -> UMTS",
+        "CI +0x0c is masked against capability +0x44 (ARBI 0x068aff96) -> LTE low",
+        "CI +0x10 is masked against capability +0x48 (ARBI 0x068b002a) -> LTE high"
+      ],
+      "confidence": "SUPPORTED INFERENCE for the RAT labels; CONFIRMED that the four fields are masked against four distinct capability fields of those widths."
+    },
+    "readback_format": {
+      "read_response": "*BAND: %d, %lu, %lu, %lu, %lu, %d, %d, %d, %d, %lu (atcmdsrv 0x91f5b)",
+      "test_response": "*BAND:(%d-%d),%lu,%lu,%lu,%lu (atcmdsrv 0x90a93)",
+      "note": "The read response carries ten fields: the reverse-mapped NwMode, four band masks, four small selectors (one more than the setter accepts - CI +0x17, which the setter always sends as 0), and one u32. This explains why the mobile-side parser recognises only 0/4/5/8/11/15: those are the AT NwMode values whose preferredMode is either the sole RAT or LTE."
+    },
+    "observed_setter_values": {
+      "0": "AP policy 0 -> GSM only",
+      "1": "AP policy 1 -> UMTS only",
+      "5": "AP policy 2 -> LTE only",
+      "11": "AP policy 3 -> UMTS+LTE, prefer LTE"
+    },
+    "namespace_warning": "AT NwMode, CI networkMode, CI preferredMode, the CP internal RAT state, the AP configured policy enum and the AP readback enum are six different numeric spaces. They must not be collapsed."
   }
 }
