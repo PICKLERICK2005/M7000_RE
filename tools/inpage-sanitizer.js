@@ -1,11 +1,13 @@
-/* In-page sanitizer used for the read-only physical validation.
+/* In-page sanitizer used for the M7000 hardware validations.
  *
- * Published so the sanitization claim in docs/readonly-validation-result.md is
- * auditable: this is the exact policy that decided what was retained.
+ * Published so the sanitization claims in docs/readonly-validation-result.md and
+ * docs/hardware-validation-002.md are auditable: this is the exact policy that
+ * decided what was retained.
  *
  * Deny by default. Values survive only for the allowlisted, non-identifying
  * enums the static model makes predictions about. Everything else is reduced to
- * type, length and character class before it leaves the page.
+ * type, length and character class before it leaves the page. The request tap
+ * records only a module/action tag and argument key names.
  */
 (function () {
   if (window.__obs) return 'already-installed';
@@ -102,7 +104,32 @@
     } catch (e) { /* never break the app */ }
     return out;
   };
-  window.__obs.uninstall = function () { JSON.parse = origParse; return 'removed'; };
+  // Request-side tap. The frontend JSON.stringify's each request object before
+  // encrypting it. We record ONLY the module/action tag and the top-level key
+  // names, never argument values. Passive: the object is not modified.
+  window.__obs.requests = [];
+  var origStr = JSON.stringify;
+  JSON.stringify = function (v, replacer, space) {
+    try {
+      if (v && typeof v === 'object' && !(v instanceof Array) &&
+          Object.prototype.hasOwnProperty.call(v, 'module') &&
+          Object.prototype.hasOwnProperty.call(v, 'action')) {
+        window.__obs.requests.push({
+          t: Date.now(),
+          module: String(v.module).slice(0, 24),
+          action: v.action,
+          arg_keys: Object.keys(v).sort(),
+          arg_schema: san(v)
+        });
+        if (window.__obs.requests.length > 200) window.__obs.requests.shift();
+      }
+    } catch (e) { /* never break the app */ }
+    return origStr.apply(JSON, arguments);
+  };
+
+  window.__obs.uninstall = function () {
+    JSON.parse = origParse; JSON.stringify = origStr; return 'removed';
+  };
 
   return 'installed';
 })();
