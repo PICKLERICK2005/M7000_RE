@@ -77,7 +77,7 @@ plus roughly eight capability/feature-flag getters (`cloud`, `macFilters`,
 | P11 | Repeated reads return a stable projection | 6 like-for-like `status:0` samples across the run: **0 changed value paths, 18 stable** | **Consistent** | medium |
 | P12 | Numeric PLMN is decimal-only (BCD model) | No numeric PLMN was exposed — no SIM | **Not exercised** | — |
 | P13 | Current-operator structure (`<mode>`, `<format>`, long/short name, AcT) | No current operator — no SIM | **Not exercised** | — |
-| P14 | Record 84 workflow state (`networkSelectionStatus`) | `wan:10` never issued by any reachable stock page | **Not exercised** | — |
+| P14 | Record 84 workflow state (`networkSelectionStatus`) | `wan:10` never issued by any page exercised in this pass | **Not exercised** — superseded by [hardware-validation-002.md](hardware-validation-002.md), where the Network Settings page does issue it and it returns state 0 (idle) | — |
 
 ### The core question: cached projection vs fresh modem query
 
@@ -189,3 +189,7 @@ Those remain untested against hardware.
 This result **does not authorize a write phase**, and nothing here changes the two
 standing blockers: `AT+COPS=0` resets the RAT policy to all-RAT, and record 76 has no
 rollback path. A SIM-present read-only pass should precede any write design.
+
+---
+
+Continued in [Hardware Validation 002](hardware-validation-002.md): SIM-backed Gate A validation and the first reversible preferred-RAT write.
