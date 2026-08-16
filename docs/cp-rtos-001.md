@@ -140,32 +140,71 @@ receives a structure. Its validated request fields are:
 
 Out-of-range fields fail at `0x068afe7a` with code `0xf001`.
 
-### The CI RAT enum, constrained from the assertions
+### The CI RAT enum, now confirmed
 
-The handler's two assertions pin the enum without needing its definition. When
-`networkMode` is `0`, `1` or `3` it requires `preferredMode == networkMode`
-(assertion `pSig->preferredMode == pSig->networkMode`, line 3767). When
-`networkMode` is `2` or `≥ 4` it instead requires `preferredMode` to be one of
-`0`, `1`, `3` (the `CI_DEV_NW_GSM || CI_DEV_NW_UMTS || CI_DEV_NW_LTE` assertion,
-line 3760).
+The handler's two assertions constrain the enum. When `networkMode` is `0`, `1`
+or `3` it requires `preferredMode == networkMode` (assertion
+`pSig->preferredMode == pSig->networkMode`, line 3767). When `networkMode` is `2`
+or `≥ 4` it instead requires `preferredMode` to be one of `0`, `1`, `3` (the
+`CI_DEV_NW_GSM || CI_DEV_NW_UMTS || CI_DEV_NW_LTE` assertion, line 3760).
 
 So `CI_DEV_NW_GSM`, `CI_DEV_NW_UMTS` and `CI_DEV_NW_LTE` are exactly the set
-`{0, 1, 3}`, and `{2, 4, 5, 6}` are the multi-RAT combinations — those are
-precisely the values for which a *separate* single-RAT preference is demanded.
-Matching the test order against the symbol order in the assertion text gives
-`GSM = 0`, `UMTS = 1`, `LTE = 3` as a supported inference.
+`{0, 1, 3}`, and `{2, 4, 5, 6}` are the multi-RAT combinations.
 
-That in turn suggests `networkMode` enumerates the seven non-empty subsets of
-{GSM, UMTS, LTE} as `bitmask − 1` with GSM=1, UMTS=2, LTE=4 — yielding GSM=0,
-UMTS=1, GSM+UMTS=2, LTE=3, GSM+LTE=4, UMTS+LTE=5, all=6. It is the unique
-assignment that puts the singletons at exactly `{0, 1, 3}` while matching the
-`< 7` range check. It is recorded as a supported inference, not as fact: the enum
-definition itself was not recovered.
+**Important scoping correction.** Both assertions sit behind
+`request[+0x18] == 3`, the RAT mode-change branch. The `AT*BAND` path always
+sends `0` in that field, so these assertions are *not* on the `AT*BAND` path.
+They corroborate the enum; they do not establish it.
 
-**This 0–6 CI space is not the `AT*BAND` textual `NwMode` space.** The AP sends
-`AT*BAND=0/1/5/11` (default `99`) and recognises `0/4/5/8/11/15` on readback,
-values that a 0–6 enum cannot hold. `atcmdsrv` therefore translates between the
-two, and that translation is still unrecovered.
+The individual assignment is established instead by the AP-side translation
+table, which offers a `preferredMode` for every multi-RAT `networkMode`: `0`
+appears for `networkMode` 2, 4 and 6; `1` for 2, 5 and 6; `3` for 4, 5 and 6.
+Those are exactly the combinations containing GSM, UMTS and LTE, and the
+intersection is unique. So `GSM = 0`, `UMTS = 1`, `LTE = 3` is **confirmed**, and
+with it the encoding of `networkMode` as `bitmask − 1` with GSM=1, UMTS=2, LTE=4:
+GSM=0, UMTS=1, GSM+UMTS=2, LTE=3, GSM+LTE=4, UMTS+LTE=5, all=6.
+
+A third, fully independent corroboration comes from the readback path below.
+
+**This 0–6 CI space is not the `AT*BAND` textual `NwMode` space**, and the
+translation between them is now recovered in full — see
+[AP-to-Modem Control Path](modem-control-path.md).
+
+### The readback path and the CP internal RAT state
+
+`CI_DEV_PRIM_GET_BAND_MODE_CNF` (primitive `0x36`) is built at VA `0x068b0156`,
+which reaches the CP from the internal signal table rather than the CI request
+table — consistent with a query that must wait on lower layers. It carries the
+mode pair at `+0x02` and `+0x03` rather than `+0x00`/`+0x01`.
+
+It also contains an explicit translation: identical `tbb` byte tables
+`03 05 07 09 0f 0d` at `0x068b0192` and `0x068b01c2` map a CP-internal RAT state
+onto the CI value as `0→0, 1→1, 2→3, 3→2, 4→4, 5→5, ≥6→6`. Internal 2 and 3 swap
+places relative to CI. That fixes the CP internal ordering as singletons first
+and then pairs — GSM, UMTS, LTE, GSM+UMTS, GSM+LTE, UMTS+LTE, all — and every
+pair position agrees with the bitmask reading of the CI space.
+
+This is a **sixth** numeric namespace for the same concept, differing from the CI
+space only in where LTE sits.
+
+### The CP request dispatcher
+
+The DEV request dispatcher is a flat table at `0x06f394fc`: 76 entries of
+`{u32 primId, u32 handler|1}`, extending to `0x06f3977c`. Primitive `0x33` pairs
+with `0x068afdf1`, and every one of the 76 ids resolves to a `CI_DEV_PRIM_*_REQ`
+name under the confirmed 1-based numbering.
+
+The handler's failure return is also now readable: `movs r0, #9` is
+`CI_SG_ID_DEV` and `movw r1, #0xf001` is `CI_ERR_PRIM_HASINVALIDPARAS_CNF` — a
+primitive id from the global error range, not an ad-hoc error code. On success
+`0x068b0108` emits primitive `0x34`, `CI_DEV_PRIM_SET_BAND_MODE_CNF`.
+
+Two field notes. `+0x17` is never read by this handler and is always sent as `0`
+by the AP, though the AT read response reports it. And `+0x18` selects the
+operation: `0`/`5` the GSM band branch, `1`/`2` the UMTS band branch, `3` the RAT
+mode-change branch, anything else an assertion failure at line 3789. Since
+`AT*BAND` always sends `0`, the RAT-change branch is reachable only from some
+other CI sender, which was not located.
 
 `L1CSetRat` sits below this: its invalid-mode assertion at VA `0x06905cbc` is
 reached by an `ADR` at `0x06905a6c`, line 2257, inside a small RAT-state
@@ -192,6 +231,37 @@ This is consistent with the existing classification of GRBI as the ASR Falcon LT
 Layer-1 image: firmware for a DSP/vector core rather than the ARM CP. No load
 base is claimed for it. Progress there requires identifying the target ISA first,
 which is a different kind of problem from the pointer-anchoring used for ARBI.
+
+### What the instruction stream does say
+
+A byte-position frequency analysis over the code region narrows the field
+without naming it. The image has a clear **period-2** signature: odd byte
+positions are strongly enriched in `0xe1` (82,107 occurrences) while even
+positions are not, and positions 1 and 3 behave identically, as do 0 and 2.
+There is no period-3 or period-4 differentiation.
+
+That means instructions are **16-bit granular**, with the opcode field in the
+high byte of each little-endian halfword. The dominant families are `0xe1`,
+`0x60`, `0x30`, `0xe4`, `0xe6`, `0x0c`, `0x32`, `0x18`, `0xd1` and `0xe3`, and
+the most common individual halfwords after `0x0000`/`0xffff` are `0xe148`,
+`0xe108`, `0xe149`, `0xe109`, `0xe180` — a tight cluster differing in low bits,
+which is what one opcode with a small register or immediate field looks like.
+
+This refutes any fixed 32-bit encoding with a per-word parallel bit — the TI C6x
+family shape — which would show a period-4 signature and an LSB skew. Neither is
+present.
+
+An ARCompact-style mixed 16/32-bit hypothesis was tested and **not confirmed**.
+Walking the stream under its length rule and comparing the major-opcode
+distribution at instruction boundaries against the unconditional halfword
+distribution gave 3.485 bits against a 3.823-bit baseline: a marginal
+concentration, nowhere near enough to promote. (Self-synchronisation from
+misaligned starts was immediate, but that happens for any variable-length rule on
+any data and is not discriminating.) It is recorded as a candidate only.
+
+Identification now needs a real decoder for a candidate ISA, not more statistics.
+Nothing here should be inferred from vendor lineage: the Falcon classification
+rests on strings and container structure, not on any decoded instruction.
 
 ## Ownership assessment
 

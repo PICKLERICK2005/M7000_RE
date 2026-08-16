@@ -4,21 +4,57 @@
   "offset_convention": "mobile+0xOFFSET is a file offset; add 0x10000 for the first executable PT_LOAD ELF VA.",
   "registration_raw": {
     "values": [
-      {"value": 0, "meaning": "not registered, not searching", "evidence": "mobile_status_at.cpp branch plus embedded log"},
-      {"value": 1, "meaning": "registered home", "evidence": "normalizer branch; value is treated as registered and not roaming"},
-      {"value": 2, "meaning": "not registered, searching", "evidence": "mobile_status_at.cpp branch plus embedded log"},
-      {"value": 3, "meaning": "registration denied", "evidence": "mobile_status_at.cpp branch plus embedded log"},
-      {"value": 4, "meaning": "unknown/not registered", "evidence": "falls into the not-registered/not-searching aggregate branch; exact source label not logged"},
-      {"value": 5, "meaning": "registered roaming", "evidence": "treated as registered and independently raises roaming record 80"}
+      {
+        "value": 0,
+        "meaning": "not registered, not searching",
+        "evidence": "mobile_status_at.cpp branch plus embedded log"
+      },
+      {
+        "value": 1,
+        "meaning": "registered home",
+        "evidence": "normalizer branch; value is treated as registered and not roaming"
+      },
+      {
+        "value": 2,
+        "meaning": "not registered, searching",
+        "evidence": "mobile_status_at.cpp branch plus embedded log"
+      },
+      {
+        "value": 3,
+        "meaning": "registration denied",
+        "evidence": "mobile_status_at.cpp branch plus embedded log"
+      },
+      {
+        "value": 4,
+        "meaning": "unknown/not registered",
+        "evidence": "falls into the not-registered/not-searching aggregate branch; exact source label not logged"
+      },
+      {
+        "value": 5,
+        "meaning": "registered roaming",
+        "evidence": "treated as registered and independently raises roaming record 80"
+      }
     ],
     "confidence": "high; value 4 label is supported inference"
   },
   "registration_normalized_record_81": {
     "values": [
-      {"value": 0, "meaning": "not registered"},
-      {"value": 1, "meaning": "registered on primary packet-service domain"},
-      {"value": 2, "meaning": "searching, or registered on the secondary service domain"},
-      {"value": 3, "meaning": "registration denied"}
+      {
+        "value": 0,
+        "meaning": "not registered"
+      },
+      {
+        "value": 1,
+        "meaning": "registered on primary packet-service domain"
+      },
+      {
+        "value": 2,
+        "meaning": "searching, or registered on the secondary service domain"
+      },
+      {
+        "value": 3,
+        "meaning": "registration denied"
+      }
     ],
     "derivation": [
       "primary raw 1 or 5 -> 1",
@@ -32,75 +68,209 @@
     "confidence": "high"
   },
   "roaming_record_80": {
-    "values": [{"value": 0, "meaning": "not roaming"}, {"value": 1, "meaning": "roaming"}],
+    "values": [
+      {
+        "value": 0,
+        "meaning": "not roaming"
+      },
+      {
+        "value": 1,
+        "meaning": "roaming"
+      }
+    ],
     "derivation": "1 when any of the three retained raw registration-domain values equals 5; otherwise 0",
     "confidence": "high"
   },
   "service_substate_record_83": {
     "values": [
-      {"value": 0, "meaning": "no service"},
-      {"value": 1, "meaning": "limited service", "internal_source":"secondary service state 11"},
-      {"value": 2, "meaning": "available", "internal_source":"secondary service state 1 or 5, or primary-registered fallback"},
-      {"value": 3, "meaning": "limited area", "internal_source":"secondary service state 3"}
+      {
+        "value": 0,
+        "meaning": "no service"
+      },
+      {
+        "value": 1,
+        "meaning": "limited service",
+        "internal_source": "secondary service state 11"
+      },
+      {
+        "value": 2,
+        "meaning": "available",
+        "internal_source": "secondary service state 1 or 5, or primary-registered fallback"
+      },
+      {
+        "value": 3,
+        "meaning": "limited area",
+        "internal_source": "secondary service state 3"
+      }
     ],
     "note": "The input service-state enum extends beyond raw registration 0-5 (a jump table covers 1-11). The shared-state daemon binds record 83 to mobile_status.net_status.srv_stat, whose shipped configuration supplies the labels.",
     "confidence": "high"
   },
   "connection_record_79": {
     "values": [
-      {"value": 0, "meaning": "disabled"},
-      {"value": 1, "meaning": "disconnected"},
-      {"value": 2, "meaning": "connecting"},
-      {"value": 3, "meaning": "disconnecting"},
-      {"value": 4, "meaning": "connected"}
+      {
+        "value": 0,
+        "meaning": "disabled"
+      },
+      {
+        "value": 1,
+        "meaning": "disconnected"
+      },
+      {
+        "value": 2,
+        "meaning": "connecting"
+      },
+      {
+        "value": 3,
+        "meaning": "disconnecting"
+      },
+      {
+        "value": 4,
+        "meaning": "connected"
+      }
     ],
     "evidence": "frontend enum and mobile BackHaulFsm state dispatch at ELF VA 0x464bc-0x47004",
     "confidence": "high"
   },
   "current_network_type_record_82": {
     "values": [
-      {"value": 0, "meaning": "no service"},
-      {"value": 1, "meaning": "GSM"},
-      {"value": 2, "meaning": "WCDMA"},
-      {"value": 3, "meaning": "LTE"},
-      {"value": 4, "meaning": "TD-SCDMA", "reachability": "frontend-supported; AP writer not confirmed"},
-      {"value": 5, "meaning": "CDMA 1x", "reachability": "frontend-supported; AP writer not confirmed"},
-      {"value": 6, "meaning": "CDMA 1x EV-DO", "reachability": "frontend-supported; AP writer not confirmed"}
+      {
+        "value": 0,
+        "meaning": "no service"
+      },
+      {
+        "value": 1,
+        "meaning": "GSM"
+      },
+      {
+        "value": 2,
+        "meaning": "WCDMA"
+      },
+      {
+        "value": 3,
+        "meaning": "LTE"
+      },
+      {
+        "value": 4,
+        "meaning": "TD-SCDMA",
+        "reachability": "frontend-supported; AP writer not confirmed"
+      },
+      {
+        "value": 5,
+        "meaning": "CDMA 1x",
+        "reachability": "frontend-supported; AP writer not confirmed"
+      },
+      {
+        "value": 6,
+        "meaning": "CDMA 1x EV-DO",
+        "reachability": "frontend-supported; AP writer not confirmed"
+      }
     ],
     "confidence": "high for 0-3; medium for 4-6 as management-layer enum"
   },
   "preferred_network_record_75": {
     "configured_rpc_values": [
-      {"value": 1, "meaning": "3G only"},
-      {"value": 2, "meaning": "4G only"},
-      {"value": 3, "meaning": "4G preferred / LTE preferred"}
+      {
+        "value": 1,
+        "meaning": "3G only"
+      },
+      {
+        "value": 2,
+        "meaning": "4G only"
+      },
+      {
+        "value": 3,
+        "meaning": "4G preferred / LTE preferred"
+      }
     ],
     "modem_to_record_mapping": [
-      {"modem_value": 1, "record_value": 0},
-      {"modem_value": 2, "record_value": 1},
-      {"modem_value": 3, "record_value": 2},
-      {"modem_value": 0, "record_value": 3},
-      {"modem_value": "0x3081", "record_value": 3},
-      {"modem_value": "other", "record_value": 3}
+      {
+        "modem_value": 1,
+        "record_value": 0
+      },
+      {
+        "modem_value": 2,
+        "record_value": 1
+      },
+      {
+        "modem_value": 3,
+        "record_value": 2
+      },
+      {
+        "modem_value": 0,
+        "record_value": 3
+      },
+      {
+        "modem_value": "0x3081",
+        "record_value": 3
+      },
+      {
+        "modem_value": "other",
+        "record_value": 3
+      }
     ],
     "at_band_nwmode_sent": [
-      {"configured_value": 0, "nwmode_argument": 0},
-      {"configured_value": 1, "nwmode_argument": 1},
-      {"configured_value": 2, "nwmode_argument": 5},
-      {"configured_value": 3, "nwmode_argument": 11},
-      {"configured_value": "out of range", "nwmode_argument": 99}
+      {
+        "configured_value": 0,
+        "nwmode_argument": 0
+      },
+      {
+        "configured_value": 1,
+        "nwmode_argument": 1
+      },
+      {
+        "configured_value": 2,
+        "nwmode_argument": 5
+      },
+      {
+        "configured_value": 3,
+        "nwmode_argument": 11
+      },
+      {
+        "configured_value": "out of range",
+        "nwmode_argument": 99
+      }
     ],
     "at_band_nwmode_parsed": [
-      {"nwmode_response": 0, "policy_value": 0},
-      {"nwmode_response": 4, "policy_value": 1},
-      {"nwmode_response": 5, "policy_value": 2},
-      {"nwmode_response": 8, "policy_value": 3},
-      {"nwmode_response": 11, "policy_value": 3},
-      {"nwmode_response": 15, "policy_value": 3},
-      {"nwmode_response": "other", "policy_value": -1}
+      {
+        "nwmode_response": 0,
+        "policy_value": 0
+      },
+      {
+        "nwmode_response": 4,
+        "policy_value": 1
+      },
+      {
+        "nwmode_response": 5,
+        "policy_value": 2
+      },
+      {
+        "nwmode_response": 8,
+        "policy_value": 3
+      },
+      {
+        "nwmode_response": 11,
+        "policy_value": 3
+      },
+      {
+        "nwmode_response": 15,
+        "policy_value": 3
+      },
+      {
+        "nwmode_response": "other",
+        "policy_value": -1
+      }
     ],
-    "hidden_response_value": {"modem_value":1,"record_value":0,"meaning":"GSM/2G only; accepted by the native model but not offered by this product UI"},
-    "hidden_setter_value": {"configured_value":0,"acceptance":"CMobileClient::SetPrefNetType range-checks only value <= 3, so 0 passes client validation and is placed in the event payload unchanged","status":"static acceptance only; never exercised, and not evidence that the daemon, modem manager or CP apply it safely"},
+    "hidden_response_value": {
+      "modem_value": 1,
+      "record_value": 0,
+      "meaning": "GSM/2G only; accepted by the native model but not offered by this product UI"
+    },
+    "hidden_setter_value": {
+      "configured_value": 0,
+      "acceptance": "CMobileClient::SetPrefNetType range-checks only value <= 3, so 0 passes client validation and is placed in the event payload unchanged",
+      "status": "static acceptance only; never exercised, and not evidence that the daemon, modem manager or CP apply it safely"
+    },
     "numeric_spaces": {
       "count": 4,
       "spaces": [
@@ -124,41 +294,117 @@
     "confidence": "high for all four numeric tables; unknown for the authoritative CP NwMode enumeration and for the 0x3081 bit allocation"
   },
   "network_selection_mode_record_76": {
-    "values": [{"value": 0, "meaning": "automatic"}, {"value": 1, "meaning": "manual"}],
+    "values": [
+      {
+        "value": 0,
+        "meaning": "automatic"
+      },
+      {
+        "value": 1,
+        "meaning": "manual"
+      }
+    ],
     "normalization": "any nonzero modem/status input becomes 1",
     "storage": "persistent policy with a separate temporary workflow write path; do not collapse these roles",
     "confidence": "high"
   },
   "network_selection_status_record_84": {
     "values": [
-      {"value": 0, "meaning": "idle"},
-      {"value": 1, "meaning": "registering"},
-      {"value": 2, "meaning": "registered"},
-      {"value": 3, "meaning": "searching"},
-      {"value": 4, "meaning": "search finished"},
-      {"value": 5, "meaning": "generic search failure"},
-      {"value": 6, "meaning": "generic registration failure"},
-      {"value": 7, "meaning": "registration denied by network"},
-      {"value": 8, "meaning": "illegal SIM or ME"},
-      {"value": 9, "meaning": "saving"},
-      {"value": 10, "meaning": "saved"},
-      {"value": 11, "meaning": "canceling"},
-      {"value": 12, "meaning": "canceled"},
-      {"value": 13, "meaning": "search failed because SMS was being sent"}
+      {
+        "value": 0,
+        "meaning": "idle"
+      },
+      {
+        "value": 1,
+        "meaning": "registering"
+      },
+      {
+        "value": 2,
+        "meaning": "registered"
+      },
+      {
+        "value": 3,
+        "meaning": "searching"
+      },
+      {
+        "value": 4,
+        "meaning": "search finished"
+      },
+      {
+        "value": 5,
+        "meaning": "generic search failure"
+      },
+      {
+        "value": 6,
+        "meaning": "generic registration failure"
+      },
+      {
+        "value": 7,
+        "meaning": "registration denied by network"
+      },
+      {
+        "value": 8,
+        "meaning": "illegal SIM or ME"
+      },
+      {
+        "value": 9,
+        "meaning": "saving"
+      },
+      {
+        "value": 10,
+        "meaning": "saved"
+      },
+      {
+        "value": 11,
+        "meaning": "canceling"
+      },
+      {
+        "value": 12,
+        "meaning": "canceled"
+      },
+      {
+        "value": 13,
+        "meaning": "search failed because SMS was being sent"
+      }
     ],
     "evidence": "shipped frontend enum independently correlated with mobile writer callsites",
     "daemon_writer": "single setter at mobile ELF VA 0x425ec (record write 0x42618, temporary commit 0x42658), which also stages the value at status-object +0x2bc",
     "observed_constants_at_callsites": {
-      "0": ["0x3b9a0"],
-      "2": ["0x370b8"],
-      "3": ["0x3b9c0"],
-      "4": ["0x36e68"],
-      "5": ["0x36ebc"],
-      "10": ["0x370ac"],
-      "11": ["0x3bc9c"],
-      "12": ["0x331ec", "0x3698c", "0x36d64", "0x36f2c", "0x3bc8c"],
-      "13": ["0x3bae0"],
-      "computed": ["0x370dc", "0x3b620"]
+      "0": [
+        "0x3b9a0"
+      ],
+      "2": [
+        "0x370b8"
+      ],
+      "3": [
+        "0x3b9c0"
+      ],
+      "4": [
+        "0x36e68"
+      ],
+      "5": [
+        "0x36ebc"
+      ],
+      "10": [
+        "0x370ac"
+      ],
+      "11": [
+        "0x3bc9c"
+      ],
+      "12": [
+        "0x331ec",
+        "0x3698c",
+        "0x36d64",
+        "0x36f2c",
+        "0x3bc8c"
+      ],
+      "13": [
+        "0x3bae0"
+      ],
+      "computed": [
+        "0x370dc",
+        "0x3b620"
+      ]
     },
     "callsite_note": "Fifteen call sites were enumerated. Values 1, 6, 7, 8 and 9 are not written with an immediate at any site; two sites pass a computed register, which is where those values are expected to originate.",
     "gate_linkage": "Values 1 (registering), 3 (searching) and 11 (canceling) are exactly the three states that block SetPrefNetType and SetNetSel in libmobile, each with its own refusal message. Value 13 names the SMS interaction directly, which is why those setters also read record 19.",
@@ -166,9 +412,18 @@
   },
   "call_failure_rpc": {
     "values": [
-      {"value": 0, "meaning": "normal/no displayed disconnect reason"},
-      {"value": 1, "meaning": "roaming-policy disconnect"},
-      {"value": 2, "meaning": "flow-statistics/data-limit disconnect"}
+      {
+        "value": 0,
+        "meaning": "normal/no displayed disconnect reason"
+      },
+      {
+        "value": 1,
+        "meaning": "roaming-policy disconnect"
+      },
+      {
+        "value": 2,
+        "meaning": "flow-statistics/data-limit disconnect"
+      }
     ],
     "precedence": [
       "Only derive a reason when record 81 == 1 and record 79 == 1; otherwise return 0.",
@@ -178,5 +433,82 @@
     ],
     "evidence": "CMobileClient::GetCallFailReason at libmobile ELF VA 0xbc2c-0xbe10 plus frontend labels",
     "confidence": "high"
+  },
+  "ci_rat_enum": {
+    "status": "CONFIRMED",
+    "space": "CI networkMode and preferredMode, both 0..6, used by CI_DEV_PRIM_SET_BAND_MODE_REQ (+0x00, +0x01) and GET_BAND_MODE_CNF (+0x02, +0x03).",
+    "encoding": "RAT bitmask minus one, with GSM=1, UMTS=2, LTE=4.",
+    "values": {
+      "0": "GSM",
+      "1": "UMTS",
+      "2": "GSM+UMTS",
+      "3": "LTE",
+      "4": "GSM+LTE",
+      "5": "UMTS+LTE",
+      "6": "GSM+UMTS+LTE"
+    },
+    "individual_assignment": {
+      "result": "CI_DEV_NW_GSM = 0, CI_DEV_NW_UMTS = 1, CI_DEV_NW_LTE = 3",
+      "status": "CONFIRMED (previously only a supported inference)",
+      "proof": "The atcmdsrv AT*BAND translation emits a preferredMode for every multi-RAT networkMode, and the sets intersect uniquely: preferredMode 0 appears for networkMode 2, 4 and 6; preferredMode 1 for networkMode 2, 5 and 6; preferredMode 3 for networkMode 4, 5 and 6. Under the bitmask-minus-one reading those are exactly the combinations containing GSM, UMTS and LTE respectively. No other assignment fits.",
+      "corroboration": "The CP GET_BAND_MODE tbb tables at ARBI 0x068b0192/0x068b01c2 map internal state 2 to CI 3 and internal 3 to CI 2, which is only consistent if CI 3 is a singleton (LTE) and CI 2 is a pair (GSM+UMTS)."
+    },
+    "assertion_evidence": {
+      "note": "The CP assertions at ARBI lines 3760 and 3767 constrain the same sets, but they sit behind `request[+0x18] == 3` and are therefore NOT on the AT*BAND path. They corroborate the enum; they are no longer the primary evidence for it."
+    }
+  },
+  "cp_internal_rat_state": {
+    "status": "CONFIRMED",
+    "space": "CP-internal RAT state, 0..6, held in the CP band-mode context at +0x0a (network) and +0x0c (preferred).",
+    "values": {
+      "0": "GSM",
+      "1": "UMTS",
+      "2": "LTE",
+      "3": "GSM+UMTS",
+      "4": "GSM+LTE",
+      "5": "UMTS+LTE",
+      "6": "GSM+UMTS+LTE"
+    },
+    "translation_to_ci": {
+      "0": 0,
+      "1": 1,
+      "2": 3,
+      "3": 2,
+      "4": 4,
+      "5": 5,
+      "6+": 6
+    },
+    "evidence": "tbb byte tables `03 05 07 09 0f 0d` at ARBI 0x068b0192 and 0x068b01c2, inside the GET_BAND_MODE_CNF builder at 0x068b0156.",
+    "why_it_matters": "This is a sixth distinct numeric namespace. It differs from the CI space only in the placement of LTE and GSM+UMTS, which makes accidental conflation easy and silent."
+  },
+  "at_band_nwmode_space": {
+    "status": "CONFIRMED",
+    "accepted_range": "0..30, default 240 when the parameter is omitted",
+    "range_site": "atcmdsrv 0x3819a-0x381aa: min 0 in r3, max 0x1e on the stack, default 0xf0",
+    "handled_values": "0..15 and 240. Values 16..30 pass the range check and then fall through to the CME error path at 0x3828e, so they are accepted by the parser but rejected by the dispatcher.",
+    "translation": "See at_to_ci_translation in analysis/modem-control-paths.json for the full 16-row NwMode -> (networkMode, preferredMode) table.",
+    "caution": "Acceptance by the parser is not evidence that a value is safe to send. No value was sent."
+  },
+  "value_0x3081": {
+    "status": "RESOLVED as NEGATIVE EVIDENCE",
+    "question": "What does 0x3081 encode in the AP preferred-network readback normalizer?",
+    "answer": "Nothing that this firmware acts on. It is a vestigial constant.",
+    "site": "mobile 0x4a2f0, inside the readback handler at 0x4a254 (entry 11 of the modem-status handler table at 0x68b9c, which writes record 75).",
+    "normalizer_map": {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "0": 3,
+      "0x3081": 3,
+      "any other value": 3
+    },
+    "findings": [
+      "The 0x3081 branch produces exactly the same result (3) as the default branch, so removing the comparison would not change behaviour.",
+      "The constant is never masked, shifted, added to or compared for ordering - only tested for equality once.",
+      "It occurs exactly once in the entire userspace stack: a single ARM movw in mobile, and zero occurrences in atcmdsrv, libmobile or libdata_management.",
+      "It is absent from the CP image entirely."
+    ],
+    "conclusion": "Its bit structure cannot be recovered because no code decomposes it, and its semantics cannot be recovered because no code distinguishes it. Recorded as closed: further static work on this constant has no evidence left to draw on.",
+    "superseded": "Earlier notes left this open as 'belongs to the CI preferred-mode readback space'. That placement is still correct, but the value is inert within it."
   }
 }

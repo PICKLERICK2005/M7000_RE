@@ -9,30 +9,61 @@
     "cp_load_base": "0x06800000"
   },
   "service_groups": {
-    "table_va": "0x0b2fa8",
-    "note": "CI_SG_ID_* enumeration; the index in this table is the service-group ID.",
+    "table_va": "0x0b2fa4 (atcmdsrv, biased base; slot 0 is a shared empty-string placeholder, so the table is indexed directly by the numeric service-group id)",
+    "numbering": "CONFIRMED 1-based. A previous revision of this file recorded these ids as 0-based (CC=0 ... OAM=13); that was an artefact of counting the placeholder slot as entry 0 and is superseded.",
+    "decisive_evidence": [
+      "atcmdsrv 0x7de58: `ldr.w r3,[r0, r5, lsl #2]` indexes the group-name table with r5 = the raw svgId argument, not svgId-1.",
+      "atcmdsrv 0x7ddf0: `add.w r8, r0, #-1` then `cmp r3,#0xd` bounds svgId-1 to 0..13, i.e. svgId 1..14.",
+      "ARBI 0x068afe7a and 0x068b010a both load `movs r0, #9` as the service group when emitting a DEV error / confirmation, matching DEV = 9."
+    ],
     "ids": {
-      "0": "CI_SG_ID_CC",
-      "1": "CI_SG_ID_SS",
-      "2": "CI_SG_ID_MM",
-      "3": "CI_SG_ID_PB",
-      "4": "CI_SG_ID_SIM",
-      "5": "CI_SG_ID_MSG",
-      "6": "CI_SG_ID_PS",
-      "7": "CI_SG_ID_DAT",
-      "8": "CI_SG_ID_DEV",
-      "9": "CI_SG_ID_HSCSD",
-      "10": "CI_SG_ID_DEB",
-      "11": "CI_SG_ID_ATPI",
-      "12": "CI_SG_ID_PL",
-      "13": "CI_SG_ID_OAM",
-      "14": "CI_SG_ID_NEXTAVAIL"
+      "1": "CI_SG_ID_CC",
+      "2": "CI_SG_ID_SS",
+      "3": "CI_SG_ID_MM",
+      "4": "CI_SG_ID_PB",
+      "5": "CI_SG_ID_SIM",
+      "6": "CI_SG_ID_MSG",
+      "7": "CI_SG_ID_PS",
+      "8": "CI_SG_ID_DAT",
+      "9": "CI_SG_ID_DEV",
+      "10": "CI_SG_ID_HSCSD",
+      "11": "CI_SG_ID_DEB",
+      "12": "CI_SG_ID_ATPI",
+      "13": "CI_SG_ID_PL",
+      "14": "CI_SG_ID_OAM",
+      "15": "CI_SG_ID_NEXTAVAIL (sentinel, not a group)"
     }
   },
   "primitive_id_encoding": {
-    "status": "UNKNOWN",
-    "what_is_known": "Each service group has its own dense, zero-based name table, so a primitive is identified by (service group, index within group). Index 0 of each table is that group's first primitive and the last entry is its LAST_COMMON_PRIM / NEXTAVAIL marker.",
-    "what_is_not_known": "The numeric on-wire primitive ID and any group/index packing. None of the ten name tables is referenced by an absolute pointer, a PIC-style pc-relative pair, or a Thumb movw/movt immediate, so the code that indexes them was not located.",
+    "status": "CONFIRMED",
+    "rule": "The numeric wire primitive id is the 1-based index into that service group's own name table. There is no group field packed into the id: (service_group, primId) is carried as two separate wire fields.",
+    "global_error_range": {
+      "range": "0xF000 - 0xF008",
+      "meaning": "A single global primitive range shared by all service groups, indexed as primId - 0xF000 into a separate table at atcmdsrv 0x0b2440.",
+      "members": {
+        "0xF000": "CI_ERR_PRIM_HASNOSUPPORT_CNF",
+        "0xF001": "CI_ERR_PRIM_HASINVALIDPARAS_CNF",
+        "0xF002": "CI_ERR_PRIM_ISINVALIDREQUEST_CNF",
+        "0xF003": "CI_ERR_PRIM_SIMNOTREADY_CNF",
+        "0xF004": "CI_ERR_PRIM_ACCESSDENIED_CNF",
+        "0xF005": "CI_ERR_PRIM_INTERLINKDOWN_IND",
+        "0xF006": "CI_ERR_PRIM_INTERLINKDOWN_RSP",
+        "0xF007": "CI_ERR_PRIM_INTERLINKUP_IND",
+        "0xF008": "CI_ERR_PRIM_NEXTAVAIL (sentinel)"
+      },
+      "correction": "A previous revision recorded CI_ERR as occupying DEV indices 246-254. That was wrong: the CI_ERR name strings merely sit next to the DEV table in memory. The dispatcher at atcmdsrv 0x7de1e tests `primId <= 0xF007` and 0x7deac tests `(primId + 0x1000) & 0xFFFF <= 7` before any group dispatch, proving CI_ERR is a separate namespace reached without consulting the service group."
+    },
+    "decisive_evidence": [
+      "Every group name table's slot 0 holds the same pointer (atcmdsrv 0x000979f0, an empty string), i.e. a placeholder for the unused id 0.",
+      "The dispatcher at atcmdsrv 0x7ddec loads each group table from a base biased by -4 and indexes it with the raw primId (`ldr.w r3,[r1, r4, lsl #2]`), which is only correct for 1-based ids.",
+      "atcmdsrv 0x40cac (the AT*BAND request builder) emits `movs r1, #0x33` = 51 = the table index of CI_DEV_PRIM_SET_BAND_MODE_REQ.",
+      "atcmdsrv 0x40c90 emits `movs r1, #0x35` = 53 = CI_DEV_PRIM_GET_BAND_MODE_REQ.",
+      "atcmdsrv 0x40c74 emits `movs r1, #0x37` = 55 = CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ.",
+      "ARBI 0x068b0108 emits `movs r1, #0x34` = 52 = CI_DEV_PRIM_SET_BAND_MODE_CNF as the reply.",
+      "ARBI 0x068afe7c emits `movw r1, #0xf001` = CI_ERR_PRIM_HASINVALIDPARAS_CNF on parameter failure.",
+      "The CP DEV request-dispatch table at ARBI 0x6f394fc pairs primId 0x33 with handler 0x068afdf1, and all 76 of its ids resolve to *_REQ names under this numbering."
+    ],
+    "validated_across": "Five primitives (0x33, 0x34, 0x35, 0x37, 0xF001) from two independent binaries on opposite sides of the AP/CP boundary, plus a 76-entry CP dispatch table whose every entry resolves to a _REQ name.",
     "refuted_hypothesis": {
       "hypothesis": "primId = (service_group_id << 8) | index, which would make the compiler hold a biased table pointer of (table - 4*(sg<<8)).",
       "test": "For CI_DEV (group 8) that biased pointer would be 0x0b2068 - 0x2000 = 0x0b0068, and a word equal to 0x000b0068 does occur in atcmdsrv at VA 0x7ad10.",
@@ -44,49 +75,89 @@
       "table_va": "0x0b1d54",
       "entry_count": 165,
       "first": "CI_CC_PRIM_GET_NUMBERTYPE_REQ",
-      "last": "CI_CC_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_CC_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 1,
+      "name_table_biased_base_va": "0x0b1d50",
+      "valid_prim_ids": "1..164",
+      "bound_check": "atcmdsrv 0x7df84 `cmp r4,#0xa4`",
+      "payload_size_table_va": "0x0bd8c8 (u16 per primId, indexed directly)"
     },
     "SS": {
       "table_va": "0x0b2fe8",
       "entry_count": 113,
       "first": "CI_SS_PRIM_GET_CLIP_STATUS_REQ",
-      "last": "CI_SS_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_SS_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 2,
+      "name_table_biased_base_va": "0x0b2fe4",
+      "valid_prim_ids": "1..112",
+      "bound_check": "atcmdsrv 0x7dfc6 `cmp r4,#0x70`",
+      "payload_size_table_va": "0x0be1f8 (u16 per primId, indexed directly)"
     },
     "MM": {
       "table_va": "0x0b2468",
       "entry_count": 196,
       "first": "CI_MM_PRIM_GET_NUM_SUBSCRIBER_NUMBERS_REQ",
-      "last": "CI_MM_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_MM_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 3,
+      "name_table_biased_base_va": "0x0b2464",
+      "valid_prim_ids": "1..195",
+      "bound_check": "atcmdsrv 0x7e0de `cmp r4,#0xc3`",
+      "payload_size_table_va": "0x0bdc4a (u16 per primId, indexed directly)"
     },
     "PB": {
       "table_va": "0x0b277c",
       "entry_count": 48,
       "first": "CI_PB_PRIM_GET_SUPPORTED_PHONEBOOKS_REQ",
-      "last": "CI_PB_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_PB_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 4,
+      "name_table_biased_base_va": "0x0b2778",
+      "valid_prim_ids": "1..47",
+      "bound_check": "atcmdsrv 0x7e0a6 `cmp r4,#0x2f`",
+      "payload_size_table_va": "0x0bde7e (u16 per primId, indexed directly)"
     },
     "SIM": {
       "table_va": "0x0b2c28",
       "entry_count": 136,
       "first": "CI_SIM_PRIM_EXECCMD_REQ",
-      "last": "CI_SIM_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_SIM_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 5,
+      "name_table_biased_base_va": "0x0b2c24",
+      "valid_prim_ids": "1..135",
+      "bound_check": "atcmdsrv 0x7dffe `cmp r4,#0x87`",
+      "payload_size_table_va": "0x0be0e8 (u16 per primId, indexed directly)"
     },
     "MSG": {
       "table_va": "0x0b2e4c",
       "entry_count": 86,
       "first": "CI_MSG_PRIM_GET_SUPPORTED_SERVICES_REQ",
-      "last": "CI_MSG_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_MSG_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 6,
+      "name_table_biased_base_va": "0x0b2e48",
+      "valid_prim_ids": "1..85",
+      "bound_check": "atcmdsrv 0x7e036 `cmp r4,#0x55`",
+      "payload_size_table_va": "0x0bddd2 (u16 per primId, indexed directly)"
     },
     "PS": {
       "table_va": "0x0b2840",
       "entry_count": 249,
       "first": "CI_PS_PRIM_SET_ATTACH_STATE_REQ",
-      "last": "CI_PS_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_PS_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 7,
+      "name_table_biased_base_va": "0x0b283c",
+      "valid_prim_ids": "1..248",
+      "bound_check": "atcmdsrv 0x7e06e `cmp r4,#0xf8`",
+      "payload_size_table_va": "0x0bdede (u16 per primId, indexed directly)"
     },
     "DAT": {
       "table_va": "0x0b1fec",
       "entry_count": 30,
       "first": "CI_DAT_PRIM_GET_MAX_PDU_SIZE_REQ",
-      "last": "CI_DAT_PRIM_LAST_COMMON_PRIM"
+      "last": "CI_DAT_PRIM_LAST_COMMON_PRIM",
+      "svg_id": 8,
+      "name_table_biased_base_va": "0x0b1fe8",
+      "valid_prim_ids": "1..29",
+      "bound_check": "atcmdsrv 0x7e1ea `cmp r4,#0x1d`",
+      "payload_size_rule": "DAT payload sizes are computed at run time by atcmdsrv 0x7ef30 from the payload itself, not read from a table."
     },
     "DEV": {
       "table_va": "0x0b2068",
@@ -108,22 +179,34 @@
           "CI_ERR_PRIM_INTERLINKUP_IND",
           "CI_ERR_PRIM_NEXTAVAIL"
         ]
+      },
+      "svg_id": 9,
+      "name_table_biased_base_va": "0x0b2064",
+      "valid_prim_ids": "1..245",
+      "bound_check": "atcmdsrv 0x7e1b2 `cmp r4,#0xf5`",
+      "payload_size_table_va": "0x0bda4e (u16 per primId, indexed directly)",
+      "request_dispatch_table_cp": {
+        "va": "0x06f394fc",
+        "form": "76 entries of {u32 primId, u32 handler|1} (8-byte stride)",
+        "extent": "0x06f394fc .. 0x06f3977c",
+        "verification": "Every id resolves to a CI_DEV_PRIM_*_REQ name under the confirmed numbering; primId 0x33 pairs with 0x068afdf1, the independently proven SET_BAND_MODE handler."
       }
     }
   },
   "anchor": {
     "name": "CI_DEV_PRIM_SET_BAND_MODE_REQ",
-    "service_group": "CI_SG_ID_DEV (id 8)",
-    "index_in_group": 50,
+    "service_group": "CI_SG_ID_DEV = 9",
+    "index_in_group": "51 (1-based; a previous revision said 50 by counting the placeholder slot)",
     "confirm": {
       "name": "CI_DEV_PRIM_SET_BAND_MODE_CNF",
       "index_in_group": 51
     },
     "siblings": {
-      "CI_DEV_PRIM_GET_BAND_MODE_REQ": 52,
-      "CI_DEV_PRIM_GET_BAND_MODE_CNF": 53,
-      "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ": 54,
-      "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_CNF": 55
+      "52 (0x34)": "CI_DEV_PRIM_SET_BAND_MODE_CNF, payload 4 bytes",
+      "53 (0x35)": "CI_DEV_PRIM_GET_BAND_MODE_REQ, payload 0 bytes",
+      "54 (0x36)": "CI_DEV_PRIM_GET_BAND_MODE_CNF, payload 28 bytes",
+      "55 (0x37)": "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ, payload 0 bytes",
+      "56 (0x38)": "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_CNF, payload 28 bytes"
     },
     "ap_origin": "AT*BAND, parsed by the atcmdsrv AT dispatch entry at VA 0xdb8ac whose handler is the Thumb function at VA 0x3813c",
     "cp_handler": {
@@ -209,14 +292,22 @@
       },
       "important_distinction": "This CI networkMode space (0-6) is NOT the AT*BAND textual NwMode space. The AP sends AT*BAND=0/1/5/11 with default 99 and recognises 0/4/5/8/11/15 on readback, all of which exceed or contradict a 0-6 enum. atcmdsrv therefore translates between them, and that translation is not yet recovered."
     },
-    "mutation_status": "NOT EXECUTED. No CI primitive was built or sent."
+    "mutation_status": "NOT EXECUTED. No CI primitive was built or sent.",
+    "numeric_prim_id": "51 (0x33)",
+    "payload_size_bytes": 32,
+    "payload_size_evidence": [
+      "atcmdsrv 0x40cbc `movs r2,#0x20` sizes the allocation.",
+      "The DEV size table at 0x0bda4e holds 32 at index 51."
+    ],
+    "namespace_collision_warning": "CI_DEV_PRIM_SET_BAND_MODE_REQ is primId 0x33 and the AP libmobile/mobile preferred-RAT event is also id 0x33. These are unrelated numbers in unrelated namespaces (CI primitive id vs CMobileEvent id) that happen to coincide. Do not treat one as evidence for the other."
   },
   "numeric_spaces_now_known": [
-    "configured AP/UI policy enum (0-3)",
-    "AT*BAND textual NwMode sent (0/1/5/11, default 99)",
-    "AT*BAND textual NwMode parsed on readback (0/4/5/8/11/15)",
-    "CI preferred-mode readback space consumed by the AP normalizer (0/1/2/3/0x3081)",
-    "CP CI networkMode / preferredMode enum (0-6, singletons {0,1,3})"
+    "UI / configured policy enum (AP record 75 `mobile_config.net_config.pref_net`), values 0-3.",
+    "AT*BAND textual NwMode, accepted range 0..30 with default 240; only 0..15 and 240 are handled.",
+    "CI networkMode / preferredMode, 0..6, the RAT bitmask minus one (GSM=1, UMTS=2, LTE=4).",
+    "CP internal RAT state, 0..6, singletons first then pairs; translated to CI space by the tbb tables at ARBI 0x068b0192 and 0x068b01c2.",
+    "AP modem readback enum used by mobile 0x4a254, values 0-3.",
+    "CI numeric primitive id, per service group, 1-based, plus the global 0xF000 error range."
   ],
   "safety": "Static recovery only. The presence of a primitive name, index, or request structure is not evidence that it is reachable, permitted, or safe to invoke."
 }
