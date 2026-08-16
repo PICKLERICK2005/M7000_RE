@@ -455,3 +455,64 @@ no longer blocked in principle. What remains missing there is not the base but
 call-graph anchors: the CP is mixed ARM/Thumb with interleaved literal pools, and
 its assertion strings are not reached by plain absolute pointers, so locating a
 specific handler still requires per-case work rather than a global sweep.
+
+## The CI primitive layer as a control surface
+
+Because AT text stops at `atcmdsrv`, the CI primitive set — not the AT vocabulary
+— is the real AP/CP control surface. `atcmdsrv` carries the whole enumeration as
+name tables, one array per service group, extracted in
+[`ci-primitives.json`](../analysis/ci-primitives.json):
+
+| Group | Table VA | Entries |
+| --- | --- | ---: |
+| `CI_CC` | `0x0b1d54` | 165 |
+| `CI_DAT` | `0x0b1fec` | 30 |
+| `CI_DEV` (+ `CI_ERR`) | `0x0b2068` | 255 |
+| `CI_MM` | `0x0b2468` | 196 |
+| `CI_PB` | `0x0b277c` | 48 |
+| `CI_PS` | `0x0b2840` | 249 |
+| `CI_SIM` | `0x0b2c28` | 136 |
+| `CI_MSG` | `0x0b2e4c` | 86 |
+| `CI_SS` | `0x0b2fe8` | 113 |
+
+A separate `CI_SG_ID` table at `0x0b2fa8` gives the service-group IDs:
+`CC`=0, `SS`=1, `MM`=2, `PB`=3, `SIM`=4, `MSG`=5, `PS`=6, `DAT`=7, `DEV`=8,
+`HSCSD`=9, `DEB`=10, `ATPI`=11, `PL`=12, `OAM`=13. The `CI_DEV` array holds that
+group at indices 0–245 and then `CI_ERR` at 246–254; `CI_ERR` has no table of its
+own.
+
+`CI_DEV_PRIM_SET_BAND_MODE_REQ` is index 50 in the DEV group, its `_CNF` 51, and
+the `GET`/`GET_SUPPORTED` pairs follow at 52–55.
+
+The numeric on-wire ID is still unknown, and one plausible encoding was tested
+and **refuted**. If IDs were `(group << 8) | index`, the compiler would hold a
+biased table pointer of `table − 4·(sg<<8)`; for DEV that is
+`0x0b2068 − 0x2000 = 0x0b0068`, and a word with exactly that value does exist at
+VA `0x7ad10`. But `0x0b0068` turns out to be the address of the string
+`mrvl_gps_integrity_test`, inside an unrelated AT handler — a collision, not an
+encoding. Only 1 of 9 groups matched at that shift, and shifts 9, 10, 12 and 16
+produced nothing better. None of the ten tables is reached by an absolute
+pointer, a PIC pair, or a `movw`/`movt` immediate, so the indexing code remains
+unlocated.
+
+## Network-selection results, closed
+
+Record 84's enumeration is confirmed from two independent directions. The shipped
+frontend defines it outright — `idle:0, registering:1, registered:2, searching:3,
+searchFinish:4, search_generic_failure:5, register_generic_failure:6,
+register_denied_by_network:7, register_illegal_sim_or_me:8, saving:9, saved:10,
+canceling:11, canceled:12, search_failure_sending_sms:13` — and enumerating the
+fifteen call sites of the daemon's single setter at VA `0x425ec` recovers the
+immediates `0`, `2`, `3`, `4`, `5`, `10`, `11`, `12`, `13`, with two sites passing
+a computed register.
+
+The three states that block `SetPrefNetType` and `SetNetSel` are exactly `1`
+registering, `3` searching and `11` canceling — each with its own refusal string.
+
+That leaves value `13`, `search_failure_sending_sms`, which closes the last open
+question about the pre-flight gate. Record 19 is the SMS send status: the
+decisive evidence is that `GetAvailableNet` reads record 19 *alone*, and its
+failure message is literally *"Retriving sms sending status data failed."* So an
+in-flight SMS send blocking a network operation is not an inference — it is a
+condition the firmware models and names. `GetAvailableNet` gates on record 19
+only; the two setters gate on both 19 and 84.

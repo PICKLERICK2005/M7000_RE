@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "scope": "Canonical map of the Marvell/ASR CI (Common Interface) primitive layer that carries AP-to-CP modem control on M7000(EU) v3.2 firmware 3.0.2 Build 241129 Rel.3n. Recovered statically from bin/atcmdsrv name tables and from the CP image 05-ARBI.bin at its confirmed load base. No primitive was constructed, sent, or observed on a live device.",
+  "why_this_layer_matters": "AT text does not cross the AP/CP boundary. atcmdsrv parses the AT command and emits a binary CI primitive over the shared-memory transport, so the CI primitive set - not the AT vocabulary - is the real control surface between the two processors.",
+  "source": {
+    "ap_binary": "bin/atcmdsrv",
+    "table_form": "arrays of pointers to NUL-terminated primitive-name strings, one array per CI service group",
+    "cp_binary": "05-ARBI.bin",
+    "cp_load_base": "0x06800000"
+  },
+  "service_groups": {
+    "table_va": "0x0b2fa8",
+    "note": "CI_SG_ID_* enumeration; the index in this table is the service-group ID.",
+    "ids": {
+      "0": "CI_SG_ID_CC",
+      "1": "CI_SG_ID_SS",
+      "2": "CI_SG_ID_MM",
+      "3": "CI_SG_ID_PB",
+      "4": "CI_SG_ID_SIM",
+      "5": "CI_SG_ID_MSG",
+      "6": "CI_SG_ID_PS",
+      "7": "CI_SG_ID_DAT",
+      "8": "CI_SG_ID_DEV",
+      "9": "CI_SG_ID_HSCSD",
+      "10": "CI_SG_ID_DEB",
+      "11": "CI_SG_ID_ATPI",
+      "12": "CI_SG_ID_PL",
+      "13": "CI_SG_ID_OAM",
+      "14": "CI_SG_ID_NEXTAVAIL"
+    }
+  },
+  "primitive_id_encoding": {
+    "status": "UNKNOWN",
+    "what_is_known": "Each service group has its own dense, zero-based name table, so a primitive is identified by (service group, index within group). Index 0 of each table is that group's first primitive and the last entry is its LAST_COMMON_PRIM / NEXTAVAIL marker.",
+    "what_is_not_known": "The numeric on-wire primitive ID and any group/index packing. None of the ten name tables is referenced by an absolute pointer, a PIC-style pc-relative pair, or a Thumb movw/movt immediate, so the code that indexes them was not located.",
+    "refuted_hypothesis": {
+      "hypothesis": "primId = (service_group_id << 8) | index, which would make the compiler hold a biased table pointer of (table - 4*(sg<<8)).",
+      "test": "For CI_DEV (group 8) that biased pointer would be 0x0b2068 - 0x2000 = 0x0b0068, and a word equal to 0x000b0068 does occur in atcmdsrv at VA 0x7ad10.",
+      "result": "REFUTED. 0x0b0068 is the address of the ASCII string 'mrvl_gps_integrity_test', and the referencing function is an unrelated AT handler. Only 1 of 9 groups produced any match at shift 8, and shifts 9, 10, 12 and 16 produced 0 or 1 coincidental matches. The apparent hit is a collision, not an encoding."
+    }
+  },
+  "groups": {
+    "CC": {
+      "table_va": "0x0b1d54",
+      "entry_count": 165,
+      "first": "CI_CC_PRIM_GET_NUMBERTYPE_REQ",
+      "last": "CI_CC_PRIM_LAST_COMMON_PRIM"
+    },
+    "SS": {
+      "table_va": "0x0b2fe8",
+      "entry_count": 113,
+      "first": "CI_SS_PRIM_GET_CLIP_STATUS_REQ",
+      "last": "CI_SS_PRIM_LAST_COMMON_PRIM"
+    },
+    "MM": {
+      "table_va": "0x0b2468",
+      "entry_count": 196,
+      "first": "CI_MM_PRIM_GET_NUM_SUBSCRIBER_NUMBERS_REQ",
+      "last": "CI_MM_PRIM_LAST_COMMON_PRIM"
+    },
+    "PB": {
+      "table_va": "0x0b277c",
+      "entry_count": 48,
+      "first": "CI_PB_PRIM_GET_SUPPORTED_PHONEBOOKS_REQ",
+      "last": "CI_PB_PRIM_LAST_COMMON_PRIM"
+    },
+    "SIM": {
+      "table_va": "0x0b2c28",
+      "entry_count": 136,
+      "first": "CI_SIM_PRIM_EXECCMD_REQ",
+      "last": "CI_SIM_PRIM_LAST_COMMON_PRIM"
+    },
+    "MSG": {
+      "table_va": "0x0b2e4c",
+      "entry_count": 86,
+      "first": "CI_MSG_PRIM_GET_SUPPORTED_SERVICES_REQ",
+      "last": "CI_MSG_PRIM_LAST_COMMON_PRIM"
+    },
+    "PS": {
+      "table_va": "0x0b2840",
+      "entry_count": 249,
+      "first": "CI_PS_PRIM_SET_ATTACH_STATE_REQ",
+      "last": "CI_PS_PRIM_LAST_COMMON_PRIM"
+    },
+    "DAT": {
+      "table_va": "0x0b1fec",
+      "entry_count": 30,
+      "first": "CI_DAT_PRIM_GET_MAX_PDU_SIZE_REQ",
+      "last": "CI_DAT_PRIM_LAST_COMMON_PRIM"
+    },
+    "DEV": {
+      "table_va": "0x0b2068",
+      "entry_count": 255,
+      "first": "CI_DEV_PRIM_STATUS_IND",
+      "last": "CI_ERR_PRIM_NEXTAVAIL",
+      "note": "This table holds the CI_DEV group at indices 0-245 (index 245 is CI_DEV_PRIM_LAST_COMMON_PRIM) followed by the CI_ERR group at indices 246-254. CI_ERR has no separate table.",
+      "ci_err_range": {
+        "start_index": 246,
+        "end_index": 254,
+        "entries": [
+          "CI_ERR_PRIM_HASNOSUPPORT_CNF",
+          "CI_ERR_PRIM_HASINVALIDPARAS_CNF",
+          "CI_ERR_PRIM_ISINVALIDREQUEST_CNF",
+          "CI_ERR_PRIM_SIMNOTREADY_CNF",
+          "CI_ERR_PRIM_ACCESSDENIED_CNF",
+          "CI_ERR_PRIM_INTERLINKDOWN_IND",
+          "CI_ERR_PRIM_INTERLINKDOWN_RSP",
+          "CI_ERR_PRIM_INTERLINKUP_IND",
+          "CI_ERR_PRIM_NEXTAVAIL"
+        ]
+      }
+    }
+  },
+  "anchor": {
+    "name": "CI_DEV_PRIM_SET_BAND_MODE_REQ",
+    "service_group": "CI_SG_ID_DEV (id 8)",
+    "index_in_group": 50,
+    "confirm": {
+      "name": "CI_DEV_PRIM_SET_BAND_MODE_CNF",
+      "index_in_group": 51
+    },
+    "siblings": {
+      "CI_DEV_PRIM_GET_BAND_MODE_REQ": 52,
+      "CI_DEV_PRIM_GET_BAND_MODE_CNF": 53,
+      "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_REQ": 54,
+      "CI_DEV_PRIM_GET_SUPPORTED_BAND_MODE_CNF": 55
+    },
+    "ap_origin": "AT*BAND, parsed by the atcmdsrv AT dispatch entry at VA 0xdb8ac whose handler is the Thumb function at VA 0x3813c",
+    "cp_handler": {
+      "entry": "ARBI VA 0x068afdf0 (file offset 0xafdf0)",
+      "identification": "Reached from the AT*BAND log string at VA 0x068b03cc, which is referenced by an ADR at VA 0x068b0134, and from the two assertion strings referenced at VA 0x068b009c and 0x068b0082.",
+      "request_struct": [
+        {
+          "offset": "0x00",
+          "size": 1,
+          "field": "networkMode",
+          "validation": "must be < 7"
+        },
+        {
+          "offset": "0x01",
+          "size": 1,
+          "field": "preferredMode",
+          "validation": "must be < 7"
+        },
+        {
+          "offset": "0x04",
+          "size": 4,
+          "field": "band mask A (GSM band candidate)",
+          "validation": "passed to helper at VA 0x068afdb4; bit 9 tested via lsls #22"
+        },
+        {
+          "offset": "0x08",
+          "size": 4,
+          "field": "band mask B (UMTS band candidate)",
+          "validation": "masked against a capability word"
+        },
+        {
+          "offset": "0x0c",
+          "size": 8,
+          "field": "band mask C/D (LTE band pair, loaded with ldrd)",
+          "validation": "not decomposed"
+        },
+        {
+          "offset": "0x14",
+          "size": 1,
+          "field": "unnamed selector",
+          "validation": "must be < 3"
+        },
+        {
+          "offset": "0x15",
+          "size": 1,
+          "field": "unnamed selector",
+          "validation": "must be < 5"
+        },
+        {
+          "offset": "0x16",
+          "size": 1,
+          "field": "unnamed selector",
+          "validation": "must be < 3"
+        },
+        {
+          "offset": "0x18",
+          "size": 1,
+          "field": "operation selector",
+          "validation": "branches on 0/5, 1/2, else"
+        },
+        {
+          "offset": "0x1c",
+          "size": 4,
+          "field": "unnamed word",
+          "validation": "copied to local state"
+        }
+      ],
+      "range_check_failure": "Out-of-range fields return through the error path at VA 0x068afe7a with code 0xf001.",
+      "confidence": "CONFIRMED for offsets, widths and the range checks; UNKNOWN for the names of the fields at 0x14, 0x15, 0x16 and 0x1c."
+    },
+    "cp_enum_finding": {
+      "observed_logic": "When networkMode is 0, 1 or 3 the handler requires preferredMode == networkMode (assertion 'pSig->preferredMode == pSig->networkMode', line 3767). When networkMode is 2 or >= 4 it requires preferredMode to be one of 0, 1 or 3 (assertion 'pSig->preferredMode == CI_DEV_NW_GSM || pSig->preferredMode == CI_DEV_NW_UMTS || pSig->preferredMode == CI_DEV_NW_LTE', line 3760).",
+      "direct_consequence": "CI_DEV_NW_GSM, CI_DEV_NW_UMTS and CI_DEV_NW_LTE are exactly the set {0, 1, 3}. Values 2, 4, 5 and 6 are multi-RAT combinations, because they are the values for which a separate single-RAT preference is required.",
+      "individual_assignment": {
+        "claim": "CI_DEV_NW_GSM = 0, CI_DEV_NW_UMTS = 1, CI_DEV_NW_LTE = 3",
+        "basis": "the order of the equality tests (0, 1, 3) matches the order of the symbols in the assertion text",
+        "classification": "SUPPORTED INFERENCE"
+      },
+      "subset_interpretation": {
+        "claim": "networkMode enumerates the 7 non-empty subsets of {GSM, UMTS, LTE} as (bitmask - 1) with GSM=1, UMTS=2, LTE=4, giving GSM=0, UMTS=1, GSM+UMTS=2, LTE=3, GSM+LTE=4, UMTS+LTE=5, all=6.",
+        "basis": "It is the unique assignment that puts the singletons at exactly {0, 1, 3}, matches the observed range check of < 7, and matches the singleton/combination split the handler enforces.",
+        "classification": "SUPPORTED INFERENCE - self-consistent and strongly constrained, but the enum definition itself was not recovered."
+      },
+      "important_distinction": "This CI networkMode space (0-6) is NOT the AT*BAND textual NwMode space. The AP sends AT*BAND=0/1/5/11 with default 99 and recognises 0/4/5/8/11/15 on readback, all of which exceed or contradict a 0-6 enum. atcmdsrv therefore translates between them, and that translation is not yet recovered."
+    },
+    "mutation_status": "NOT EXECUTED. No CI primitive was built or sent."
+  },
+  "numeric_spaces_now_known": [
+    "configured AP/UI policy enum (0-3)",
+    "AT*BAND textual NwMode sent (0/1/5/11, default 99)",
+    "AT*BAND textual NwMode parsed on readback (0/4/5/8/11/15)",
+    "CI preferred-mode readback space consumed by the AP normalizer (0/1/2/3/0x3081)",
+    "CP CI networkMode / preferredMode enum (0-6, singletons {0,1,3})"
+  ],
+  "safety": "Static recovery only. The presence of a primitive name, index, or request structure is not evidence that it is reachable, permitted, or safe to invoke."
+}

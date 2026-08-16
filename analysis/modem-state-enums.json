@@ -147,7 +147,22 @@
       {"value": 13, "meaning": "search failed because SMS was being sent"}
     ],
     "evidence": "shipped frontend enum independently correlated with mobile writer callsites",
-    "confidence": "high"
+    "daemon_writer": "single setter at mobile ELF VA 0x425ec (record write 0x42618, temporary commit 0x42658), which also stages the value at status-object +0x2bc",
+    "observed_constants_at_callsites": {
+      "0": ["0x3b9a0"],
+      "2": ["0x370b8"],
+      "3": ["0x3b9c0"],
+      "4": ["0x36e68"],
+      "5": ["0x36ebc"],
+      "10": ["0x370ac"],
+      "11": ["0x3bc9c"],
+      "12": ["0x331ec", "0x3698c", "0x36d64", "0x36f2c", "0x3bc8c"],
+      "13": ["0x3bae0"],
+      "computed": ["0x370dc", "0x3b620"]
+    },
+    "callsite_note": "Fifteen call sites were enumerated. Values 1, 6, 7, 8 and 9 are not written with an immediate at any site; two sites pass a computed register, which is where those values are expected to originate.",
+    "gate_linkage": "Values 1 (registering), 3 (searching) and 11 (canceling) are exactly the three states that block SetPrefNetType and SetNetSel in libmobile, each with its own refusal message. Value 13 names the SMS interaction directly, which is why those setters also read record 19.",
+    "confidence": "high; independently re-derived from daemon call sites in addition to the frontend enum"
   },
   "call_failure_rpc": {
     "values": [

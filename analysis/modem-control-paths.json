@@ -32,6 +32,13 @@
   "preflight_gate": {
     "description": "A shared pre-flight check performed by the two network-touching setters only. It batch-reads two records through CCfgHelper and refuses the request before any event is constructed.",
     "records_read": [19, 84],
+    "record_19_identity": {
+      "resolved": "Record 19 is the SMS send status. CMobileClient::GetAvailableNet reads record 19 alone and its failure message is literally 'Retriving sms sending status data failed.', which names the record.",
+      "corroboration": "Record 84 value 13 is search_failure_sending_sms in the shipped frontend enum, so an in-flight SMS send causing a network-scan failure is an explicitly modelled condition in this firmware.",
+      "meaning_of_4": "SUPPORTED INFERENCE that value 4 is the send-in-progress state. The blocking comparison is confirmed; the label for 4 is not independently proven.",
+      "confidence": "CONFIRMED for identity and role; SUPPORTED INFERENCE for the value label"
+    },
+    "also_gated": {"GetAvailableNet (event 0x23)": "reads record 19 only, not record 84"},
     "rules": [
       {"record": 19, "name": "sms.sms_send_result.result", "blocking_value": 4, "mp_ret": 14, "log": "(no dedicated message; MP_Ret 0xe returned)"},
       {"record": 84, "name": "mobile_status.net_status.net_sel_stat", "blocking_value": 3, "mp_ret": 15, "log": "Now searching network, operation blocked."},
@@ -173,12 +180,17 @@
         }
       },
       "cp_handler": {
-        "log": "'AT*BAND, NwMode=%d, PreferMode=%d' at 05-ARBI.bin offset 0xb03cc",
-        "adjacent_assertion": "'pSig->preferredMode == pSig->networkMode' at offset 0xb03a0 (the equality fast path)",
-        "preferred_mode_assertion": "'pSig->preferredMode == CI_DEV_NW_GSM || pSig->preferredMode == CI_DEV_NW_UMTS || pSig->preferredMode == CI_DEV_NW_LTE' at offset 0x6d4104",
+        "entry": "ARBI VA 0x068afdf0",
+        "reached_via": "CI primitive CI_DEV_PRIM_SET_BAND_MODE_REQ, not AT text. See ci-primitives.json.",
+        "log": "'AT*BAND, NwMode=%d, PreferMode=%d' at VA 0x068b03cc, referenced by an ADR at VA 0x068b0134",
+        "adjacent_assertion": "'pSig->preferredMode == pSig->networkMode' at VA 0x068b03a0, referenced at VA 0x068b009c, line 3767",
+        "preferred_mode_assertion": "'pSig->preferredMode == CI_DEV_NW_GSM || ... UMTS || ... LTE' at VA 0x06ed4104, referenced at VA 0x068b0082, line 3760",
+        "validation": "networkMode (byte at +0x00) and preferredMode (byte at +0x01) must each be < 7; three further byte selectors are bounded by 3, 5 and 3. Failures return code 0xf001 at VA 0x068afe7a.",
+        "enum_result": "Single-RAT networkMode values are exactly {0, 1, 3}: for those the handler requires preferredMode == networkMode. For networkMode 2 or >= 4 it requires preferredMode in {0, 1, 3}. CI_DEV_NW_GSM/UMTS/LTE are therefore {0, 1, 3}.",
+        "space_warning": "This 0-6 CI enum is NOT the AT*BAND textual NwMode space (0/1/5/11 sent, 0/4/5/8/11/15 parsed). atcmdsrv translates between them and that translation is not recovered.",
         "rat_vocabulary": ["NMODE_GSM", "NMODE_UMTS", "NMODE_LTE", "SM_RAT_MODE_NULL", "SM_RAT_MODE_LTE", "GSM_RAT"],
-        "cp_function": "L1CSetRat, evidenced by the assertion '\"invalid RAT mode using the function L1CSetRat\"' at offset 0x105cbc",
-        "confidence": "CONFIRMED for presence and vocabulary; the CP load base is unresolved, so no CP call graph was reconstructed."
+        "cp_function": "L1CSetRat, evidenced by the assertion '\"invalid RAT mode using the function L1CSetRat\"' at VA 0x06905cbc, referenced by an ADR at VA 0x06905a6c, line 2257",
+        "confidence": "CONFIRMED for the handler entry, request-field validation and the singleton/combination split; SUPPORTED INFERENCE for the individual GSM/UMTS/LTE value assignment."
       },
       "readback_normalizer": {
         "address": "mobile VA 0x4a254-0x4a31c",
