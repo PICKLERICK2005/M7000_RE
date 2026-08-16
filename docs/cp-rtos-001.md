@@ -2,10 +2,11 @@
 
 ## Component identity
 
-`ARBI` is a 7,707,288-byte little-endian ARM image. Its first instructions are
-valid ARM branch/load sequences and its early pointer table clusters around
-`0x06800000`-`0x08000000`, supporting an approximately `0x06800000` execution
-region. Exact segment boundaries and the entry-point contract remain unresolved.
+`ARBI` is a 7,707,288-byte little-endian ARM image. Its load base is now
+confirmed at `0x06800000` (see [Image load base](#image-load-base)), giving a
+virtual range of `0x06800000`-`0x06f59a98`, and its entry point is `0x06e88c40`
+via the three-word stub at image offset 0. Internal segment boundaries remain
+unresolved.
 
 The image is not ELF. It is a linked RTOS image containing source paths, task
 names, assertions, configuration filenames, and diagnostic messages. Evidence
@@ -81,8 +82,12 @@ The CP image contains the receiving side of the AP's preferred-RAT path. Its
 and asserts that a standalone preferred mode is one of `CI_DEV_NW_GSM`,
 `CI_DEV_NW_UMTS`, or `CI_DEV_NW_LTE`. Downstream strings distinguish
 `NMODE_GSM`, `NMODE_UMTS`, and `NMODE_LTE`, plus state-manager values
-`SM_RAT_MODE_NULL` and `SM_RAT_MODE_LTE`. This is the CP-side enum family that
-correlates with AP modem responses `1`, `2`, and `3` respectively.
+`SM_RAT_MODE_NULL` and `SM_RAT_MODE_LTE`.
+
+An earlier draft equated this CP enum family with AP modem responses `1`, `2`
+and `3`. That is superseded: disassembling the handler shows the CI values are
+`{0, 1, 3}`, a different space from the AP readback. See
+[The CI RAT enum](#the-ci-rat-enum-constrained-from-the-assertions) below.
 
 The CP also exposes `L1CSetRat`; its invalid-mode assertion confirms a lower
 Layer-1 RAT transition API. Registration and service results return through the
@@ -108,6 +113,85 @@ is the confirmed durable policy owner, CP receives `AT*BAND` policy into runtime
 RAT state, and CP persistence for that particular field is unresolved. The
 ACIPC symbols establish the AP/CP transport substrate, but the exact ACIPC
 message ID beneath this AT request is not recoverable from strings alone.
+
+## The CI primitive layer
+
+With the base fixed, the CP side of the preferred-RAT path resolves properly.
+The handler entry is at VA `0x068afdf0`, reached from the `AT*BAND` log string at
+`0x068b03cc` (an `ADR` at `0x068b0134`) and from the two assertion strings
+referenced at `0x068b009c` and `0x068b0082`.
+
+Critically, it is **not** reached by parsing AT text. `atcmdsrv` converts the
+command into the CI primitive `CI_DEV_PRIM_SET_BAND_MODE_REQ`, and the handler
+receives a structure. Its validated request fields are:
+
+| Offset | Size | Field | Check |
+| --- | ---: | --- | --- |
+| `0x00` | 1 | `networkMode` | `< 7` |
+| `0x01` | 1 | `preferredMode` | `< 7` |
+| `0x04` | 4 | band mask A (GSM candidate) | helper at `0x068afdb4`; bit 9 tested |
+| `0x08` | 4 | band mask B (UMTS candidate) | masked against a capability word |
+| `0x0C` | 8 | band mask C/D (LTE pair, `ldrd`) | not decomposed |
+| `0x14` | 1 | unnamed selector | `< 3` |
+| `0x15` | 1 | unnamed selector | `< 5` |
+| `0x16` | 1 | unnamed selector | `< 3` |
+| `0x18` | 1 | operation selector | branches on 0/5, 1/2, else |
+| `0x1C` | 4 | unnamed word | copied to local state |
+
+Out-of-range fields fail at `0x068afe7a` with code `0xf001`.
+
+### The CI RAT enum, constrained from the assertions
+
+The handler's two assertions pin the enum without needing its definition. When
+`networkMode` is `0`, `1` or `3` it requires `preferredMode == networkMode`
+(assertion `pSig->preferredMode == pSig->networkMode`, line 3767). When
+`networkMode` is `2` or `≥ 4` it instead requires `preferredMode` to be one of
+`0`, `1`, `3` (the `CI_DEV_NW_GSM || CI_DEV_NW_UMTS || CI_DEV_NW_LTE` assertion,
+line 3760).
+
+So `CI_DEV_NW_GSM`, `CI_DEV_NW_UMTS` and `CI_DEV_NW_LTE` are exactly the set
+`{0, 1, 3}`, and `{2, 4, 5, 6}` are the multi-RAT combinations — those are
+precisely the values for which a *separate* single-RAT preference is demanded.
+Matching the test order against the symbol order in the assertion text gives
+`GSM = 0`, `UMTS = 1`, `LTE = 3` as a supported inference.
+
+That in turn suggests `networkMode` enumerates the seven non-empty subsets of
+{GSM, UMTS, LTE} as `bitmask − 1` with GSM=1, UMTS=2, LTE=4 — yielding GSM=0,
+UMTS=1, GSM+UMTS=2, LTE=3, GSM+LTE=4, UMTS+LTE=5, all=6. It is the unique
+assignment that puts the singletons at exactly `{0, 1, 3}` while matching the
+`< 7` range check. It is recorded as a supported inference, not as fact: the enum
+definition itself was not recovered.
+
+**This 0–6 CI space is not the `AT*BAND` textual `NwMode` space.** The AP sends
+`AT*BAND=0/1/5/11` (default `99`) and recognises `0/4/5/8/11/15` on readback,
+values that a 0–6 enum cannot hold. `atcmdsrv` therefore translates between the
+two, and that translation is still unrecovered.
+
+`L1CSetRat` sits below this: its invalid-mode assertion at VA `0x06905cbc` is
+reached by an `ADR` at `0x06905a6c`, line 2257, inside a small RAT-state
+dispatcher that returns 1 or 2 for different radio states.
+
+## GRBI: characterized, deliberately not anchored
+
+GRBI was examined after ARBI and the honest result is that none of the methods
+that anchored ARBI apply to it.
+
+- It contains **no string-pointer tables at all** — zero qualifying pointer runs,
+  so the delta-shape method that fixed the ARBI base has nothing to match.
+- It has essentially **no ASCII strings**; the few printable runs are binary
+  coincidence.
+- It is **not ARM or Thumb code**. Across five 1 KiB windows, Thumb decodes 120
+  instructions of a possible ~2,560 and ARM 40 of ~1,280. The same measurement on
+  ARBI yields 1,802 — roughly a 70% density against GRBI's ~5%.
+- Entropy is 5.84 overall and ranges from 0.02 to 6.86 across 128 KiB blocks,
+  with a zero-filled tail from `0x260000`. That rules out encryption or whole-image
+  compression; it is plain content for a different instruction set, mixed with
+  large coefficient and table regions.
+
+This is consistent with the existing classification of GRBI as the ASR Falcon LTE
+Layer-1 image: firmware for a DSP/vector core rather than the ARM CP. No load
+base is claimed for it. Progress there requires identifying the target ISA first,
+which is a different kind of problem from the pointer-anchoring used for ARBI.
 
 ## Ownership assessment
 
