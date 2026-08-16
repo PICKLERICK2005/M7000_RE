@@ -153,19 +153,30 @@
       "logging": "0x7ee46 calls the same decoder (0x7ddec) used on the send path, so RX and TX share one symbolic view of (svgId, primId)."
     },
     "handler_registration": {
-      "status": "CONFIRMED as a runtime mechanism; the registering clients were not enumerated",
-      "site": "atcmdsrv 0x7da76, inside a control-message handler selected by message type 3",
-      "action": "Writes four parallel per-service-group tables from a registration record: 0x000eeb94[svgId] = record+0x10 (the CNF/IND handler the dispatcher calls), 0x000eeb50[svgId] = record+0x08, 0x000f3ebc[svgId] = record+0x04, 0x000f3ef8[svgId] = record+0x0c. Service groups <= 14 additionally populate 0x000eec48 and 0x000eec0c.",
-      "consequence": "The handler pointers cannot be resolved from static data alone; they are supplied by whichever module registers for that group. They are recoverable indirectly, by identifying the function that decodes primitives of that group.",
-      "known_handlers": {
-        "MM (svgId 3)": "0x1d644 - confirmed by its primId bound check `cmp r6,#0xc3` (195 = the MM maximum) and by its handling of MM CNF ids 0x15, 0x25 and others."
-      }
+      "status": "CONFIRMED - static after all",
+      "registrar": "atcmdsrv 0x5a344 builds one 36-byte record per service group; 0x7ccd4 -> 0x7d9cc message type 3 installs it.",
+      "handler_source": "The RX handler pointer comes from the static table at 0x0977ac indexed by service group id, so 0x000eeb94[svgId] is fully predictable.",
+      "handlers": {
+        "CC": "0x0173fc",
+        "SS": "0x037488",
+        "MM": "0x01fd28",
+        "PB": "0x033cec",
+        "SIM": "0x058e98",
+        "MSG": "0x04f7b0",
+        "PS": "0x0315e4",
+        "DAT": "0x047320",
+        "DEV": "0x0453f8",
+        "HSCSD/DEB/ATPI/PL/OAM": "0x05a2c4 (shared stub)"
+      },
+      "supersedes": "The earlier statement that the handler pointers 'cannot be resolved from static data alone' is wrong and is retracted. The registration is data-driven, but the data is a static table."
     },
     "envelope_types": {
-      "4": "CI primitive request (the SET_BAND_MODE and network-selection paths)",
-      "3": "client/handler registration control message",
-      "5": "a further control message handled at 0x7da26; not decoded",
-      "note": "The outer envelope's second word, previously recorded only as 'constant 4 for CI primitives', is a message type discriminator on a shared msocket control channel."
+      "3": "register a service-group handler set (installed locally AND forwarded to the CP)",
+      "4": "CI primitive request",
+      "5": "register the global catch-all handler pair",
+      "6": "clear the global catch-all handler pair",
+      "10": "observed at atcmdsrv 0x5b450; not decoded",
+      "note": "The outer envelope's second word is a message-type discriminator on a shared msocket control channel, not a constant."
     },
     "reserved_header_bytes": {
       "offset": "0x18 of the wire buffer (the last 4 bytes of the 16-byte inner header)",

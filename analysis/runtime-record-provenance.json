@@ -719,7 +719,10 @@
       },
       "208": {
         "name": "mobile_status.rf_info.cell_id",
-        "status": "named in the tp_data table; no writer found in this pass"
+        "status": "NEGATIVE EVIDENCE - no writer",
+        "detail": "Record 208 is named in the tp_data table but is never written by the mobile daemon. Its siblings 200-207 and 417 all have writers; 208 does not.",
+        "false_positive_note": "Two sites in mobile load the immediate 208 (0x3e924 and 0x3e9c0), but both pass it to _ZdlPvj - a sized operator delete on a 208-byte object - not to a record setter. They are object sizes, not record ids.",
+        "consequence": "Any consumer reading record 208 gets whatever the record defaults to. Do not treat it as a live cell-identity source."
       },
       "417": {
         "name": "mobile_status.rf_info.radio_if",
