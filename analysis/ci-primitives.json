@@ -322,6 +322,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x17c12"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetDS",
+              "source": "src/cc_api.c:4237"
+            }
           ]
         },
         "3": {
@@ -329,6 +335,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x17c4a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetCSTA",
+              "source": "src/cc_api.c:4284"
+            }
           ]
         },
         "5": {
@@ -336,6 +348,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16524"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetBst",
+              "source": "src/cc_api.c:1294"
+            }
           ]
         },
         "7": {
@@ -343,6 +361,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16508"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetBst",
+              "source": "src/cc_api.c:1294"
+            }
           ]
         },
         "9": {
@@ -350,6 +374,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x16562"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetMod",
+              "source": "src/cc_api.c:1365"
+            }
           ]
         },
         "11": {
@@ -357,6 +387,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x162ec"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetAmm",
+              "source": "src/cc_api.c:982"
+            }
           ]
         },
         "13": {
@@ -364,6 +400,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x162d0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetAmm",
+              "source": "src/cc_api.c:982"
+            }
           ]
         },
         "15": {
@@ -371,6 +413,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x164d8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetBst",
+              "source": "src/cc_api.c:1294"
+            }
           ]
         },
         "21": {
@@ -378,6 +426,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16184"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetDTMFDuration",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "25": {
@@ -386,6 +440,16 @@
           "ap_senders": [
             "0x17dea",
             "0x1804a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_DialEmergency",
+              "source": "src/cc_api.c:4418"
+            },
+            {
+              "symbol": "CC_Dial",
+              "source": "src/cc_api.c:39"
+            }
           ]
         },
         "35": {
@@ -394,6 +458,16 @@
           "ap_senders": [
             "0x16d4a",
             "0x1709a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "AUTO_ANSWER_TIMER_CALLBACK",
+              "source": "src/cc_api.c:3992"
+            },
+            {
+              "symbol": "CC_Answer",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "37": {
@@ -401,6 +475,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x15f1a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HangVT",
+              "source": "src/cc_api.c:25"
+            }
           ]
         },
         "40": {
@@ -408,6 +488,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x189a2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HoldActiveCall",
+              "source": "src/cc_api.c:37"
+            }
           ]
         },
         "50": {
@@ -416,6 +502,16 @@
           "ap_senders": [
             "0x171ca",
             "0x17276"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_Hangup",
+              "source": "src/cc_api.c:0"
+            },
+            {
+              "symbol": "CC_ManageCalls",
+              "source": "src/cc_api.c:801"
+            }
           ]
         },
         "52": {
@@ -423,6 +519,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x161c2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HangupAllVoiceCall",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "70": {
@@ -430,6 +532,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x17d10"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SendLongDTMF",
+              "source": "src/cc_api.c:4375"
+            }
           ]
         },
         "74": {
@@ -437,6 +545,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16104"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SendDTMF",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "76": {
@@ -445,6 +559,16 @@
           "ap_senders": [
             "0x1606e",
             "0x16150"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SendDTMF",
+              "source": "src/cc_api.c:None"
+            },
+            {
+              "symbol": "CC_SetDTMFDuration",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "78": {
@@ -452,6 +576,12 @@
           "req_size": 34,
           "ap_senders": [
             "0x1870e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "ccCnf",
+              "source": "src/cc_api.c:191"
+            }
           ]
         },
         "83": {
@@ -459,6 +589,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1658c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetMod",
+              "source": "src/cc_api.c:1365"
+            }
           ]
         },
         "89": {
@@ -466,6 +602,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x161ec"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HangupAllVoiceCall",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "91": {
@@ -473,6 +615,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16212"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HangupAllVoiceCall",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "93": {
@@ -480,6 +628,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x16240"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_HangupAllVoiceCall",
+              "source": "src/cc_api.c:None"
+            }
           ]
         },
         "95": {
@@ -487,6 +641,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x1628e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetAmm",
+              "source": "src/cc_api.c:982"
+            }
           ]
         },
         "97": {
@@ -494,6 +654,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x17c6a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetCSTA",
+              "source": "src/cc_api.c:4284"
+            }
           ]
         },
         "99": {
@@ -501,6 +667,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x17cb2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetCPUC",
+              "source": "src/cc_api.c:4340"
+            }
           ]
         },
         "105": {
@@ -508,20 +680,28 @@
           "req_size": 0,
           "ap_senders": [
             "0x17bb6"
-          ]
+          ],
+          "ap_builders": []
         },
         "107": {
           "name": "CI_CC_PRIM_GET_DATACOMP_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x17ba2"
-          ]
+          ],
+          "ap_builders": []
         },
         "109": {
           "name": "CI_CC_PRIM_SET_DATACOMP_REQ",
           "req_size": 6,
           "ap_senders": [
             "0x17bf2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetDS",
+              "source": "src/cc_api.c:4237"
+            }
           ]
         },
         "111": {
@@ -529,6 +709,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x165f4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_GetRlp",
+              "source": "src/cc_api.c:1413"
+            }
           ]
         },
         "113": {
@@ -536,6 +722,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x165ca"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_GetRlp",
+              "source": "src/cc_api.c:1413"
+            }
           ]
         },
         "115": {
@@ -543,6 +735,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x16638"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetRlp",
+              "source": "src/cc_api.c:1463"
+            }
           ]
         },
         "131": {
@@ -550,6 +748,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x15fcc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetTty",
+              "source": "src/cc_api.c:66"
+            }
           ]
         },
         "135": {
@@ -557,13 +761,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x15ea0"
-          ]
+          ],
+          "ap_builders": []
         },
         "142": {
           "name": "CI_CC_PRIM_SRVCC_STATUS_REQ",
           "req_size": 1724,
           "ap_senders": [
             "0x1811c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "CC_SetCurrentCalls",
+              "source": "src/cc_api.c:4549"
+            }
           ]
         }
       },
@@ -573,6 +784,12 @@
           "req_size": null,
           "ap_senders": [
             "0x474ac"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "datInd",
+              "source": "src/teldat.c:1442"
+            }
           ]
         },
         "16": {
@@ -580,6 +797,12 @@
           "req_size": null,
           "ap_senders": [
             "0x46e70"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "ciVZWTESTAPP",
+              "source": "src/teldat.c:1102"
+            }
           ]
         },
         "21": {
@@ -587,6 +810,12 @@
           "req_size": null,
           "ap_senders": [
             "0x4796e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "ciMBMS",
+              "source": "src/teldat.c:None"
+            }
           ]
         },
         "25": {
@@ -594,13 +823,20 @@
           "req_size": null,
           "ap_senders": [
             "0x47162"
-          ]
+          ],
+          "ap_builders": []
         },
         "27": {
           "name": "CI_DAT_PRIM_SET_MBMS_EV_REQ",
           "req_size": null,
           "ap_senders": [
             "0x47d7a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "ciMBMSEv",
+              "source": "src/teldat.c:1930"
+            }
           ]
         }
       },
@@ -611,13 +847,20 @@
           "ap_senders": [
             "0x5b5b6",
             "0x5b5ce"
-          ]
+          ],
+          "ap_builders": []
         },
         "10": {
           "name": "CI_DEV_PRIM_SET_FUNC_REQ",
           "req_size": 8,
           "ap_senders": [
             "0x40c0a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetFunc",
+              "source": "src/dev_api.c:38"
+            }
           ]
         },
         "12": {
@@ -625,13 +868,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x40aea"
-          ]
+          ],
+          "ap_builders": []
         },
         "24": {
           "name": "CI_DEV_PRIM_SET_ENGMODE_REPORT_OPTION_REQ",
           "req_size": 4,
           "ap_senders": [
             "0x40e06"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetEngModeIndicatorOption",
+              "source": "src/dev_api.c:4"
+            }
           ]
         },
         "26": {
@@ -652,6 +902,32 @@
             "0x419f6",
             "0x41a2e",
             "0x461a2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetNeighbourcell_Info",
+              "source": "src/dev_api.c:1023"
+            },
+            {
+              "symbol": "DEV_GetEngModeInfo",
+              "source": "src/dev_api.c:1050"
+            },
+            {
+              "symbol": "DEV_GetZAIRInfo",
+              "source": "src/dev_api.c:1090"
+            },
+            {
+              "symbol": "DEV_GetZCQI",
+              "source": "src/dev_api.c:1121"
+            },
+            {
+              "symbol": "DEV_SetLteCoexReportOptionReq",
+              "source": "src/dev_api.c:2331"
+            },
+            {
+              "symbol": "DEV_GetZCELLINFO",
+              "source": "src/dev_api.c:13315"
+            }
           ]
         },
         "44": {
@@ -659,6 +935,12 @@
           "req_size": 492,
           "ap_senders": [
             "0x41050"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_setLPNWUL",
+              "source": "src/dev_api.c:1268"
+            }
           ]
         },
         "50": {
@@ -666,7 +948,8 @@
           "req_size": 0,
           "ap_senders": [
             "0x36c78"
-          ]
+          ],
+          "ap_builders": []
         },
         "51": {
           "name": "CI_DEV_PRIM_SET_BAND_MODE_REQ",
@@ -674,6 +957,16 @@
           "ap_senders": [
             "0x40d30",
             "0x46324"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetBandModeReq",
+              "source": "src/dev_api.c:249"
+            },
+            {
+              "symbol": "DEV_SetBandModeReqExt",
+              "source": "src/dev_api.c:13525"
+            }
           ]
         },
         "53": {
@@ -683,6 +976,16 @@
             "0x40ca4",
             "0x40d5c",
             "0x461d0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetBandModeReq",
+              "source": "src/dev_api.c:249"
+            },
+            {
+              "symbol": "DEV_GetZCELLINFO",
+              "source": "src/dev_api.c:13315"
+            }
           ]
         },
         "55": {
@@ -690,13 +993,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x40c88"
-          ]
+          ],
+          "ap_builders": []
         },
         "57": {
           "name": "CI_DEV_PRIM_SET_SV_REQ",
           "req_size": 17,
           "ap_senders": [
             "0x411da"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetSoftwareVersionNumber",
+              "source": "src/dev_api.c:1436"
+            }
           ]
         },
         "59": {
@@ -704,6 +1014,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x41188"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetLPOtdoaReq",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "61": {
@@ -711,6 +1027,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x41802"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetPOWERIND",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "63": {
@@ -718,6 +1040,12 @@
           "req_size": 6,
           "ap_senders": [
             "0x412e2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetTdModeTxRxReq",
+              "source": "src/dev_api.c:1526"
+            }
           ]
         },
         "65": {
@@ -725,6 +1053,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x4132e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetTdModeLoopbackReq",
+              "source": "src/dev_api.c:1555"
+            }
           ]
         },
         "67": {
@@ -732,6 +1066,12 @@
           "req_size": 24,
           "ap_senders": [
             "0x41396"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetGsmModeTxRxReq",
+              "source": "src/dev_api.c:1582"
+            }
           ]
         },
         "71": {
@@ -739,6 +1079,12 @@
           "req_size": 9,
           "ap_senders": [
             "0x41260"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetHsdpaModeReq",
+              "source": "src/dev_api.c:1465"
+            }
           ]
         },
         "73": {
@@ -746,6 +1092,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4129c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetHsdpaModeReq",
+              "source": "src/dev_api.c:1465"
+            }
           ]
         },
         "75": {
@@ -753,6 +1105,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x4171e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_ReadRFTemperatureReq",
+              "source": "src/dev_api.c:2199"
+            }
           ]
         },
         "104": {
@@ -760,6 +1118,12 @@
           "req_size": 24,
           "ap_senders": [
             "0x414b4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetPowerBackOffReq",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "106": {
@@ -768,13 +1132,20 @@
           "ap_senders": [
             "0x5b5c2",
             "0x5b5da"
-          ]
+          ],
+          "ap_builders": []
         },
         "108": {
           "name": "CI_DEV_PRIM_SET_COM_CONFIG_REQ",
           "req_size": 124,
           "ap_senders": [
             "0x41614"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetComConfigReq",
+              "source": "src/dev_api.c:2052"
+            }
           ]
         },
         "110": {
@@ -783,6 +1154,16 @@
           "ap_senders": [
             "0x41502",
             "0x4154c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetComConfigReq",
+              "source": "src/dev_api.c:1997"
+            },
+            {
+              "symbol": "DEV_GetComVendorReq",
+              "source": "src/dev_api.c:1997"
+            }
           ]
         },
         "112": {
@@ -790,6 +1171,12 @@
           "req_size": 14,
           "ap_senders": [
             "0x41408"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetWcdmaModeTxRxReq",
+              "source": "src/dev_api.c:1644"
+            }
           ]
         },
         "124": {
@@ -797,6 +1184,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x41de8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetPark",
+              "source": "src/dev_api.c:2969"
+            }
           ]
         },
         "126": {
@@ -804,6 +1197,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x410a4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetLPECID",
+              "source": "src/dev_api.c:1314"
+            }
           ]
         },
         "134": {
@@ -813,6 +1212,16 @@
             "0x41640",
             "0x4165c",
             "0x41ca0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetComConfigReq",
+              "source": "src/dev_api.c:2052"
+            },
+            {
+              "symbol": "DEV_IGNSet",
+              "source": "src/dev_api.c:251"
+            }
           ]
         },
         "136": {
@@ -820,6 +1229,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x4184e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLteCoexReportOptionReq",
+              "source": "src/dev_api.c:2331"
+            }
           ]
         },
         "138": {
@@ -827,6 +1242,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x417a8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLTEModeTxRxReq",
+              "source": "src/dev_api.c:2228"
+            }
           ]
         },
         "146": {
@@ -834,6 +1255,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x4177c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLTEModeTxRxReq",
+              "source": "src/dev_api.c:2228"
+            }
           ]
         },
         "148": {
@@ -841,6 +1268,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x41a76"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetL2RandFillReq",
+              "source": "src/dev_api.c:59"
+            }
           ]
         },
         "150": {
@@ -848,6 +1281,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x41aa0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetL2RandFillReq",
+              "source": "src/dev_api.c:59"
+            }
           ]
         },
         "161": {
@@ -855,6 +1294,12 @@
           "req_size": 12,
           "ap_senders": [
             "0x41e40"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "Dev_L1Debug",
+              "source": "src/dev_api.c:3012"
+            }
           ]
         },
         "164": {
@@ -862,6 +1307,12 @@
           "req_size": 1304,
           "ap_senders": [
             "0x4112c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetLPOtdoaReq",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "167": {
@@ -869,6 +1320,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4116c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetLPOtdoaReq",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "176": {
@@ -876,6 +1333,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x41c6c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_IGNSet",
+              "source": "src/dev_api.c:251"
+            }
           ]
         },
         "178": {
@@ -883,6 +1346,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x41c14"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SendCpMrdOperReq",
+              "source": "src/dev_api.c:177"
+            }
           ]
         },
         "180": {
@@ -890,6 +1359,12 @@
           "req_size": 66,
           "ap_senders": [
             "0x41af6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetIMLConfigReq",
+              "source": "src/dev_api.c:105"
+            }
           ]
         },
         "182": {
@@ -897,6 +1372,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x41bf8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SendCpMrdOperReq",
+              "source": "src/dev_api.c:177"
+            }
           ]
         },
         "185": {
@@ -904,6 +1385,12 @@
           "req_size": 21,
           "ap_senders": [
             "0x416a8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLTEBand",
+              "source": "src/dev_api.c:2145"
+            }
           ]
         },
         "187": {
@@ -911,6 +1398,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x416e0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLTEBand",
+              "source": "src/dev_api.c:2145"
+            }
           ]
         },
         "193": {
@@ -918,6 +1411,12 @@
           "req_size": 260,
           "ap_senders": [
             "0x41d50"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetOperCfg_req",
+              "source": "src/dev_api.c:2951"
+            }
           ]
         },
         "195": {
@@ -925,6 +1424,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x41cf4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetOperCfg_req",
+              "source": "src/dev_api.c:None"
+            }
           ]
         },
         "197": {
@@ -933,6 +1438,16 @@
           "ap_senders": [
             "0x41b5e",
             "0x41bca"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SendSetIMEIOperReq",
+              "source": "src/dev_api.c:148"
+            },
+            {
+              "symbol": "DEV_SendCpMrdOperReq",
+              "source": "src/dev_api.c:177"
+            }
           ]
         },
         "199": {
@@ -940,13 +1455,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x40c6c"
-          ]
+          ],
+          "ap_builders": []
         },
         "201": {
           "name": "CI_DEV_PRIM_FACTORY_RESET_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x417c4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetLTEModeTxRxReq",
+              "source": "src/dev_api.c:2228"
+            }
           ]
         },
         "205": {
@@ -954,6 +1476,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x4627a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetMEDCR",
+              "source": "src/dev_api.c:13389"
+            }
           ]
         },
         "207": {
@@ -961,6 +1489,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x46224"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_GetMEDCR",
+              "source": "src/dev_api.c:13365"
+            }
           ]
         },
         "214": {
@@ -968,6 +1502,12 @@
           "req_size": 62,
           "ap_senders": [
             "0x4637c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_DelFbPlmn",
+              "source": "src/dev_api.c:13602"
+            }
           ]
         },
         "240": {
@@ -975,6 +1515,12 @@
           "req_size": 1028,
           "ap_senders": [
             "0x42982"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "Dev_SetComFeature",
+              "source": "src/dev_api.c:3499"
+            }
           ]
         },
         "242": {
@@ -982,6 +1528,12 @@
           "req_size": 16,
           "ap_senders": [
             "0x42a3a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "Dev_GetComFeature",
+              "source": "src/dev_api.c:3571"
+            }
           ]
         },
         "244": {
@@ -989,6 +1541,12 @@
           "req_size": 44,
           "ap_senders": [
             "0x41436"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "DEV_SetWcdmaModeTxRxReq",
+              "source": "src/dev_api.c:1644"
+            }
           ]
         }
       },
@@ -998,6 +1556,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1ba94"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetSubscriber",
+              "source": "src/mm_api.c:1238"
+            }
           ]
         },
         "3": {
@@ -1005,6 +1569,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1ba48"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetSubscriber",
+              "source": "src/mm_api.c:1238"
+            }
           ]
         },
         "5": {
@@ -1012,13 +1582,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b2fc"
-          ]
+          ],
+          "ap_builders": []
         },
         "9": {
           "name": "CI_MM_PRIM_SET_REGRESULT_OPTION_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x1b49e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetRegOption",
+              "source": "src/mm_api.c:1"
+            }
           ]
         },
         "12": {
@@ -1026,13 +1603,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b31a"
-          ]
+          ],
+          "ap_builders": []
         },
         "20": {
           "name": "CI_MM_PRIM_GET_NUM_NETWORK_OPERATORS_REQ",
           "req_size": 2,
           "ap_senders": [
             "0x1b502"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_QuerySuppOperator",
+              "source": "src/mm_api.c:109"
+            }
           ]
         },
         "22": {
@@ -1040,6 +1624,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1b962"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_QuerySuppOpeInfo",
+              "source": "src/mm_api.c:1157"
+            }
           ]
         },
         "24": {
@@ -1047,13 +1637,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b7dc"
-          ]
+          ],
+          "ap_builders": []
         },
         "26": {
           "name": "CI_MM_PRIM_GET_PREFERRED_OPERATOR_INFO_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x1b9ae"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetPrefOpeInfo",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "28": {
@@ -1061,6 +1658,12 @@
           "req_size": 44,
           "ap_senders": [
             "0x1ab8a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "libAddPreferenceOperation",
+              "source": "src/mm_api.c:4"
+            }
           ]
         },
         "30": {
@@ -1068,6 +1671,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1b886"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "libDeletePreferenceOperation",
+              "source": "src/mm_api.c:429"
+            }
           ]
         },
         "32": {
@@ -1075,6 +1684,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b52c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_QuerySuppOperator",
+              "source": "src/mm_api.c:109"
+            }
           ]
         },
         "38": {
@@ -1082,6 +1697,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b56c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_QuerySuppOperator",
+              "source": "src/mm_api.c:109"
+            }
           ]
         },
         "42": {
@@ -1089,6 +1710,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x1c1b8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCSQConfig",
+              "source": "src/mm_api.c:2198"
+            }
           ]
         },
         "49": {
@@ -1097,6 +1724,16 @@
           "ap_senders": [
             "0x1b924",
             "0x1d2cc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "libDeletePreferenceOperation",
+              "source": "src/mm_api.c:429"
+            },
+            {
+              "symbol": "MM_GetStarExtendedSignalQuality",
+              "source": "src/mm_api.c:7565"
+            }
           ]
         },
         "54": {
@@ -1104,6 +1741,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1ca46"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SelectCPLS",
+              "source": "src/mm_api.c:6951"
+            }
           ]
         },
         "56": {
@@ -1111,13 +1754,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1ca08"
-          ]
+          ],
+          "ap_builders": []
         },
         "59": {
           "name": "CI_MM_PRIM_SET_BANDIND_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x1caae"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetBANDIND",
+              "source": "src/mm_api.c:6999"
+            }
           ]
         },
         "61": {
@@ -1125,6 +1775,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1ca70"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SelectCPLS",
+              "source": "src/mm_api.c:6951"
+            }
           ]
         },
         "65": {
@@ -1132,6 +1788,12 @@
           "req_size": 12,
           "ap_senders": [
             "0x1bb9e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCellLOCK",
+              "source": "src/mm_api.c:1350"
+            }
           ]
         },
         "72": {
@@ -1139,6 +1801,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1bf36"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetNASIntegrityCheckFlag",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "74": {
@@ -1146,13 +1814,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1bedc"
-          ]
+          ],
+          "ap_builders": []
         },
         "76": {
           "name": "CI_MM_PRIM_GET_NUM_LTE_NETWORK_OPERATORS_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x1bc5c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetCellLOCK_Ext",
+              "source": "src/mm_api.c:1380"
+            }
           ]
         },
         "78": {
@@ -1160,6 +1835,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1bc9a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_QuerySuppLteOpeInfo",
+              "source": "src/mm_api.c:1457"
+            }
           ]
         },
         "80": {
@@ -1167,13 +1848,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1bef8"
-          ]
+          ],
+          "ap_builders": []
         },
         "82": {
           "name": "CI_MM_PRIM_SET_LTE_BACKGROUND_INFO_REQ",
           "req_size": 4,
           "ap_senders": [
             "0x1bf86"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetLteCurrOperator",
+              "source": "src/mm_api.c:1871"
+            }
           ]
         },
         "87": {
@@ -1181,6 +1869,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1cf32"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetSrvccSupport",
+              "source": "src/mm_api.c:7267"
+            }
           ]
         },
         "89": {
@@ -1188,6 +1882,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1cf5c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetSrvccSupport",
+              "source": "src/mm_api.c:7267"
+            }
           ]
         },
         "91": {
@@ -1195,6 +1895,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1cf9a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetImsNwReportMode",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "93": {
@@ -1202,6 +1908,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1cfc4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetImsNwReportMode",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "97": {
@@ -1209,6 +1921,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1ce62"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetEmergencyNumbersReport",
+              "source": "src/mm_api.c:7209"
+            }
           ]
         },
         "99": {
@@ -1216,6 +1934,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1ce8c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetEmergencyNumbersReport",
+              "source": "src/mm_api.c:7209"
+            }
           ]
         },
         "102": {
@@ -1223,6 +1947,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1ceca"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetNwEmergencyBearerService",
+              "source": "src/mm_api.c:7238"
+            }
           ]
         },
         "104": {
@@ -1230,6 +1960,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1cef4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetNwEmergencyBearerService",
+              "source": "src/mm_api.c:7238"
+            }
           ]
         },
         "108": {
@@ -1237,6 +1973,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1cfe0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetImsNwReportMode",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "110": {
@@ -1246,6 +1988,20 @@
             "0x1b9fa",
             "0x1ce10",
             "0x1d2a0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetSignalQuality",
+              "source": "src/mm_api.c:1211"
+            },
+            {
+              "symbol": "MM_GetExtendedSignalQuality",
+              "source": "src/mm_api.c:7182"
+            },
+            {
+              "symbol": "MM_GetStarExtendedSignalQuality",
+              "source": "src/mm_api.c:7565"
+            }
           ]
         },
         "114": {
@@ -1253,13 +2009,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x1b7f8"
-          ]
+          ],
+          "ap_builders": []
         },
         "116": {
           "name": "CI_MM_PRIM_TRIGGER_USER_RESELECTION_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x1c1ec"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCSQConfig",
+              "source": "src/mm_api.c:2198"
+            }
           ]
         },
         "118": {
@@ -1267,6 +2030,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1c246"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetPowerUpPlmnMode",
+              "source": "src/mm_api.c:2269"
+            }
           ]
         },
         "120": {
@@ -1274,6 +2043,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1c208"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCSQConfig",
+              "source": "src/mm_api.c:2198"
+            }
           ]
         },
         "125": {
@@ -1281,6 +2056,12 @@
           "req_size": 12,
           "ap_senders": [
             "0x1c2c0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_FratListSet",
+              "source": "src/mm_api.c:2312"
+            }
           ]
         },
         "127": {
@@ -1288,6 +2069,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1c270"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetPowerUpPlmnMode",
+              "source": "src/mm_api.c:2269"
+            }
           ]
         },
         "129": {
@@ -1295,6 +2082,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1d096"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetImsNwReportMode",
+              "source": "src/mm_api.c:None"
+            }
           ]
         },
         "131": {
@@ -1302,6 +2095,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x1eaf6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "processSetCsgListSerachConf",
+              "source": "src/mm_api.c:4252"
+            }
           ]
         },
         "138": {
@@ -1309,6 +2108,12 @@
           "req_size": 12,
           "ap_senders": [
             "0x2026a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetSecurityCapability_Req",
+              "source": "src/mm_api.c:7701"
+            }
           ]
         },
         "140": {
@@ -1316,6 +2121,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x202c0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetSecurityCapability_Req",
+              "source": "src/mm_api.c:7701"
+            }
           ]
         },
         "159": {
@@ -1327,6 +2138,24 @@
             "0x1c448",
             "0x1c464",
             "0x1c504"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_FratListSet",
+              "source": "src/mm_api.c:2312"
+            },
+            {
+              "symbol": "MM_SetCfgRpmSwitch",
+              "source": "src/mm_api.c:2441"
+            },
+            {
+              "symbol": "MM_SetCfgRpmPara",
+              "source": "src/mm_api.c:2491"
+            },
+            {
+              "symbol": "MM_SetCfgRpmClr",
+              "source": "src/mm_api.c:58"
+            }
           ]
         },
         "162": {
@@ -1334,6 +2163,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x1d1de"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetZSNT",
+              "source": "src/mm_api.c:7491"
+            }
           ]
         },
         "164": {
@@ -1341,6 +2176,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1d18c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCsgMode",
+              "source": "src/mm_api.c:7421"
+            }
           ]
         },
         "166": {
@@ -1348,6 +2189,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1d264"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetZSNT",
+              "source": "src/mm_api.c:7491"
+            }
           ]
         },
         "168": {
@@ -1355,6 +2202,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1d170"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCsgMode",
+              "source": "src/mm_api.c:7421"
+            }
           ]
         },
         "171": {
@@ -1363,6 +2216,12 @@
           "ap_senders": [
             "0x1d3b2",
             "0x71396"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetAsrCurrOperator",
+              "source": "src/mm_api.c:7651"
+            }
           ]
         },
         "173": {
@@ -1370,6 +2229,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1bbe6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetCellLOCK_Ext",
+              "source": "src/mm_api.c:1380"
+            }
           ]
         },
         "180": {
@@ -1377,6 +2242,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x1d36e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_GetOosPhasePeriod_req",
+              "source": "src/mm_api.c:7626"
+            }
           ]
         },
         "194": {
@@ -1386,6 +2257,20 @@
             "0x1c336",
             "0x1c41c",
             "0x1c4d8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MM_SetCfgRpmSwitch",
+              "source": "src/mm_api.c:2441"
+            },
+            {
+              "symbol": "MM_SetCfgRpmPara",
+              "source": "src/mm_api.c:2491"
+            },
+            {
+              "symbol": "MM_SetCfgRpmClr",
+              "source": "src/mm_api.c:58"
+            }
           ]
         }
       },
@@ -1395,13 +2280,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x4d314"
-          ]
+          ],
+          "ap_builders": []
         },
         "3": {
           "name": "CI_MSG_PRIM_SELECT_SERVICE_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x4d36e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetSmsService",
+              "source": "src/msg_api.c:2882"
+            }
           ]
         },
         "5": {
@@ -1409,13 +2301,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x4d330"
-          ]
+          ],
+          "ap_builders": []
         },
         "7": {
           "name": "CI_MSG_PRIM_GET_SUPPORTED_STORAGES_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x4d398"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetSmsService",
+              "source": "src/msg_api.c:2882"
+            }
           ]
         },
         "11": {
@@ -1423,6 +2322,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4d3b8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetSmsService",
+              "source": "src/msg_api.c:2882"
+            }
           ]
         },
         "13": {
@@ -1430,6 +2335,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x4ce44"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_ReadMsg_",
+              "source": "src/msg_api.c:3430"
+            }
           ]
         },
         "15": {
@@ -1438,6 +2349,16 @@
           "ap_senders": [
             "0x4de50",
             "0x50e4c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_DeleteMsg_",
+              "source": "src/msg_api.c:3803"
+            },
+            {
+              "symbol": "MSG_DeleteMsgByDelFlag",
+              "source": "src/msg_api.c:3987"
+            }
           ]
         },
         "17": {
@@ -1447,6 +2368,16 @@
             "0x4bb08",
             "0x4e572",
             "0x50aee"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "sendStoredMESms",
+              "source": "src/msg_api.c:230"
+            },
+            {
+              "symbol": "msgReadCnfForAtSendStoredMsg",
+              "source": "src/msg_api.c:5949"
+            }
           ]
         },
         "23": {
@@ -1454,6 +2385,12 @@
           "req_size": 92,
           "ap_senders": [
             "0x4dc04"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SendStoredMsg",
+              "source": "src/msg_api.c:3630"
+            }
           ]
         },
         "25": {
@@ -1461,6 +2398,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x4d734"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetNewMsgIndSetting",
+              "source": "src/msg_api.c:3265"
+            }
           ]
         },
         "30": {
@@ -1468,6 +2411,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4d4a8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetPrefStorage",
+              "source": "src/msg_api.c:2970"
+            }
           ]
         },
         "32": {
@@ -1475,6 +2424,12 @@
           "req_size": 43,
           "ap_senders": [
             "0x4d500"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetSrvCenterAddr",
+              "source": "src/msg_api.c:3045"
+            }
           ]
         },
         "34": {
@@ -1482,6 +2437,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4ded4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_DeleteMsg_",
+              "source": "src/msg_api.c:3803"
+            }
           ]
         },
         "36": {
@@ -1489,13 +2450,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x4e1c8"
-          ]
+          ],
+          "ap_builders": []
         },
         "38": {
           "name": "CI_MSG_PRIM_SET_MOSMS_SERVICE_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x4e206"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetMoService",
+              "source": "src/msg_api.c:4347"
+            }
           ]
         },
         "42": {
@@ -1503,6 +2471,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4d5bc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetSrvCenterAddr",
+              "source": "src/msg_api.c:3045"
+            }
           ]
         },
         "44": {
@@ -1511,6 +2485,16 @@
           "ap_senders": [
             "0x4d652",
             "0x5127c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetCbMsgType",
+              "source": "src/msg_api.c:3181"
+            },
+            {
+              "symbol": "MSG_SetPnerStatus",
+              "source": "src/msg_api.c:9890"
+            }
           ]
         },
         "46": {
@@ -1519,6 +2503,16 @@
           "ap_senders": [
             "0x4d468",
             "0x503a6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetPrefStorage",
+              "source": "src/msg_api.c:2970"
+            },
+            {
+              "symbol": "msgSetSingleMsgConfigFromDb",
+              "source": "src/msg_api.c:9751"
+            }
           ]
         },
         "48": {
@@ -1526,6 +2520,12 @@
           "req_size": 230,
           "ap_senders": [
             "0x4e8a8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_CRSM_WriteMsgWithIndex",
+              "source": "src/msg_api.c:23"
+            }
           ]
         },
         "52": {
@@ -1533,6 +2533,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x4df12"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_CMEMFULL",
+              "source": "src/msg_api.c:4299"
+            }
           ]
         },
         "54": {
@@ -1540,6 +2546,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x51364"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_set_record_sms_status",
+              "source": "src/msg_api.c:321"
+            }
           ]
         },
         "56": {
@@ -1547,6 +2559,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x4e908"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetCbmFilterStatus",
+              "source": "src/msg_api.c:127"
+            }
           ]
         },
         "58": {
@@ -1554,6 +2572,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x4e934"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetCbmFilterStatus",
+              "source": "src/msg_api.c:127"
+            }
           ]
         },
         "60": {
@@ -1563,6 +2587,20 @@
             "0x4d852",
             "0x4dd2c",
             "0x4e976"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_ListMsgStart",
+              "source": "src/msg_api.c:3386"
+            },
+            {
+              "symbol": "MSG_QueryDelMsg",
+              "source": "src/msg_api.c:3754"
+            },
+            {
+              "symbol": "MSG_LockSMSStatus",
+              "source": "src/msg_api.c:173"
+            }
           ]
         },
         "68": {
@@ -1570,6 +2608,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x4eace"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_SetCbRat",
+              "source": "src/msg_api.c:6065"
+            }
           ]
         },
         "70": {
@@ -1577,6 +2621,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x512d0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_get_stored_sms_status",
+              "source": "src/msg_api.c:10448"
+            }
           ]
         },
         "72": {
@@ -1584,6 +2634,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x513f4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_get_status_req",
+              "source": "src/msg_api.c:10557"
+            }
           ]
         },
         "74": {
@@ -1591,6 +2647,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x513b0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MSG_set_status_req",
+              "source": "src/msg_api.c:10529"
+            }
           ]
         },
         "82": {
@@ -1598,6 +2660,12 @@
           "req_size": 8,
           "ap_senders": [
             "0x51452"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "Msg_SetResendPara",
+              "source": "src/msg_api.c:10577"
+            }
           ]
         },
         "84": {
@@ -1605,6 +2673,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x51480"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "Msg_SetResendPara",
+              "source": "src/msg_api.c:10577"
+            }
           ]
         }
       },
@@ -1614,13 +2688,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x32fe0"
-          ]
+          ],
+          "ap_builders": []
         },
         "3": {
           "name": "CI_PB_PRIM_GET_PHONEBOOK_INFO_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x33022"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_GetInfo",
+              "source": "src/pb_api.c:203"
+            }
           ]
         },
         "5": {
@@ -1628,6 +2709,12 @@
           "req_size": 18,
           "ap_senders": [
             "0x3310e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_SetStorage",
+              "source": "src/pb_api.c:249"
+            }
           ]
         },
         "17": {
@@ -1635,6 +2722,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x32cc0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_DeleteEntry_",
+              "source": "src/pb_api.c:495"
+            }
           ]
         },
         "19": {
@@ -1643,6 +2736,16 @@
           "ap_senders": [
             "0x32e7e",
             "0x332a0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_WriteEntry_",
+              "source": "src/pb_api.c:95"
+            },
+            {
+              "symbol": "PBW_ProcessEntry",
+              "source": "src/pb_api.c:134"
+            }
           ]
         },
         "21": {
@@ -1650,6 +2753,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x32c7c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_ReadOneEntry_",
+              "source": "src/pb_api.c:3"
+            }
           ]
         },
         "40": {
@@ -1659,6 +2768,16 @@
             "0x3316c",
             "0x33210",
             "0x33320"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PB_SetStorage",
+              "source": "src/pb_api.c:249"
+            },
+            {
+              "symbol": "PBW_ProcessEntry",
+              "source": "src/pb_api.c:143"
+            }
           ]
         },
         "42": {
@@ -1666,6 +2785,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x3333c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PBW_ProcessEntry",
+              "source": "src/pb_api.c:143"
+            }
           ]
         }
       },
@@ -1675,6 +2800,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x2ada6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSAttached",
+              "source": "src/ps_api.c:1909"
+            }
           ]
         },
         "3": {
@@ -1682,6 +2813,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2add8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSAttached",
+              "source": "src/ps_api.c:1909"
+            }
           ]
         },
         "5": {
@@ -1689,6 +2826,12 @@
           "req_size": 268,
           "ap_senders": [
             "0x2ac12"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSContext",
+              "source": "src/ps_api.c:1819"
+            }
           ]
         },
         "7": {
@@ -1696,6 +2839,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2ac8a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_DeleteGPRSContext",
+              "source": "src/ps_api.c:1844"
+            }
           ]
         },
         "9": {
@@ -1716,6 +2865,40 @@
             "0x2e44a",
             "0x2e876",
             "0x2ea10"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetTftList",
+              "source": "src/ps_api.c:1652"
+            },
+            {
+              "symbol": "PS_GetGPRSContextList",
+              "source": "src/ps_api.c:1770"
+            },
+            {
+              "symbol": "PS_GetGPRSContextActivatedList",
+              "source": "src/ps_api.c:1940"
+            },
+            {
+              "symbol": "PS_GetGPRSContextIP",
+              "source": "src/ps_api.c:2091"
+            },
+            {
+              "symbol": "PS_GetSecondaryContextRange",
+              "source": "src/ps_api.c:2410"
+            },
+            {
+              "symbol": "PS_Get4GAddr",
+              "source": "src/ps_api.c:3951"
+            },
+            {
+              "symbol": "PS_GetPdpPCO",
+              "source": "src/ps_api.c:4353"
+            },
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:7128"
+            }
           ]
         },
         "13": {
@@ -1723,6 +2906,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x2af16"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSContextActivated",
+              "source": "src/ps_api.c:2020"
+            }
           ]
         },
         "15": {
@@ -1730,6 +2919,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2aadc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetTftFilter",
+              "source": "src/ps_api.c:1713"
+            }
           ]
         },
         "17": {
@@ -1737,6 +2932,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x2b16a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_EnterGPRSDataMode",
+              "source": "src/ps_api.c:2127"
+            }
           ]
         },
         "22": {
@@ -1744,6 +2945,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c4fc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGsmGprsClass",
+              "source": "src/ps_api.c:4095"
+            }
           ]
         },
         "24": {
@@ -1751,6 +2958,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c490"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GRegOption",
+              "source": "src/ps_api.c:4053"
+            }
           ]
         },
         "26": {
@@ -1758,6 +2971,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c4ac"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GRegOption",
+              "source": "src/ps_api.c:4053"
+            }
           ]
         },
         "28": {
@@ -1765,6 +2984,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2a978"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSRegStatus",
+              "source": "src/ps_api.c:1623"
+            }
           ]
         },
         "31": {
@@ -1772,6 +2997,12 @@
           "req_size": 7,
           "ap_senders": [
             "0x2ad56"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetQualityOfService",
+              "source": "src/ps_api.c:1887"
+            }
           ]
         },
         "35": {
@@ -1780,6 +3011,16 @@
           "ap_senders": [
             "0x2acf0",
             "0x2dfa0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetQualityOfServiceList",
+              "source": "src/ps_api.c:1863"
+            },
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:7258"
+            }
           ]
         },
         "37": {
@@ -1787,6 +3028,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2b752"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetPsPowerOnAutoAttach",
+              "source": "src/ps_api.c:2465"
+            }
           ]
         },
         "46": {
@@ -1794,6 +3041,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2a9b0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGPRSRegStatus",
+              "source": "src/ps_api.c:1623"
+            }
           ]
         },
         "52": {
@@ -1802,6 +3055,16 @@
           "ap_senders": [
             "0x2b228",
             "0x2f23e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Get3GQualityOfServiceList",
+              "source": "src/ps_api.c:2197"
+            },
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:8247"
+            }
           ]
         },
         "54": {
@@ -1809,6 +3072,12 @@
           "req_size": 28,
           "ap_senders": [
             "0x2b2a2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set3GQualityOfService",
+              "source": "src/ps_api.c:None"
+            }
           ]
         },
         "58": {
@@ -1816,6 +3085,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2b2f0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Get3GCapsQos",
+              "source": "src/ps_api.c:2245"
+            }
           ]
         },
         "60": {
@@ -1823,6 +3098,12 @@
           "req_size": 9,
           "ap_senders": [
             "0x2b566"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetSecondaryPDPContext",
+              "source": "src/ps_api.c:2359"
+            }
           ]
         },
         "62": {
@@ -1830,6 +3111,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2b61a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_DeleteSecondaryPDPContext",
+              "source": "src/ps_api.c:2389"
+            }
           ]
         },
         "64": {
@@ -1838,6 +3125,16 @@
           "ap_senders": [
             "0x2b438",
             "0x2e0d4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetSecondaryContextList",
+              "source": "src/ps_api.c:2312"
+            },
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:7362"
+            }
           ]
         },
         "66": {
@@ -1845,6 +3142,12 @@
           "req_size": 92,
           "ap_senders": [
             "0x2aab0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetTftFilter",
+              "source": "src/ps_api.c:1713"
+            }
           ]
         },
         "68": {
@@ -1852,6 +3155,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2aa56"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_DeleteTft",
+              "source": "src/ps_api.c:1693"
+            }
           ]
         },
         "70": {
@@ -1859,6 +3168,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2e328"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:7540"
+            }
           ]
         },
         "72": {
@@ -1866,6 +3181,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x2ab1e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ModifyGPRSContext",
+              "source": "src/ps_api.c:1748"
+            }
           ]
         },
         "83": {
@@ -1873,6 +3194,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x2c99c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ConfigACL",
+              "source": "src/ps_api.c:4394"
+            }
           ]
         },
         "91": {
@@ -1880,6 +3207,12 @@
           "req_size": 406,
           "ap_senders": [
             "0x2afe6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SendAUTHReq",
+              "source": "src/ps_api.c:2063"
+            }
           ]
         },
         "93": {
@@ -1887,6 +3220,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2b6ac"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetSecondaryContextRange",
+              "source": "src/ps_api.c:2410"
+            }
           ]
         },
         "97": {
@@ -1894,6 +3233,12 @@
           "req_size": 20,
           "ap_senders": [
             "0x2b702"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetFDY",
+              "source": "src/ps_api.c:2439"
+            }
           ]
         },
         "100": {
@@ -1901,6 +3246,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2b9ba"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetPsPlusPaging",
+              "source": "src/ps_api.c:38"
+            }
           ]
         },
         "102": {
@@ -1908,6 +3259,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2b77c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetPsPowerOnAutoAttach",
+              "source": "src/ps_api.c:2465"
+            }
           ]
         },
         "104": {
@@ -1916,6 +3273,16 @@
           "ap_senders": [
             "0x2be82",
             "0x2f99c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynPara",
+              "source": "src/ps_api.c:3607"
+            },
+            {
+              "symbol": "psCnf",
+              "source": "src/ps_api.c:9827"
+            }
           ]
         },
         "106": {
@@ -1923,6 +3290,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2be18"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GQualityOfService",
+              "source": "src/ps_api.c:3569"
+            }
           ]
         },
         "108": {
@@ -1930,6 +3303,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c458"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GRegOption",
+              "source": "src/ps_api.c:4053"
+            }
           ]
         },
         "111": {
@@ -1937,6 +3316,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c3a8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetConfigSignallingConnectionOptionReq",
+              "source": "src/ps_api.c:3990"
+            }
           ]
         },
         "113": {
@@ -1944,6 +3329,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2bd3a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Get4GQualityOfServiceList",
+              "source": "src/ps_api.c:3529"
+            }
           ]
         },
         "115": {
@@ -1951,6 +3342,12 @@
           "req_size": 36,
           "ap_senders": [
             "0x2bdea"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GQualityOfService",
+              "source": "src/ps_api.c:3569"
+            }
           ]
         },
         "117": {
@@ -1958,6 +3355,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2bcd6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Delete4GEPSContext",
+              "source": "src/ps_api.c:3511"
+            }
           ]
         },
         "119": {
@@ -1965,6 +3368,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2bd86"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Get4GCapsQos",
+              "source": "src/ps_api.c:3551"
+            }
           ]
         },
         "121": {
@@ -1972,6 +3381,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c1b4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetVoiceMode",
+              "source": "src/ps_api.c:None"
+            }
           ]
         },
         "123": {
@@ -1979,6 +3394,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c20e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetEpsMode",
+              "source": "src/ps_api.c:3899"
+            }
           ]
         },
         "125": {
@@ -1986,6 +3407,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c1d0"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetVoiceMode",
+              "source": "src/ps_api.c:None"
+            }
           ]
         },
         "129": {
@@ -1993,6 +3420,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c23c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetEpsMode",
+              "source": "src/ps_api.c:3899"
+            }
           ]
         },
         "131": {
@@ -2000,6 +3433,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2bf0a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadSecDynPara",
+              "source": "src/ps_api.c:3649"
+            }
           ]
         },
         "133": {
@@ -2007,6 +3446,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2beb8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynPara",
+              "source": "src/ps_api.c:3607"
+            }
           ]
         },
         "135": {
@@ -2014,6 +3459,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c00a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynQOS",
+              "source": "src/ps_api.c:3749"
+            }
           ]
         },
         "137": {
@@ -2021,6 +3472,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2bfb8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynTFT",
+              "source": "src/ps_api.c:3717"
+            }
           ]
         },
         "139": {
@@ -2028,6 +3485,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c038"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynQOS",
+              "source": "src/ps_api.c:3749"
+            }
           ]
         },
         "141": {
@@ -2035,6 +3498,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x2c0c4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Set4GRep",
+              "source": "src/ps_api.c:3807"
+            }
           ]
         },
         "143": {
@@ -2042,6 +3511,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c054"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynQOS",
+              "source": "src/ps_api.c:3749"
+            }
           ]
         },
         "145": {
@@ -2049,6 +3524,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c11e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetVoiceMode",
+              "source": "src/ps_api.c:3826"
+            }
           ]
         },
         "147": {
@@ -2056,6 +3537,12 @@
           "req_size": 4,
           "ap_senders": [
             "0x2c18a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetVoiceMode",
+              "source": "src/ps_api.c:None"
+            }
           ]
         },
         "149": {
@@ -2063,6 +3550,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c148"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetVoiceMode",
+              "source": "src/ps_api.c:3826"
+            }
           ]
         },
         "151": {
@@ -2070,6 +3563,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2bf8a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadDynTFT",
+              "source": "src/ps_api.c:3717"
+            }
           ]
         },
         "153": {
@@ -2077,6 +3576,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2bf38"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_ReadSecDynPara",
+              "source": "src/ps_api.c:3649"
+            }
           ]
         },
         "158": {
@@ -2084,6 +3589,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c6b2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetImsVoiceCallAvailability",
+              "source": "src/ps_api.c:4217"
+            }
           ]
         },
         "160": {
@@ -2091,6 +3602,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c674"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetEpsUsageSetting",
+              "source": "src/ps_api.c:4185"
+            }
           ]
         },
         "162": {
@@ -2098,6 +3615,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c71a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetImsSmsAvailability",
+              "source": "src/ps_api.c:4245"
+            }
           ]
         },
         "164": {
@@ -2105,6 +3628,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c6dc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetImsVoiceCallAvailability",
+              "source": "src/ps_api.c:4217"
+            }
           ]
         },
         "166": {
@@ -2112,6 +3641,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c782"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetMmImsVoiceTermination",
+              "source": "src/ps_api.c:4273"
+            }
           ]
         },
         "168": {
@@ -2119,6 +3654,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c744"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetImsSmsAvailability",
+              "source": "src/ps_api.c:4245"
+            }
           ]
         },
         "170": {
@@ -2126,6 +3667,12 @@
           "req_size": 144,
           "ap_senders": [
             "0x2b85a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetDefaultPDPContext",
+              "source": "src/ps_api.c:2522"
+            }
           ]
         },
         "172": {
@@ -2134,6 +3681,16 @@
           "ap_senders": [
             "0x2b7ba",
             "0x2b806"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetDefaultPDPContext",
+              "source": "src/ps_api.c:2491"
+            },
+            {
+              "symbol": "PS_GetDefaultPDPContext_Ext",
+              "source": "src/ps_api.c:2506"
+            }
           ]
         },
         "174": {
@@ -2141,6 +3698,12 @@
           "req_size": 116,
           "ap_senders": [
             "0x2b96e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetAPNList",
+              "source": "src/ps_api.c:22"
+            }
           ]
         },
         "176": {
@@ -2148,6 +3711,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2b928"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetDefaultPdpAuthenticate",
+              "source": "src/ps_api.c:2554"
+            }
           ]
         },
         "178": {
@@ -2155,6 +3724,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c826"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_NotifyImsRegStateToCp",
+              "source": "src/ps_api.c:4308"
+            }
           ]
         },
         "186": {
@@ -2162,6 +3737,12 @@
           "req_size": 408,
           "ap_senders": [
             "0x2b8fc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetDefaultPdpAuthenticate",
+              "source": "src/ps_api.c:2554"
+            }
           ]
         },
         "188": {
@@ -2169,6 +3750,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2b8a6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_GetDefaultPdpAuthenticate",
+              "source": "src/ps_api.c:2538"
+            }
           ]
         },
         "190": {
@@ -2176,6 +3763,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x2c5c6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetVoiceDomainPreference",
+              "source": "src/ps_api.c:4154"
+            }
           ]
         },
         "192": {
@@ -2183,6 +3776,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c57e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetGsmGprsClass",
+              "source": "src/ps_api.c:4095"
+            }
           ]
         },
         "194": {
@@ -2190,6 +3789,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c63c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetEpsUsageSetting",
+              "source": "src/ps_api.c:4185"
+            }
           ]
         },
         "196": {
@@ -2197,6 +3802,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c604"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetVoiceDomainPreference",
+              "source": "src/ps_api.c:4154"
+            }
           ]
         },
         "198": {
@@ -2204,6 +3815,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x2c7d8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_NotifyApConfigToCp",
+              "source": "src/ps_api.c:4289"
+            }
           ]
         },
         "200": {
@@ -2211,6 +3828,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c872"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetPsDomainConfig",
+              "source": "src/ps_api.c:4324"
+            }
           ]
         },
         "202": {
@@ -2218,6 +3841,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c89c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetPsDomainConfig",
+              "source": "src/ps_api.c:4324"
+            }
           ]
         },
         "204": {
@@ -2225,6 +3854,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x2c94a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetImsSrv",
+              "source": "src/ps_api.c:4373"
+            }
           ]
         },
         "209": {
@@ -2232,6 +3867,12 @@
           "req_size": 674,
           "ap_senders": [
             "0x2a0e6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "setRedefinePdpActiveReq",
+              "source": "src/ps_api.c:842"
+            }
           ]
         },
         "227": {
@@ -2239,6 +3880,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x2c36e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_SetConfigSignallingConnectionOptionReq",
+              "source": "src/ps_api.c:3990"
+            }
           ]
         },
         "229": {
@@ -2246,6 +3893,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x2c328"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PS_Get4GAddr",
+              "source": "src/ps_api.c:3951"
+            }
           ]
         }
       },
@@ -2256,6 +3909,16 @@
           "ap_senders": [
             "0x55a28",
             "0x55ab6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GenericAccess",
+              "source": "src/sim_api.c:2"
+            },
+            {
+              "symbol": "SIM_GenericAccessCGLA",
+              "source": "src/sim_api.c:1691"
+            }
           ]
         },
         "4": {
@@ -2263,6 +3926,12 @@
           "req_size": 35,
           "ap_senders": [
             "0x56808"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "PersonalizeME",
+              "source": "src/sim_api.c:231"
+            }
           ]
         },
         "6": {
@@ -2270,6 +3939,12 @@
           "req_size": 36,
           "ap_senders": [
             "0x55d5e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_EnterPin",
+              "source": "src/sim_api.c:1855"
+            }
           ]
         },
         "8": {
@@ -2277,6 +3952,12 @@
           "req_size": 65,
           "ap_senders": [
             "0x56062"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "STK_DownloadMeProfile",
+              "source": "src/sim_api.c:2093"
+            }
           ]
         },
         "13": {
@@ -2284,6 +3965,12 @@
           "req_size": 264,
           "ap_senders": [
             "0x560dc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "STK_SendEnvelopeCmd",
+              "source": "src/sim_api.c:2130"
+            }
           ]
         },
         "15": {
@@ -2291,6 +3978,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x55ae4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GenericAccessCGLA",
+              "source": "src/sim_api.c:1691"
+            }
           ]
         },
         "17": {
@@ -2299,6 +3992,12 @@
           "ap_senders": [
             "0x55b02",
             "0x55c2e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GenericAccessCGLA",
+              "source": "src/sim_api.c:1691"
+            }
           ]
         },
         "21": {
@@ -2307,6 +4006,12 @@
           "ap_senders": [
             "0x55f86",
             "0x55fc4"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "STK_EnableProactiveCmdIndConfig",
+              "source": "src/sim_api.c:2037"
+            }
           ]
         },
         "23": {
@@ -2314,6 +4019,12 @@
           "req_size": 19,
           "ap_senders": [
             "0x55eec"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_SetLockFacility",
+              "source": "src/sim_api.c:1979"
+            }
           ]
         },
         "31": {
@@ -2322,6 +4033,16 @@
           "ap_senders": [
             "0x55f3a",
             "0x7175a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GetSpn",
+              "source": "src/sim_api.c:2010"
+            },
+            {
+              "symbol": "quec_qspn_spn_ci_req",
+              "source": "src/quectel_nw_at_handler.c:189"
+            }
           ]
         },
         "42": {
@@ -2329,6 +4050,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x566f8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GetAppInfo",
+              "source": "src/sim_api.c:168"
+            }
           ]
         },
         "44": {
@@ -2337,6 +4064,12 @@
           "ap_senders": [
             "0x5534c",
             "0x558e2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_RunGSMAlgorithm",
+              "source": "src/sim_api.c:1349"
+            }
           ]
         },
         "47": {
@@ -2344,6 +4077,12 @@
           "req_size": 7,
           "ap_senders": [
             "0x5673e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_CheckEmergencyNum",
+              "source": "src/sim_api.c:205"
+            }
           ]
         },
         "53": {
@@ -2351,6 +4090,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x5656a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "MEPReadCodes",
+              "source": "src/sim_api.c:55"
+            }
           ]
         },
         "61": {
@@ -2358,6 +4103,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x5635c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_CCHC",
+              "source": "src/sim_api.c:2350"
+            }
           ]
         },
         "63": {
@@ -2365,6 +4116,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x56340"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_CCHC",
+              "source": "src/sim_api.c:2350"
+            }
           ]
         },
         "67": {
@@ -2372,6 +4129,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x563b2"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapConnect",
+              "source": "src/sim_api.c:2438"
+            }
           ]
         },
         "69": {
@@ -2379,6 +4142,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x563dc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapConnect",
+              "source": "src/sim_api.c:2438"
+            }
           ]
         },
         "71": {
@@ -2386,6 +4155,12 @@
           "req_size": 264,
           "ap_senders": [
             "0x56434"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapTransferAPDU",
+              "source": "src/sim_api.c:2491"
+            }
           ]
         },
         "73": {
@@ -2394,6 +4169,16 @@
           "ap_senders": [
             "0x56374",
             "0x56470"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_CCHC",
+              "source": "src/sim_api.c:2350"
+            },
+            {
+              "symbol": "SIM_BtSapTransferAPDU",
+              "source": "src/sim_api.c:2491"
+            }
           ]
         },
         "75": {
@@ -2401,6 +4186,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x564ae"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapSimControl",
+              "source": "src/sim_api.c:2541"
+            }
           ]
         },
         "78": {
@@ -2408,6 +4199,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x564d8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapSimControl",
+              "source": "src/sim_api.c:2541"
+            }
           ]
         },
         "80": {
@@ -2415,6 +4212,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x56516"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_BtSapSetTransportProtocol",
+              "source": "src/sim_api.c:28"
+            }
           ]
         },
         "84": {
@@ -2423,6 +4226,16 @@
           "ap_senders": [
             "0x559b4",
             "0x5629a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GenericAccess",
+              "source": "src/sim_api.c:1615"
+            },
+            {
+              "symbol": "SIM_CCHO",
+              "source": "src/sim_api.c:2312"
+            }
           ]
         },
         "86": {
@@ -2430,6 +4243,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x56316"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_CCHC",
+              "source": "src/sim_api.c:2350"
+            }
           ]
         },
         "95": {
@@ -2437,6 +4256,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x5a0d6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_RsapStat",
+              "source": "src/sim_api.c:7615"
+            }
           ]
         },
         "106": {
@@ -2445,6 +4270,16 @@
           "ap_senders": [
             "0x568d8",
             "0x5a12c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "processRestrictedSimAccessConf",
+              "source": "src/sim_api.c:3371"
+            },
+            {
+              "symbol": "SIM_RsapSimSelect",
+              "source": "src/sim_api.c:7631"
+            }
           ]
         },
         "108": {
@@ -2452,6 +4287,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x55448"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_RunTContextAuth",
+              "source": "src/sim_api.c:1406"
+            }
           ]
         },
         "113": {
@@ -2459,13 +4300,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x585d0"
-          ]
+          ],
+          "ap_builders": []
         },
         "119": {
           "name": "CI_SIM_PRIM_GET_NUM_UICC_APPLICATIONS_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x56682"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GetAppNum",
+              "source": "src/sim_api.c:140"
+            }
           ]
         },
         "121": {
@@ -2473,6 +4321,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x566ce"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_GetAppInfo",
+              "source": "src/sim_api.c:168"
+            }
           ]
         },
         "130": {
@@ -2480,13 +4334,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x5a01c"
-          ]
+          ],
+          "ap_builders": []
         },
         "132": {
           "name": "CI_SIM_PRIM_SET_POLL_REQ",
           "req_size": 8,
           "ap_senders": [
             "0x5a06a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_SetSimPoll",
+              "source": "src/sim_api.c:7585"
+            }
           ]
         },
         "134": {
@@ -2494,6 +4355,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x5a098"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SIM_SetSimPoll",
+              "source": "src/sim_api.c:7585"
+            }
           ]
         }
       },
@@ -2504,6 +4371,12 @@
           "ap_senders": [
             "0x35f50",
             "0x373fa"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCallerIdStatus",
+              "source": "src/ss_api.c:243"
+            }
           ]
         },
         "7": {
@@ -2511,6 +4384,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x35fea"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetHideIdStatus",
+              "source": "src/ss_api.c:5"
+            }
           ]
         },
         "11": {
@@ -2518,6 +4397,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x360ce"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetDialedIdStatus",
+              "source": "src/ss_api.c:9"
+            }
           ]
         },
         "13": {
@@ -2525,6 +4410,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x3794c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCcmOption",
+              "source": "src/ss_api.c:2137"
+            }
           ]
         },
         "15": {
@@ -2532,6 +4423,12 @@
           "req_size": 3,
           "ap_senders": [
             "0x37992"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCcugConfig",
+              "source": "src/ss_api.c:2187"
+            }
           ]
         },
         "19": {
@@ -2539,6 +4436,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x367fe"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetNamePresentationStatus",
+              "source": "src/ss_api.c:197"
+            }
           ]
         },
         "33": {
@@ -2546,6 +4449,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x3657a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_GetLocalCallWaitingSettings",
+              "source": "src/ss_api.c:26"
+            }
           ]
         },
         "35": {
@@ -2553,6 +4462,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x365d6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetLocalCallWaitingStatus",
+              "source": "src/ss_api.c:54"
+            }
           ]
         },
         "45": {
@@ -2560,6 +4475,12 @@
           "req_size": 231,
           "ap_senders": [
             "0x36688"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SendSupServiceData",
+              "source": "src/ss_api.c:95"
+            }
           ]
         },
         "47": {
@@ -2567,13 +4488,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x36766"
-          ]
+          ],
+          "ap_builders": []
         },
         "49": {
           "name": "CI_SS_PRIM_GET_CCM_OPTION_REQ",
           "req_size": 0,
           "ap_senders": [
             "0x37910"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCcmOption",
+              "source": "src/ss_api.c:2137"
+            }
           ]
         },
         "51": {
@@ -2581,6 +4509,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x378e6"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCcmOption",
+              "source": "src/ss_api.c:2137"
+            }
           ]
         },
         "53": {
@@ -2588,13 +4522,20 @@
           "req_size": 0,
           "ap_senders": [
             "0x37824"
-          ]
+          ],
+          "ap_builders": []
         },
         "55": {
           "name": "CI_SS_PRIM_SET_AOC_WARNING_ENABLE_REQ",
           "req_size": 1,
           "ap_senders": [
             "0x37862"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCCWEMode",
+              "source": "src/ss_api.c:2106"
+            }
           ]
         },
         "57": {
@@ -2602,6 +4543,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x36878"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetNotificationOptions",
+              "source": "src/ss_api.c:215"
+            }
           ]
         },
         "59": {
@@ -2609,6 +4556,12 @@
           "req_size": 2,
           "ap_senders": [
             "0x3684e"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetNotificationOptions",
+              "source": "src/ss_api.c:215"
+            }
           ]
         },
         "97": {
@@ -2616,6 +4569,12 @@
           "req_size": 0,
           "ap_senders": [
             "0x35e7c"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_FdnCheck",
+              "source": "src/ss_api.c:166"
+            }
           ]
         },
         "99": {
@@ -2623,6 +4582,12 @@
           "req_size": 1,
           "ap_senders": [
             "0x35eb8"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCdipOption",
+              "source": "src/ss_api.c:209"
+            }
           ]
         },
         "103": {
@@ -2631,6 +4596,16 @@
           "ap_senders": [
             "0x35c9a",
             "0x35e3a"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_MmiCodeFdnCheck",
+              "source": "src/ss_api.c:117"
+            },
+            {
+              "symbol": "SS_FdnCheck",
+              "source": "src/ss_api.c:166"
+            }
           ]
         },
         "111": {
@@ -2638,9 +4613,21 @@
           "req_size": 0,
           "ap_senders": [
             "0x379bc"
+          ],
+          "ap_builders": [
+            {
+              "symbol": "SS_SetCcugConfig",
+              "source": "src/ss_api.c:2187"
+            }
           ]
         }
       }
+    },
+    "builder_symbols": {
+      "status": "CONFIRMED",
+      "method": "Every CI request payload is allocated by utlDoCalloc(file, symbol, line, 1, size) - a debug allocator that carries the builder's own symbol name and source location. Enumerating its 303 resolvable call sites and matching each to the nearest following CI send recovers the AP-side builder for 357 of the 397 send sites.",
+      "cross_validation": "The source file of each builder maps one-to-one onto a service group (cc_api.c -> CC, ss_api.c -> SS, mm_api.c -> MM, pb_api.c -> PB, sim_api.c -> SIM, msg_api.c -> MSG, ps_api.c -> PS, teldat.c -> DAT, dev_api.c and teldev.c -> DEV). Compared against the client-object slot rule on all joined senders: 356 agree, 0 disagree. Two independent signals, no conflict.",
+      "bonus": "The allocator is utlDoCalloc, so every CI request payload is zero-filled before the builder writes its fields. Any field a builder omits is therefore transmitted as zero, not as heap residue."
     }
   },
   "client_object_table": {

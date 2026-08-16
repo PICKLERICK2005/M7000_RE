@@ -822,13 +822,21 @@ format byte at `+0x03`:
 | `0x08` | 1 | MNC digit count *(numeric only)* |
 | `0x28` | 1 | `AcT`, 0–11 |
 
-So the answer to how the PLMN is represented after `atcmdsrv` is: **numeric MCC and
-MNC as two separate little-endian 16-bit integers, with an explicit MNC digit
-count.** Not packed BCD, not text. The parser at `0x5f280` accepts a 5- or
-6-character numeric string, converts characters 4-onward to the MNC and 1–3 to the
-MCC, and the digit count is simply the string length minus three.
+So the answer to how the PLMN is represented after `atcmdsrv` is: **two separate
+16-bit fields, each holding its digits BCD-packed one per nibble, plus an explicit
+MNC digit count.**
 
-In the alphanumeric formats no MCC/MNC is present at all — the name is sent instead.
+That is a correction to an earlier draft of this section, which said "plain
+little-endian integers, not packed BCD". The container is a `u16` per component —
+so it is *not* the 3GPP interleaved three-byte PLMN-ID — but the contents are BCD.
+The digit converter at `0x5efc6` accumulates with `add.w r4, r3, r4, lsl #4`: four
+bits per digit, not a multiply by ten. It also accepts `a`–`f` and `A`–`F`, which
+only makes sense for a hex-radix accumulation. MCC 262 is carried as `0x0262`.
+
+The parser at `0x5f280` accepts a 5- or 6-character numeric string, converts
+characters 4-onward to the MNC and 1–3 to the MCC, and the digit count is the string
+length minus three. In the alphanumeric formats no MCC/MNC is present at all — the
+name is sent instead.
 
 ### Cancellation cannot target a request
 
@@ -927,20 +935,101 @@ State **8** is a negative result: none of the fifteen sites can emit it, and no 
 passes a value that could evaluate to it. The frontend enumerates the state; this
 daemon build cannot reach it.
 
-## The operator-info structure, partially
+## The operator-info structure
 
 `GET_NETWORK_OPERATOR_INFO_CNF` (23) and `GET_CURRENT_OPERATOR_INFO_CNF` (33) are both
-80 bytes, and the formatter at `0x1df00` reveals part of the layout: a status word at
-`+0x00`, a field bounded to `≤ 3` at `+0x02`, a name/identity block starting at
-`+0x04`, flags at `+0x29` and `+0x2a`, and two numeric halfwords at `+0x48` and
-`+0x4a`.
+80 bytes, and the layout now partitions cleanly:
 
-The `≤ 3` field at `+0x02` is the `operatorState` candidate. It indexes a four-byte
-table at `0x85601` containing `00 01 02 01`. That is as far as the evidence goes: the
-mapping is confirmed to exist and to be indexed by that field, but it is notably *not*
-the identity and never emits 3 — so it is not a pass-through to the AT `+COPS <stat>`
-field, and the four states have no recovered names.
+| Offset | Size | Field |
+| --- | ---: | --- |
+| `0x00` | 2 | result / status word |
+| `0x02` | 1 | `operatorState`, bounded to ≤ 3 |
+| `0x03` | 1 | unnamed, not read on this path |
+| `0x04` | 38 | operator name descriptor **A** |
+| `0x2a` | 38 | operator name descriptor **B** |
 
-The 80 bytes were not fully partitioned. The long/short name extents and any
-access-technology field were not isolated. Those gaps are recorded as unknown rather
-than filled in from 3GPP terminology, which the firmware has not been shown to use.
+The arithmetic is the proof: `0x04 + 38 + 38 = 0x50`, exactly the declared size, and
+both descriptor bases appear literally in the code as `add.w r8, r4, #4` and
+`add.w r8, r4, #0x2a`, with every later field access relative to `r8`. So the
+"long/short name extents" question resolves structurally — they are two equal
+descriptors, not variable-length fields.
+
+Each descriptor is a discriminated union, and it is the mirror image of the
+registration request's operand:
+
+| Offset | Size | Field |
+| --- | ---: | --- |
+| `+0x00` | 1 | present flag (cleared when the format is invalid) |
+| `+0x01` | 1 | format: 0/1 alphanumeric, 2 numeric, else invalid |
+| `+0x02` | 1 | name length *(alphanumeric)* |
+| `+0x03` | 29 | name text *(alphanumeric)* |
+| `+0x02` | 2 | MCC, BCD-packed *(numeric)* |
+| `+0x04` | 2 | MNC, BCD-packed *(numeric)* |
+| `+0x06` | 1 | MNC digit count *(numeric)* |
+| `+0x24` | 1 | unnamed |
+| `+0x25` | 1 | descriptor qualifier — selects A vs B |
+
+The numeric arm is what settles the BCD question from the other direction: the digit
+count is compared against 3 to choose between the output formats `%03x%03x` and
+`%03x%02x`. Printing a stored value with `%03x` is only correct if the digits live in
+nibbles.
+
+Two fields remain unnamed. `+0x24` is read and copied out when a preceding value
+equals 11; `+0x25` is compared against 0 and 2 to choose which descriptor to use, and
+is distinct from the `+0x01` encoding discriminator. Their value spaces are unknown.
+
+`operatorState` also stays partly open. It indexes a four-byte table at `0x85601`
+containing `00 01 02 01`. The mapping is confirmed to exist and to be indexed by that
+field, but it is not the identity and never emits 3 — so it is not a pass-through to
+the AT `+COPS <stat>` field, and the four states have no recovered names. That gap is
+recorded rather than filled in from 3GPP terminology the firmware has not been shown
+to use.
+
+Scan results accumulate into a block allocated as `count × 80 + 30` bytes under the
+symbol `processQuerySuppOpeNumConf` in `src/mm_api.c`.
+
+## Every CI builder is named by its own allocator
+
+A side effect of the allocator turns out to be the most useful generalization in this
+pass. Every CI request payload is allocated by
+
+    utlDoCalloc(file, symbol, line, 1, size)
+
+a debug allocator that carries the *builder's own symbol name and source location*.
+Enumerating its 303 resolvable call sites and matching each to the following CI send
+names the AP-side builder for **357 of the 397** send sites — for example
+`DEV_SetBandModeReq` at `src/dev_api.c:249` and `DEV_SetBandModeReqExt` at
+`src/dev_api.c:13525`.
+
+The source files map one-to-one onto service groups: `cc_api.c` → CC, `mm_api.c` → MM,
+`ps_api.c` → PS, and so on. Checked against the client-object slot rule across every
+joined sender: **356 agree, 0 disagree.** Two independent signals for the same
+assignment, with no conflict.
+
+It also settles a smaller thing: the allocator is `utlDoCalloc`, so every request
+payload is zero-filled before the builder writes it. Any field a builder omits is
+transmitted as zero rather than heap residue.
+
+## The `+0x18` operation selector: nobody sends 1, 2 or 3
+
+`atcmdsrv` contains exactly two senders of `SET_BAND_MODE_REQ`. `DEV_SetBandModeReq`
+writes `+0x18` explicitly with 0. `DEV_SetBandModeReqExt` — the duplicated builder
+used when `AT*BAND` omits `NwMode` — **omits the `+0x18` store entirely**, but the
+zeroing allocator means it still transmits 0.
+
+No other binary in the rootfs is a CI client: `cp_load`, `eeh`, `nvmproxy` and
+`libstreamingmedia.so` reference `/dev/msocket` but carry none of the CI primitive
+vocabulary, consistent with their using other message types on the same channel. And
+on the CP side the handler is reached only from the DEV dispatch table, so there is no
+CP-internal caller either.
+
+So the UMTS band branch (`+0x18` = 1 or 2) and the RAT mode-change branch (`+0x18` = 3)
+are **dead code from this firmware's point of view** — and the line-3760/3767
+`networkMode` assertions sitting behind the latter can never fire in normal operation.
+
+The omission in `DEV_SetBandModeReqExt` is harmless here, but it is worth recording:
+it is a second instance of the same copy-paste divergence already documented for the
+six-field `AT*BAND` builder, and it would matter under a non-zeroing allocator.
+
+(A host issuing CI primitives directly over msocket could of course set any value.
+That is precisely why it is not being attempted.)

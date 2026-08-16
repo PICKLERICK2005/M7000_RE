@@ -876,7 +876,25 @@
       ],
       "error_path": "0x068afe7a emits service group 9 (DEV) with primId 0xF001 = CI_ERR_PRIM_HASINVALIDPARAS_CNF. This is a primitive id, not an ad-hoc error code.",
       "success_path": "0x068b0108 allocates DEV primId 0x34 (SET_BAND_MODE_CNF), writes halfword 1 at +0x00 and byte 0 at +0x02, and sends it. The CNF payload size table says 4 bytes, matching.",
-      "correction": "A previous revision described +0x18 as branching on 0/5, 1/2 'else', and implied the networkMode/preferredMode assertions were on the AT*BAND path. They are not: that block sits behind `[+0x18] == 3`."
+      "correction": "A previous revision described +0x18 as branching on 0/5, 1/2 'else', and implied the networkMode/preferredMode assertions were on the AT*BAND path. They are not: that block sits behind `[+0x18] == 3`.",
+      "operation_selector_reachability": {
+        "question": "Which AP component sends CI_DEV_PRIM_SET_BAND_MODE_REQ with the operation selector at +0x18 set to 1, 2 or 3?",
+        "answer": "None. NEGATIVE EVIDENCE.",
+        "evidence": [
+          "atcmdsrv contains exactly two senders of primitive 51: 0x40d30 (builder DEV_SetBandModeReq, src/dev_api.c:249) and 0x46324 (builder DEV_SetBandModeReqExt, src/dev_api.c:13525).",
+          "DEV_SetBandModeReq writes +0x18 explicitly with the constant 0 (`strb r6,[r3,#0x18]` at 0x40d26, r6 = 0).",
+          "DEV_SetBandModeReqExt omits the +0x18 store entirely, but the payload comes from utlDoCalloc, so the byte is transmitted as 0 regardless.",
+          "atcmdsrv is the only binary in the rootfs containing the CI primitive vocabulary. cp_load, eeh, nvmproxy and libstreamingmedia.so reference /dev/msocket but carry no CI_DEV_PRIM or CI_SG_ID strings, consistent with their using other msocket message types.",
+          "On the CP side the handler at 0x068afdf0 is reached only from the DEV request dispatch table, so there is no CP-internal caller that could supply a different selector."
+        ],
+        "consequence": "The UMTS band branch (+0x18 = 1 or 2) and the RAT mode-change branch (+0x18 = 3) of the CP handler are dead code from this firmware's point of view, and the line-3760/3767 networkMode assertions behind the latter can never fire in normal operation.",
+        "caveat": "This is a statement about this firmware image. A host issuing CI primitives directly over msocket could set any value; that is exactly why it is not being attempted."
+      },
+      "builder_defect_note": {
+        "finding": "DEV_SetBandModeReqExt (0x462a4), the duplicated builder used when AT*BAND omits NwMode, writes +0x00, +0x01, +0x04, +0x08, +0x0c, +0x10, +0x14, +0x15, +0x16, +0x17 and +0x1c but never writes +0x18, which its sibling DEV_SetBandModeReq does write.",
+        "impact": "None, because utlDoCalloc zeroes the payload. Recorded because the omission is real and would matter under a non-zeroing allocator, and because it is a second instance of the same copy-paste divergence already documented for the six-field AT*BAND builder.",
+        "status": "CONFIRMED as an omission; CONFIRMED as harmless in this build"
+      }
     },
     "cp_readback_handler": {
       "va": "0x068b0156",
@@ -1360,8 +1378,15 @@
         ],
         "plmn_encoding": {
           "question_closed": "Does the CP receive textual PLMN fields, numeric MCC/MNC, packed BCD, or another structure?",
-          "answer": "Numeric MCC and MNC as two separate little-endian 16-bit integers, plus an explicit MNC digit count. Not packed BCD, and not text.",
-          "parser": "0x5f280 accepts a 5- or 6-character numeric string (it requires length - 5 <= 1), converts characters 4.. to the MNC and characters 1-3 to the MCC via 0x5efc6, and returns them as two halfwords.",
+          "answer": "Two separate 16-bit fields, each holding its digits BCD-packed one digit per nibble, plus an explicit MNC digit count. It is NOT the 3GPP interleaved three-byte PLMN-ID, and it is not a plain binary integer.",
+          "correction": "An earlier revision of this file said 'two plain little-endian 16-bit integers ... not packed BCD'. That was wrong. The container is a u16 per component, but the contents are BCD.",
+          "decisive_evidence": [
+            "The digit converter at atcmdsrv 0x5efc6 accumulates with `add.w r4, r3, r4, lsl #4` - a shift of four bits per digit, i.e. one digit per nibble, not a multiply by ten.",
+            "The same converter also accepts 'a'-'f' and 'A'-'F' (range checks against 0x61 and 0x41 with a -0x37 adjustment), which only makes sense for a hex-radix accumulation.",
+            "The result-direction formatter prints the corresponding fields with '%03x%03x' / '%03x%02x' (atcmdsrv 0x1e088 and 0x1e08c), which is the exact inverse."
+          ],
+          "worked_example": "MCC 262 is carried as 0x0262; a two-digit MNC 07 as 0x0007 with digit count 2.",
+          "parser": "0x5f280 accepts a 5- or 6-character numeric string (it requires length - 5 <= 1), converts characters 4.. to the MNC and characters 1-3 to the MCC via 0x5efc6, and returns them as two halfwords. The digit count is the string length minus three.",
           "caveat": "In the two alphanumeric formats the operator NAME is sent instead, as a length-prefixed 35-byte string, and no MCC/MNC is present. The union is discriminated by the format byte at +0x03."
         }
       },
@@ -1394,53 +1419,107 @@
     },
     "operator_info_structure": {
       "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_CNF (23) and CI_MM_PRIM_GET_CURRENT_OPERATOR_INFO_CNF (33), both 80 bytes",
-      "status": "PARTIAL - offsets confirmed by use, semantics only partly recovered",
-      "consumer": "the formatter at atcmdsrv 0x1df00, inside the MM handler",
-      "fields_observed": [
+      "status": "CONFIRMED layout; two fields remain unnamed",
+      "consumer": "the formatter at atcmdsrv 0x1df00, inside the MM handler at 0x1d644",
+      "result_array": "The scan accumulates records into a block allocated by utlDoCalloc(..., 'processQuerySuppOpeNumConf', src/mm_api.c:2946, 1, count*0x50 + 0x1e), i.e. count 80-byte records plus a 30-byte header.",
+      "layout": [
         {
           "offset": "0x00",
           "size": 2,
-          "role": "status / result word; the scan-count CNF uses the same shape and requires 0"
+          "name": "result / status word",
+          "note": "the sibling count confirmation uses the same leading shape and requires 0"
         },
         {
           "offset": "0x02",
           "size": 1,
-          "name": "operatorState candidate",
-          "detail": "bounded to <= 3 at 0x1df42, then used to index a 4-byte table at 0x85601 whose contents are 00 01 02 01",
-          "confidence": "CONFIRMED that a 0..3 field at +0x02 indexes that table; the meaning of the four states and of the mapped values is UNKNOWN. The mapping is notably NOT the identity and never emits 3, so it is not a straight pass-through to the AT +COPS <stat> field."
+          "name": "operatorState",
+          "range": "0..3",
+          "detail": "bounded at 0x1df42, then used to index a 4-byte table at 0x85601 holding 00 01 02 01",
+          "confidence": "CONFIRMED as a 0..3 field feeding that table; the four state names and the meaning of the mapped values are UNKNOWN. The mapping is not the identity and never emits 3, so it is not a pass-through to the AT +COPS <stat> field."
+        },
+        {
+          "offset": "0x03",
+          "size": 1,
+          "name": "unnamed",
+          "confidence": "UNKNOWN - not read on this path"
         },
         {
           "offset": "0x04",
-          "size": null,
-          "role": "start of the name/identity block (taken as a base pointer at 0x1df3c)"
-        },
-        {
-          "offset": "0x24",
-          "size": 1,
-          "role": "read at 0x1df64 when a preceding byte equals 11"
-        },
-        {
-          "offset": "0x29",
-          "size": 1,
-          "role": "read at 0x1df34, compared against 2"
+          "size": 38,
+          "name": "operator name descriptor A"
         },
         {
           "offset": "0x2a",
-          "size": 1,
-          "role": "read at 0x1df2a, used as a presence flag"
-        },
-        {
-          "offset": "0x48",
-          "size": 2,
-          "role": "numeric field emitted by the +COPS formatter"
-        },
-        {
-          "offset": "0x4a",
-          "size": 2,
-          "role": "numeric field emitted by the +COPS formatter"
+          "size": 38,
+          "name": "operator name descriptor B"
         }
       ],
-      "honest_limits": "The 80 bytes were not fully partitioned. In particular the long/short name extents and the access-technology field were not isolated, and no operatorState enum was recovered. Do not fill these in from 3GPP terminology; the firmware has not been shown to use it."
+      "layout_proof": "0x04 + 38 + 38 = 0x50, exactly the primitive's declared size. The two descriptor bases appear literally as `add.w r8, r4, #4` (0x1df3c) and `add.w r8, r4, #0x2a` (0x1df9e), and every subsequent field access is relative to r8.",
+      "name_descriptor": {
+        "size": 38,
+        "form": "a discriminated union, structurally the mirror of the MANUAL_REGISTER_REQ operand",
+        "fields": [
+          {
+            "offset": "+0x00",
+            "size": 1,
+            "name": "present flag",
+            "detail": "cleared to 0 at 0x1dff2 when the format byte is invalid"
+          },
+          {
+            "offset": "+0x01",
+            "size": 1,
+            "name": "format",
+            "values": "0 or 1 = alphanumeric, 2 = numeric, anything else = invalid",
+            "site": "0x1dfe4"
+          },
+          {
+            "offset": "+0x02",
+            "size": 1,
+            "name": "name length (alphanumeric only)",
+            "site": "0x1dff8"
+          },
+          {
+            "offset": "+0x03",
+            "size": 29,
+            "name": "name text (alphanumeric only)",
+            "site": "0x1e000, copied with 0x13a98"
+          },
+          {
+            "offset": "+0x02",
+            "size": 2,
+            "name": "MCC, BCD-packed (numeric only)",
+            "site": "0x1e012"
+          },
+          {
+            "offset": "+0x04",
+            "size": 2,
+            "name": "MNC, BCD-packed (numeric only)",
+            "site": "0x1e016"
+          },
+          {
+            "offset": "+0x06",
+            "size": 1,
+            "name": "MNC digit count (numeric only)",
+            "detail": "compared against 3 at 0x1e01a to select the '%03x%03x' or '%03x%02x' output form"
+          },
+          {
+            "offset": "+0x24",
+            "size": 1,
+            "name": "unnamed",
+            "detail": "read at 0x1df6c and copied out when a preceding value equals 11",
+            "confidence": "UNKNOWN"
+          },
+          {
+            "offset": "+0x25",
+            "size": 1,
+            "name": "descriptor qualifier",
+            "detail": "compared against 0 and 2 at 0x1df34 and 0x1df96 to choose between descriptor A and descriptor B",
+            "confidence": "CONFIRMED as the selector between the two descriptors; its value space is UNKNOWN and it is distinct from the +0x01 encoding discriminator"
+          }
+        ]
+      },
+      "symmetry_note": "The same PLMN representation appears in both directions: format byte, then either a length-prefixed name or BCD MCC / BCD MNC / digit count. The request side (MANUAL_REGISTER_REQ) carries it at +0x03 onward, the result side at descriptor+0x01 onward.",
+      "previous_gap_closed": "The long/short name extents are no longer unknown: they are two equal 38-byte descriptors, not variable-length fields."
     },
     "safety": "Recovery only. No scan, registration, deregistration or cancellation was triggered."
   },
