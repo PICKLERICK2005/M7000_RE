@@ -1116,3 +1116,110 @@ The `<stat>` field of the `+COPS=?` *list* response (unknown / available / curre
 forbidden) is produced on a different code path and was not traced. It should not be
 assumed to live at `+0x02`; on the path decoded here that offset carries the selection
 mode.
+
+## Two operator structures, not one
+
+The scan-list confirmation and the current-operator confirmation are both 80 bytes and
+both belong to MM, so an earlier pass treated them as one structure. They are not, and
+that conflation is what produced the `operatorState` mislabel.
+
+**`GET_NETWORK_OPERATOR_INFO_CNF` (23)** — the scan-list record, decoded at `0x1ddec`,
+emitted as `(%d,"%s","%s","%03x%03x",%d)`, the 3GPP list form:
+
+| Offset | Size | Field |
+| --- | ---: | --- |
+| `0x02` | 1 | **`<stat>`** |
+| `0x06` | 1 | long name length |
+| `0x07` | 32 | long alphanumeric name |
+| `0x27` | 1 | short name length |
+| `0x28` | 32 | short alphanumeric name |
+| `0x48` | 2 | MCC, BCD |
+| `0x4a` | 2 | MNC, BCD |
+| `0x4c` | 1 | MNC digit count |
+| `0x4e` | 1 | `<AcT>` |
+
+Fully partitioned — every byte from `0x02` to `0x4e` accounted for. `<stat>` is passed
+through **unmapped** into the AT `<stat>` position, so the CI values coincide
+numerically with 0 unknown / 1 available / 2 current / 3 forbidden. That conclusion
+rests on the pass-through plus the AT contract the firmware is itself implementing, not
+on an internal table — there is no table.
+
+**`GET_CURRENT_OPERATOR_INFO_CNF` (33)** is the read record, and it is laid out
+differently: status word, the selection-mode byte at `0x02`, then two 38-byte name
+descriptors at `0x04` and `0x2a`. The two layouts share only `AcT` at absolute `0x4e`.
+
+### The last two unnamed bytes
+
+`+0x24` of a descriptor is **`AcT`**. The proof is the default: at `0x1df5c` the handler
+tests a stored access-technology byte against `11` — exactly the `AT+COPS` `<AcT>`
+parameter default — and substitutes `descriptor+0x24` when it is still that default,
+then passes the same byte to the RAT helper at `0x5be76`. Descriptor B's `+0x24` is
+absolute `0x4e`, which is where the list record independently puts `AcT`.
+
+`+0x25` stays unnamed. Its role is confirmed — the handler prefers whichever descriptor
+has `+0x25 == 2` and falls back to whichever has `0` — but no producer was located, so
+there is nothing to name the enum from. It is not a duplicate of `<format>`; that field
+is `+0x01`.
+
+## The receive handlers were static all along
+
+I previously wrote that the per-service-group RX handler pointers "cannot be resolved
+from static data alone". That was wrong, and it is retracted.
+
+The registration is data-driven, but the data is a static table. One builder at
+`0x5a344` constructs a 36-byte record per service group:
+
+| Field | Value | Installed into |
+| --- | --- | --- |
+| `+0x00` | service group id | — |
+| `+0x04` | `svgId + 10` | `0x000f3ebc[svgId]` |
+| `+0x08` | `0x09770c[svgId]` | `0x000eeb50[svgId]` |
+| `+0x0c` | `svgId + 40` | `0x000f3ef8[svgId]` |
+| `+0x10` | `0x0977ac[svgId]` | `0x000eeb94[svgId]` — the RX handler |
+
+So the handler table is just `0x0977ac` copied across at registration time:
+
+| Group | Handler | Group | Handler |
+| --- | --- | --- | --- |
+| CC | `0x0173fc` | MSG | `0x04f7b0` |
+| SS | `0x037488` | PS | `0x0315e4` |
+| MM | `0x01fd28` | DAT | `0x047320` |
+| PB | `0x033cec` | DEV | `0x0453f8` |
+| SIM | `0x058e98` | HSCSD/DEB/ATPI/PL/OAM | `0x05a2c4` (one shared stub) |
+
+Nine real handlers and a single stub for the five groups this build does not implement.
+
+Type 3 is both local and remote: it writes the AP tables *and* forwards the same record
+to the CP, so the CP learns which groups the client serves.
+
+One correction that falls out: the registered MM entry is **`0x01fd28`**, not `0x1d644`.
+`0x01fd28` switches on the primitive id and, at `0x1fd48`, branches on `reqHandle` bit 30
+into a parallel switch covering the same primitive ids — which is exactly the two-context
+behaviour the `reqHandle` field map predicted. `0x1d644` is a confirmation processor
+inside that machinery, not the entry point. The earlier identification was right about
+what the function does and wrong about its role.
+
+## Control message types 5 and 6
+
+Type 5 caches two words from the message body into globals `0x000eeb8c` and `0x000eeb90`;
+type 6 clears both. The single builder sets both words to the same function pointer,
+`0x05a600`, and uses channel ids 10 and 40 — the `svgId+10` / `svgId+40` formulas
+evaluated at group 0, i.e. a channel belonging to no service group.
+
+`0x05a600` is a log-only stub: it returns immediately when its second argument is `≤ 9`
+and otherwise emits a diagnostic. Since 9 is the highest implemented service group, it
+fires only for groups 10–14.
+
+So type 5 registers a global catch-all receive callback for the groups the client does
+not implement, and type 6 unregisters it. In this build that callback does nothing but
+log. Type 10 exists (sent from `0x5b450`) and was not decoded.
+
+## Record 208 has no writer
+
+Records 200–207 and 417 all have producers. Record 208 (`mobile_status.rf_info.cell_id`)
+does not — it is named in the `tp_data` table and never written.
+
+Two sites in `mobile` do load the immediate 208, at `0x3e924` and `0x3e9c0`, but both
+pass it to `_ZdlPvj` — a sized `operator delete` on a 208-byte object. They are object
+sizes, not record ids. Anything reading record 208 gets whatever the record defaults to;
+it is not a live cell-identity source.

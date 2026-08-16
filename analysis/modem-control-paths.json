@@ -1418,119 +1418,161 @@
       "record_76_restore": "UNKNOWN. The AP-side restoration of record 76's temporary overlay after a cancel was not traced in this pass."
     },
     "operator_info_structure": {
-      "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_CNF (23) and CI_MM_PRIM_GET_CURRENT_OPERATOR_INFO_CNF (33), both 80 bytes",
-      "status": "CONFIRMED layout; two fields remain unnamed",
-      "consumer": "the formatter at atcmdsrv 0x1df00, inside the MM handler at 0x1d644",
-      "result_array": "The scan accumulates records into a block allocated by utlDoCalloc(..., 'processQuerySuppOpeNumConf', src/mm_api.c:2946, 1, count*0x50 + 0x1e), i.e. count 80-byte records plus a 30-byte header.",
-      "layout": [
-        {
-          "offset": "0x00",
-          "size": 2,
-          "name": "result / status word",
-          "note": "the sibling count confirmation uses the same leading shape and requires 0"
-        },
-        {
-          "offset": "0x02",
-          "size": 1,
-          "name": "network selection mode",
-          "range": "0..3",
-          "correction": "Earlier revisions of this file called this field 'operatorState' and treated it as an availability status. That was wrong for this primitive. It is mapped through the 4-byte table at atcmdsrv 0x85601 (00 01 02 01) and emitted as the FIRST field of the AT read response '+COPS: %d,%d,\"%s\",%d', which by 3GPP position is <mode>, not <stat>.",
-          "mapping": {
-            "0": "0 (automatic)",
-            "1": "1 (manual)",
-            "2": "2 (deregister)",
-            "3": "1 (manual)"
-          },
-          "confidence": "CONFIRMED as feeding the AT <mode> position; the CI-side names for the four input values are still UNKNOWN."
-        },
-        {
-          "offset": "0x03",
-          "size": 1,
-          "name": "unnamed",
-          "confidence": "UNKNOWN - not read on this path"
-        },
-        {
-          "offset": "0x04",
-          "size": 38,
-          "name": "operator name descriptor A"
-        },
-        {
-          "offset": "0x2a",
-          "size": 38,
-          "name": "operator name descriptor B"
-        }
-      ],
-      "layout_proof": "0x04 + 38 + 38 = 0x50, exactly the primitive's declared size. The two descriptor bases appear literally as `add.w r8, r4, #4` (0x1df3c) and `add.w r8, r4, #0x2a` (0x1df9e), and every subsequent field access is relative to r8.",
-      "name_descriptor": {
-        "size": 38,
-        "form": "a discriminated union, structurally the mirror of the MANUAL_REGISTER_REQ operand",
+      "status": "CONFIRMED - two DISTINCT 80-byte layouts",
+      "critical_correction": "Earlier revisions treated the scan-list confirmation and the current-operator confirmation as one structure. They are not. Both are 80 bytes and both belong to service group MM, but their field layouts differ and they are decoded by different formatters. Conflating them was the source of the earlier 'operatorState' mislabel.",
+      "list_record": {
+        "primitive": "CI_MM_PRIM_GET_NETWORK_OPERATOR_INFO_CNF (23), 80 bytes",
+        "produced_by": "the AT+COPS=? scan loop",
+        "formatter": "atcmdsrv 0x1ddec",
+        "at_output": "(%d,\"%s\",\"%s\",\"%03x%03x\",%d) - the 3GPP list form (<stat>,<long>,<short>,<numeric>,<AcT>)",
         "fields": [
           {
-            "offset": "+0x00",
+            "offset": "0x02",
             "size": 1,
-            "name": "present flag",
-            "detail": "cleared to 0 at 0x1dff2 when the format byte is invalid"
+            "name": "stat",
+            "detail": "emitted UNMAPPED as the first field of the list entry, i.e. straight into the AT <stat> position",
+            "enum": "Because it is a pass-through, the CI values coincide numerically with the AT <stat> space: 0 unknown, 1 available, 2 current, 3 forbidden.",
+            "confidence": "CONFIRMED as a pass-through; the enum meanings follow from the AT interface contract the firmware is itself implementing, not from an internal table"
           },
           {
-            "offset": "+0x01",
+            "offset": "0x06",
             "size": 1,
-            "name": "format",
-            "values": "0 = long alphanumeric, 1 = short alphanumeric, 2 = numeric, anything else invalid",
-            "site": "0x1dfe4",
-            "confirmation": "This byte is emitted directly as the SECOND field of '+COPS: %d,%d,\"%s\",%d', i.e. the 3GPP <format> position, whose codes are exactly 0 = long alphanumeric, 1 = short alphanumeric, 2 = numeric. The descriptor's own decode branches agree with that reading.",
-            "descriptor_pair_meaning": "Because the format byte is per-descriptor, the two 38-byte descriptors are the long and short forms of the same operator identity."
+            "name": "long name length"
           },
           {
-            "offset": "+0x02",
+            "offset": "0x07",
+            "size": 32,
+            "name": "long alphanumeric name"
+          },
+          {
+            "offset": "0x27",
             "size": 1,
-            "name": "name length (alphanumeric only)",
-            "site": "0x1dff8"
+            "name": "short name length"
           },
           {
-            "offset": "+0x03",
-            "size": 29,
-            "name": "name text (alphanumeric only)",
-            "site": "0x1e000, copied with 0x13a98"
+            "offset": "0x28",
+            "size": 32,
+            "name": "short alphanumeric name"
           },
           {
-            "offset": "+0x02",
+            "offset": "0x48",
             "size": 2,
-            "name": "MCC, BCD-packed (numeric only)",
-            "site": "0x1e012"
+            "name": "MCC, BCD-packed"
           },
           {
-            "offset": "+0x04",
+            "offset": "0x4a",
             "size": 2,
-            "name": "MNC, BCD-packed (numeric only)",
-            "site": "0x1e016"
+            "name": "MNC, BCD-packed"
           },
           {
-            "offset": "+0x06",
+            "offset": "0x4c",
             "size": 1,
-            "name": "MNC digit count (numeric only)",
-            "detail": "compared against 3 at 0x1e01a to select the '%03x%03x' or '%03x%02x' output form"
+            "name": "MNC digit count",
+            "detail": "compared against 3 at 0x1de48 to pick %03x%03x versus %03x%02x"
           },
           {
-            "offset": "+0x24",
+            "offset": "0x4e",
+            "size": 1,
+            "name": "AcT",
+            "detail": "emitted as the trailing %d of the list entry"
+          }
+        ],
+        "completeness": "Fully partitioned. Every byte from 0x02 to 0x4e is accounted for."
+      },
+      "current_operator_record": {
+        "primitive": "CI_MM_PRIM_GET_CURRENT_OPERATOR_INFO_CNF (33), 80 bytes",
+        "produced_by": "the AT+COPS? read",
+        "formatter": "atcmdsrv 0x1df00",
+        "at_output": "+COPS: %d,%d,\"%s\",%d - the 3GPP read form (<mode>,<format>,<oper>,<AcT>)",
+        "fields": [
+          {
+            "offset": "0x00",
+            "size": 2,
+            "name": "result / status word"
+          },
+          {
+            "offset": "0x02",
+            "size": 1,
+            "name": "network selection mode",
+            "range": "0..3",
+            "detail": "mapped through the 4-byte table at 0x85601 (00 01 02 01) and emitted as the AT <mode> field: 0 automatic, 1 manual, 2 deregister, 3 manual",
+            "note": "This is NOT <stat>. <stat> exists only in the list record above."
+          },
+          {
+            "offset": "0x03",
             "size": 1,
             "name": "unnamed",
-            "detail": "read at 0x1df6c and copied out when a preceding value equals 11",
-            "confidence": "UNKNOWN"
+            "confidence": "UNKNOWN - not read"
           },
           {
-            "offset": "+0x25",
-            "size": 1,
-            "name": "descriptor qualifier",
-            "detail": "compared against 0 and 2 at 0x1df34 and 0x1df96 to choose between descriptor A and descriptor B",
-            "confidence": "CONFIRMED as the selector between the two descriptors; its value space is UNKNOWN and it is distinct from the +0x01 encoding discriminator"
+            "offset": "0x04",
+            "size": 38,
+            "name": "name descriptor A"
+          },
+          {
+            "offset": "0x2a",
+            "size": 38,
+            "name": "name descriptor B"
           }
-        ]
-      },
-      "symmetry_note": "The same PLMN representation appears in both directions: format byte, then either a length-prefixed name or BCD MCC / BCD MNC / digit count. The request side (MANUAL_REGISTER_REQ) carries it at +0x03 onward, the result side at descriptor+0x01 onward.",
-      "previous_gap_closed": "The long/short name extents are no longer unknown: they are two equal 38-byte descriptors, not variable-length fields.",
-      "open_items": {
-        "scan_list_stat": "The <stat> field of the +COPS=? list response (0 unknown / 1 available / 2 current / 3 forbidden) is produced on a different code path from the one decoded here, and was not traced. Do not assume the +0x02 field carries it - on this path it is the selection mode.",
-        "unnamed_bytes": "Descriptor +0x24 and +0x25 remain unnamed. +0x25 selects between descriptor A and B; +0x24 is copied out when a preceding value equals 11."
+        ],
+        "name_descriptor": {
+          "size": 38,
+          "fields": [
+            {
+              "offset": "+0x00",
+              "size": 1,
+              "name": "present flag"
+            },
+            {
+              "offset": "+0x01",
+              "size": 1,
+              "name": "format",
+              "detail": "emitted as the AT <format> field; 0 long alphanumeric, 1 short alphanumeric, 2 numeric"
+            },
+            {
+              "offset": "+0x02",
+              "size": 1,
+              "name": "name length (alphanumeric)"
+            },
+            {
+              "offset": "+0x03",
+              "size": 29,
+              "name": "name text (alphanumeric)"
+            },
+            {
+              "offset": "+0x02",
+              "size": 2,
+              "name": "MCC, BCD-packed (numeric)"
+            },
+            {
+              "offset": "+0x04",
+              "size": 2,
+              "name": "MNC, BCD-packed (numeric)"
+            },
+            {
+              "offset": "+0x06",
+              "size": 1,
+              "name": "MNC digit count (numeric)"
+            },
+            {
+              "offset": "+0x24",
+              "size": 1,
+              "name": "AcT",
+              "status": "RESOLVED (was unnamed)",
+              "evidence": "At 0x1df5c the handler loads a stored access-technology byte, tests it against 11 - which is exactly the AT+COPS <AcT> parameter default recovered from the parameter parser - and substitutes descriptor+0x24 when it is still that default. It then passes descriptor+0x24 to the RAT helper at 0x5be76. Descriptor B's +0x24 is absolute offset 0x4e, the same offset the list record uses for AcT.",
+              "confidence": "CONFIRMED"
+            },
+            {
+              "offset": "+0x25",
+              "size": 1,
+              "name": "descriptor selector",
+              "status": "role confirmed, value space UNKNOWN",
+              "evidence": "The handler at 0x1df34/0x1df96 prefers whichever descriptor has +0x25 == 2, falling back to whichever has 0. It is read only for selection and is distinct from the +0x01 encoding discriminator.",
+              "honest_limit": "No producer for this byte was located, so its enum cannot be named. Do not assume it duplicates <format>."
+            }
+          ],
+          "pair_meaning": "The two descriptors are the long and short forms of one operator identity, which the +0x01 format field confirms by occupying the AT <format> position."
+        }
       }
     },
     "safety": "Recovery only. No scan, registration, deregistration or cancellation was triggered.",
@@ -1722,5 +1764,62 @@
       "confidence": "CONFIRMED that the enum is internal and normalized; UNKNOWN what 6 and 13 mean in it."
     },
     "previous_gap_closed": "States 6, 7 and 9 were previously attributed to 'two call sites passing a computed register'. Both are now resolved: 0x370dc is a conditional select between 6 and 7, and 0x3b620 between 1 and 9."
+  },
+  "ap_ci_receive_registration": {
+    "status": "CONFIRMED",
+    "question_closed": "Which modules register the per-service-group CI receive handlers, and what is the registration lifecycle?",
+    "answer": "There is one registrar, it is table-driven, and the handler pointers are static after all.",
+    "control_api": {
+      "entry": "atcmdsrv 0x7ccd4 (logging wrapper) -> 0x7d9cc (dispatcher)",
+      "signature": "ciControl(clientId, msgType, body, arg)",
+      "message_types": {
+        "3": "register a service-group handler set",
+        "5": "register the global catch-all handler pair",
+        "6": "clear the global catch-all handler pair",
+        "10": "observed at call site 0x5b450; not decoded",
+        "other": "falls through to the generic path, which re-frames the body and forwards it to the CP with outer envelope type 3"
+      },
+      "important": "Type 3 is BOTH local and remote: it writes the AP-side tables and then forwards the same record to the CP, so the CP learns which groups this client serves."
+    },
+    "registration_record": {
+      "size": 36,
+      "builder": "atcmdsrv 0x5a344, one record per service group in an array at 0x0ed4ec",
+      "fields": {
+        "+0x00": "service group id",
+        "+0x04": "svgId + 10  (channel/queue id) -> stored to table 0x000f3ebc[svgId]",
+        "+0x08": "from static table 0x09770c[svgId] -> stored to table 0x000eeb50[svgId]",
+        "+0x0c": "svgId + 40  (channel/queue id) -> stored to table 0x000f3ef8[svgId]",
+        "+0x10": "from static table 0x0977ac[svgId] -> stored to the RX handler table 0x000eeb94[svgId]"
+      },
+      "consequence": "The RX handlers are NOT dynamically supplied. They come from a static table indexed by service group id, so they can be enumerated directly. The earlier note that they were 'not statically resolvable' is superseded."
+    },
+    "rx_handler_table": {
+      "va": "0x0977ac, indexed by service group id",
+      "handlers": {
+        "1 CC": "0x0173fc",
+        "2 SS": "0x037488",
+        "3 MM": "0x01fd28",
+        "4 PB": "0x033cec",
+        "5 SIM": "0x058e98",
+        "6 MSG": "0x04f7b0",
+        "7 PS": "0x0315e4",
+        "8 DAT": "0x047320",
+        "9 DEV": "0x0453f8",
+        "10 HSCSD / 11 DEB / 12 ATPI / 13 PL / 14 OAM": "0x05a2c4 (one shared stub for all five)"
+      },
+      "note": "Nine real handlers plus a shared stub for the five service groups this build does not implement."
+    },
+    "mm_handler_correction": {
+      "finding": "The registered MM entry point is 0x01fd28, not 0x1d644.",
+      "detail": "0x01fd28 switches on the primitive id and, at 0x1fd48, branches on reqHandle bit 30 to a parallel switch at 0x1ff3e covering the same primitive ids. 0x1d644 is an MM confirmation processor reached from within that machinery, not the registered entry. The earlier identification of 0x1d644 by its `cmp r6,#0xc3` bound check was correct about what the function does, but wrong about its role.",
+      "consistency": "The bit-30 branch matches the reqHandle field map: bit 30 selects between two parallel MM client contexts."
+    },
+    "type_5_and_6": {
+      "type_5": "Caches two words from the body into globals 0x000eeb8c and 0x000eeb90. The single builder (0x5b6xx, sending at 0x5b75e) sets both to the same function pointer 0x05a600 and uses channel ids 10 and 40 - the svgId+10 / svgId+40 formulas evaluated at group 0, i.e. a non-service-group channel.",
+      "type_6": "Clears both globals to zero at 0x7dad6.",
+      "callback_identity": "0x05a600 is a log-only stub: it takes (r0, r1), returns immediately when r1 <= 9, and otherwise emits a diagnostic. Since 9 is the highest implemented service group, it fires only for groups 10-14.",
+      "conclusion": "Type 5 registers a global catch-all receive callback for service groups the client does not implement, and type 6 unregisters it. In this build that callback does nothing but log.",
+      "confidence": "CONFIRMED for the mechanism and the registered callback's behaviour; SUPPORTED INFERENCE for calling it a 'catch-all', which rests on the >9 test and the group-0 channel ids."
+    }
   }
 }
