@@ -1033,3 +1033,86 @@ six-field `AT*BAND` builder, and it would matter under a non-zeroing allocator.
 
 (A host issuing CI primitives directly over msocket could of course set any value.
 That is precisely why it is not being attempted.)
+
+## Record 76 is never restored, because nothing is ever saved
+
+The open question asked how record 76's temporary overlay is restored after a
+cancelled manual search. The premise turns out to be wrong, and the real model is
+simpler.
+
+Record 76 has exactly three writers, with three different meanings:
+
+| Writer | Meaning | Persist |
+| --- | --- | :---: |
+| `0x3389c` | configured policy, written with records 447 (MCC) and 448 (MNC) from `MP_NetSel` | yes |
+| `0x3b608` | workflow commit, from a staged value at `*(obj+0x58)` | **no** |
+| `0x4a350` | modem readback, booleanised to 0 or 1 | yes |
+
+The middle one is the overlay, and the giveaway is its persist flag. The dedicated
+setter at `0x42578` passes `0` where the other two pass `1` — so the workflow commit
+is deliberately RAM-only. That is what "temporary" means here, concretely.
+
+It is also the *only* caller of that setter in the whole daemon. There is no site
+that reads record 76 into a save slot before an operation and writes it back after,
+and the value written at commit comes from a staging cell rather than from a captured
+previous value.
+
+So the overlay is a staging cell, not a saved copy. After a cancel there is nothing to
+roll back to — the stale value simply persists until something else writes. In
+practice that something is the modem readback at `0x4a350`, which booleanises whatever
+the modem reports and therefore reconciles record 76 with the modem's actual
+automatic/manual state unconditionally.
+
+Worth noting as a fragility rather than a bug: correctness of the displayed selection
+mode after an aborted operation depends on a readback arriving, not on any rollback.
+
+## The AT-error enum, and a second dead comparison
+
+Record-84 states 6 and 7 are chosen by the internal enum that `mobile 0x41110`
+produces from an AT response. That enum is now fully mapped in both directions.
+
+Textual results: `OK` → 0, `ERROR` → 1, `COMMAND NOT SUPPORT` → 3, `BUSY` → 7,
+`TOO MANY PARAMETERS` → 3, anything unrecognised → 1.
+
+`+CME ERROR: n` maps 3→12, 10→8, 11→9, 13/14/15→20, 16→18, 20→21, 22→11, 30→13,
+31→22, 32→13, 508→23, everything else→1. `+CMS ERROR: n` maps 41→19, 310→8, 311→9,
+312→10, 313/314/315→20, 322→21, 331→13, 332→22, everything else→1.
+
+The complete return set is therefore `{0, 1, 3, 7, 8, 9, 10, 11, 12, 13, 18, 19, 20,
+21, 22, 23}` — enumerated exhaustively from every `mov r0,#imm` in the function body.
+
+That settles the state selection at `0x370c0`:
+
+    cmp r6, #0xd ; cmpne r6, #6 ; moveq r1, #7 ; movne r1, #6
+
+**State 7 means the AT step failed with CME 30 (no network service), CME 32 (network
+not allowed) or CMS 331 (network error)** — a network-unavailable failure, genuinely
+distinct from the generic one. State 6 is everything else.
+
+And the `cmpne r6, #6` half is **dead**: 6 is not in the return set, so nothing can
+satisfy it. This is the second dead equality test in this daemon, after the `0x3081`
+comparison in the preferred-RAT readback normalizer — same shape, a constant no
+producer can emit.
+
+## A correction: `+0x02` is the selection mode, not an operator state
+
+I labelled the `≤ 3` field at `+0x02` of the 80-byte operator record `operatorState`
+and treated it as an availability status. That was wrong for this primitive.
+
+The field is mapped through the four-byte table at `0x85601` (`00 01 02 01`) and
+emitted as the **first** field of the AT read response `+COPS: %d,%d,"%s",%d`. By
+3GPP position that slot is `<mode>`, not `<stat>` — so the mapping reads
+0→automatic, 1→manual, 2→deregister, 3→manual. Which also explains why it never
+emits 3: there is no `<mode>` 3 in a read response.
+
+The same argument list confirms the descriptor's format byte. `+0x01` is emitted as
+the **second** field, the `<format>` position, whose 3GPP codes are exactly 0 = long
+alphanumeric, 1 = short alphanumeric, 2 = numeric — precisely the three branches the
+descriptor decoder takes. So the two 38-byte descriptors are the **long and short
+forms of the same operator identity**, which is why there are two of them and why
+they are identical in shape.
+
+The `<stat>` field of the `+COPS=?` *list* response (unknown / available / current /
+forbidden) is produced on a different code path and was not traced. It should not be
+assumed to live at `+0x02`; on the path decoded here that offset carries the selection
+mode.
