@@ -60,7 +60,7 @@ Four checks then confirm it:
   block names `SIB1`–`SIB18` and `SIB15_1`–`SIB15_5`, in order.
 - The three-word stub at image offset 0 is `nop; ldr pc,[pc,#-4]; .word
   0x06e88c40`. Under this base that entry maps to file offset `0x688c40`, which
-  disassembles as `nop; msr cpsr_c, #0xd3; b ...` — the canonical ARM
+  disassembles as `nop; msr cpsr_c, #0xd3; b ...` - the canonical ARM
   supervisor-mode-with-interrupts-masked boot entry.
 
 Additionally, the assertion string at file `0x6d4104` is referenced by the
@@ -97,7 +97,7 @@ collapses those richer results into AP records 81 and 83.
 
 A significant correction follows from the AP side: the CP does **not** parse
 `AT*BAND` text. It contains no `*BAND` command token and no `CI_DEV_PRIM_*`
-name strings at all — a search of the whole CI/CCI/msocket vocabulary across
+name strings at all - a search of the whole CI/CCI/msocket vocabulary across
 ARBI returns one unrelated hit, `BAND_MODE_CHANGE`. The handler works on
 `pSig->networkMode` and `pSig->preferredMode`, i.e. a already-decoded structure.
 The AT text is parsed on the AP by `atcmdsrv` and converted into the binary CI
@@ -167,21 +167,21 @@ GSM=0, UMTS=1, GSM+UMTS=2, LTE=3, GSM+LTE=4, UMTS+LTE=5, all=6.
 A third, fully independent corroboration comes from the readback path below.
 
 **This 0–6 CI space is not the `AT*BAND` textual `NwMode` space**, and the
-translation between them is now recovered in full — see
+translation between them is now recovered in full - see
 [AP-to-Modem Control Path](modem-control-path.md).
 
 ### The readback path and the CP internal RAT state
 
 `CI_DEV_PRIM_GET_BAND_MODE_CNF` (primitive `0x36`) is built at VA `0x068b0156`,
 which reaches the CP from the internal signal table rather than the CI request
-table — consistent with a query that must wait on lower layers. It carries the
+table - consistent with a query that must wait on lower layers. It carries the
 mode pair at `+0x02` and `+0x03` rather than `+0x00`/`+0x01`.
 
 It also contains an explicit translation: identical `tbb` byte tables
 `03 05 07 09 0f 0d` at `0x068b0192` and `0x068b01c2` map a CP-internal RAT state
 onto the CI value as `0→0, 1→1, 2→3, 3→2, 4→4, 5→5, ≥6→6`. Internal 2 and 3 swap
 places relative to CI. That fixes the CP internal ordering as singletons first
-and then pairs — GSM, UMTS, LTE, GSM+UMTS, GSM+LTE, UMTS+LTE, all — and every
+and then pairs - GSM, UMTS, LTE, GSM+UMTS, GSM+LTE, UMTS+LTE, all - and every
 pair position agrees with the bitmask reading of the CI space.
 
 This is a **sixth** numeric namespace for the same concept, differing from the CI
@@ -195,7 +195,7 @@ with `0x068afdf1`, and every one of the 76 ids resolves to a `CI_DEV_PRIM_*_REQ`
 name under the confirmed 1-based numbering.
 
 The handler's failure return is also now readable: `movs r0, #9` is
-`CI_SG_ID_DEV` and `movw r1, #0xf001` is `CI_ERR_PRIM_HASINVALIDPARAS_CNF` — a
+`CI_SG_ID_DEV` and `movw r1, #0xf001` is `CI_ERR_PRIM_HASINVALIDPARAS_CNF` - a
 primitive id from the global error range, not an ad-hoc error code. On success
 `0x068b0108` emits primitive `0x34`, `CI_DEV_PRIM_SET_BAND_MODE_CNF`.
 
@@ -215,13 +215,13 @@ dispatcher that returns 1 or 2 for different radio states.
 GRBI was examined after ARBI and the honest result is that none of the methods
 that anchored ARBI apply to it.
 
-- It contains **no string-pointer tables at all** — zero qualifying pointer runs,
+- It contains **no string-pointer tables at all** - zero qualifying pointer runs,
   so the delta-shape method that fixed the ARBI base has nothing to match.
 - It has essentially **no ASCII strings**; the few printable runs are binary
   coincidence.
 - It is **not ARM or Thumb code**. Across five 1 KiB windows, Thumb decodes 120
   instructions of a possible ~2,560 and ARM 40 of ~1,280. The same measurement on
-  ARBI yields 1,802 — roughly a 70% density against GRBI's ~5%.
+  ARBI yields 1,802 - roughly a 70% density against GRBI's ~5%.
 - Entropy is 5.84 overall and ranges from 0.02 to 6.86 across 128 KiB blocks,
   with a zero-filled tail from `0x260000`. That rules out encryption or whole-image
   compression; it is plain content for a different instruction set, mixed with
@@ -244,11 +244,11 @@ That means instructions are **16-bit granular**, with the opcode field in the
 high byte of each little-endian halfword. The dominant families are `0xe1`,
 `0x60`, `0x30`, `0xe4`, `0xe6`, `0x0c`, `0x32`, `0x18`, `0xd1` and `0xe3`, and
 the most common individual halfwords after `0x0000`/`0xffff` are `0xe148`,
-`0xe108`, `0xe149`, `0xe109`, `0xe180` — a tight cluster differing in low bits,
+`0xe108`, `0xe149`, `0xe109`, `0xe180` - a tight cluster differing in low bits,
 which is what one opcode with a small register or immediate field looks like.
 
-This refutes any fixed 32-bit encoding with a per-word parallel bit — the TI C6x
-family shape — which would show a period-4 signature and an LSB skew. Neither is
+This refutes any fixed 32-bit encoding with a per-word parallel bit - the TI C6x
+family shape - which would show a period-4 signature and an LSB skew. Neither is
 present.
 
 An ARCompact-style mixed 16/32-bit hypothesis was tested and **not confirmed**.

@@ -1,4 +1,4 @@
-# Read-Only Physical Validation — Result (Phase 1)
+# Read-Only Physical Validation - Result (Phase 1)
 
 Date: 2026-08-16. Target: TP-Link M7000(EU) v3.20, firmware 3.0.2 Build 241129 Rel.3n.
 Specification: [readonly-validation-plan.md](readonly-validation-plan.md).
@@ -20,8 +20,8 @@ installed.** No setter was issued and no state was intentionally changed.
 ### Why observation had to happen in-page
 
 The plan assumed responses could be read at the network layer. They cannot. After
-login the frontend wraps every RPC in TP-Link's `{"data":…,"sign":…}` envelope —
-AES-encrypted with a session key and RSA-signed — so bodies are opaque on the wire.
+login the frontend wraps every RPC in TP-Link's `{"data":…,"sign":…}` envelope,
+AES-encrypted with a session key and RSA-signed - so bodies are opaque on the wire.
 Only the first two pre-auth calls are plain base64.
 
 Observation therefore happened where the stock frontend itself decrypts: **inside the
@@ -64,7 +64,7 @@ plus roughly eight capability/feature-flag getters (`cloud`, `macFilters`,
 
 | # | Prediction | Observation | Result | Confidence |
 | --- | --- | --- | --- | --- |
-| P1 | `status:0` schema matches the statically recovered model | Root keys exactly `result, factoryDefault, battery, connectedDevices, deviceInfo, loginMode, message, wan, wlan` — identical to `live-rpc-001` | **Confirmed** | high |
+| P1 | `status:0` schema matches the statically recovered model | Root keys exactly `result, factoryDefault, battery, connectedDevices, deviceInfo, loginMode, message, wan, wlan` - identical to `live-rpc-001` | **Confirmed** | high |
 | P2 | `wan:0` carries connection/data/roaming state, preferred and selected network modes, ISP metadata and a profile list | All present: `connectStatus, dataSwitchStatus, roamingEnabled, networkPreferredMode, networkSelectionMode, ispVersion, selectedIspName, profileSettings{activeProfile, defaultProfile, maxProfileNum, list[]}, cardType` | **Confirmed** | high |
 | P3 | Record 78 → normalized signal level 0–4 | `signalStrength = 0` | **Consistent** (in range; idle device cannot exercise the upper range) | medium |
 | P4 | Record 79 → backhaul enum 0–4 | `connectStatus = 1` (disconnected) | **Consistent** (in range) | medium |
@@ -75,9 +75,9 @@ plus roughly eight capability/feature-flag getters (`cloud`, `macFilters`,
 | P9 | Cross-getter consistency: the same record projected into two getters agrees | `connectStatus = 1` in both `status:0` and `wan:0` | **Confirmed** | high |
 | P10 | `wan:11` exposes a derived failure reason | `callFailReason = 0`, `result = 0` | **Confirmed** structurally | high |
 | P11 | Repeated reads return a stable projection | 6 like-for-like `status:0` samples across the run: **0 changed value paths, 18 stable** | **Consistent** | medium |
-| P12 | Numeric PLMN is decimal-only (BCD model) | No numeric PLMN was exposed — no SIM | **Not exercised** | — |
-| P13 | Current-operator structure (`<mode>`, `<format>`, long/short name, AcT) | No current operator — no SIM | **Not exercised** | — |
-| P14 | Record 84 workflow state (`networkSelectionStatus`) | `wan:10` never issued by any page exercised in this pass | **Not exercised** — superseded by [hardware-validation-002.md](hardware-validation-002.md), where the Network Settings page does issue it and it returns state 0 (idle) | — |
+| P12 | Numeric PLMN is decimal-only (BCD model) | No numeric PLMN was exposed - no SIM | **Not exercised** | - |
+| P13 | Current-operator structure (`<mode>`, `<format>`, long/short name, AcT) | No current operator - no SIM | **Not exercised** | - |
+| P14 | Record 84 workflow state (`networkSelectionStatus`) | `wan:10` never issued by any page exercised in this pass | **Not exercised** - superseded by [hardware-validation-002.md](hardware-validation-002.md), where the Network Settings page does issue it and it returns state 0 (idle) | - |
 
 ### The core question: cached projection vs fresh modem query
 
@@ -88,7 +88,7 @@ reason to abandon it.
 It is not proof, and the plan anticipated this. With an idle, unregistered modem, a
 cached projection and a fresh query would both return the same constant values, so
 the observation cannot discriminate between them. The load-bearing evidence remains
-the static call graph — none of the eight `GetAllStatus` component getters constructs
+the static call graph - none of the eight `GetAllStatus` component getters constructs
 a `CMobileEvent`. Timing was not used as evidence, per the specification.
 
 **The cached/shared-state model survives validation. It was not independently
@@ -103,7 +103,7 @@ Every sample showed `imsi` empty (length 0), `simNumber` empty, `registerStatus 
 Confirmed with the operator: the device has no SIM in it.
 
 This is a limitation on scope, not a contradiction. It removes P12–P14 from reach and
-it means P3–P6 were observed only at their idle values — the enums were shown to be
+it means P3–P6 were observed only at their idle values - the enums were shown to be
 *in range*, not to span their range.
 
 ## 6. Falsification checks
@@ -146,7 +146,7 @@ hard-redacted before schema extraction.
 
 One sanitizer defect was found and fixed mid-run: a bare `sign` pattern matched
 **signal**Strength and redacted a prediction field. The pattern was anchored and the
-sample retaken. No sensitive value was exposed by the defect — it was over-redaction,
+sample retaken. No sensitive value was exposed by the defect - it was over-redaction,
 not under-redaction.
 
 Raw captures live under `emulation/work/`, which is gitignored. Only this sanitized

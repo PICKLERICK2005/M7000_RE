@@ -19,7 +19,7 @@ Observed evidence:
 - `libmarvellril.so` contains RIL request handlers for device and subscriber reads, `/tmp/atcmd`, and a high-speed serial endpoint. The underlying AT service exposes ICCID query vocabulary. No live command was sent.
 - `/tmp/atcmd` is an `AF_UNIX` stream distinct from the mobile event datagram socket. `mobile` writes carriage-return-terminated ASCII AT commands and parses line-oriented final results. The fail-closed sandbox stub and framing evidence are recorded in [`atcmd-ipc.json`](atcmd-ipc.json).
 
-The composite `status:0` model therefore uses `libmobile` as one high-level backend abstraction, but that library itself combines shared data-management records and an asynchronous command/event path. `rpmServer` adds system, WLAN, IP, battery, storage, client, and message data. It is not justified to claim every status field—or even every modem field—originates in `GetAllStatus`.
+The composite `status:0` model therefore uses `libmobile` as one high-level backend abstraction, but that library itself combines shared data-management records and an asynchronous command/event path. `rpmServer` adds system, WLAN, IP, battery, storage, client, and message data. It is not justified to claim every status field - or even every modem field - originates in `GetAllStatus`.
 
 The sanitized live getter pass adds three narrower confirmations. `wan:10`
 returns a `networkSelectionStatus` scalar and corresponds structurally to the

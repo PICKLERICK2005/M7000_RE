@@ -17,12 +17,12 @@ mode, authenticate to the web UI, or write to the router.
 
 ## State observations
 
-### State A — USB disconnected
+### State A - USB disconnected
 
 - No present COM-port or modem-class devices.
 - Existing USB and network devices were retained as the comparison baseline.
 
-### State B — router off, then USB connected
+### State B - router off, then USB connected
 
 - Windows played two USB sounds.
 - All router LEDs illuminated briefly, after which the router entered charging
@@ -38,7 +38,7 @@ mode, authenticate to the web UI, or write to the router.
 - No endpoint was opened and no payload was sent. Their functions remain
   unclassified.
 
-### State C — router powered on with USB connected
+### State C - router powered on with USB connected
 
 - The router completed a normal boot while USB remained connected.
 - The operator reported that normal boot visibly completed before the host-side
@@ -70,7 +70,7 @@ External device-ID material associates `2ECC:3001` with ASR/Quectel download
 tooling. Because that evidence is generic and no protocol interaction occurred,
 an early download/ROM personality remains a hypothesis rather than a finding.
 
-### State D — connect USB after normal boot
+### State D - connect USB after normal boot
 
 Not performed. States B and C already distinguish charging-only settled behavior
 from the powered-on RNDIS function, so another physical cycle was not justified.

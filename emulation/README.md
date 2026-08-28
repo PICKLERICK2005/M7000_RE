@@ -25,7 +25,7 @@ The representative BusyBox and `rpmServer` executables are ELF32 ARM little-endi
 
 ## Real hook path
 
-Tests execute `/etc/rc.d/S99execute_debug_shell boot` inside the guest namespace. That symlink reaches the vendor `etc/init.d/execute_debug_shell`, whose shebang delegates to the vendor `/etc/rc.common`. This is the normal late-boot service path—not a direct call to the fixture.
+Tests execute `/etc/rc.d/S99execute_debug_shell boot` inside the guest namespace. That symlink reaches the vendor `etc/init.d/execute_debug_shell`, whose shebang delegates to the vendor `/etc/rc.common`. This is the normal late-boot service path - not a direct call to the fixture.
 
 The fixtures cover absence, empty content, explicit success, diagnostic-only commands, failure, synchronous blocking, and missing execute permission. Per-case stdout/stderr and QEMU syscall traces are written beneath `emulation/traces/`; generated traces are ignored, while `debug-hook-summary.md` records stable observations.
 

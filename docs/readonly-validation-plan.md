@@ -26,8 +26,8 @@ removal.
 ## 2. Why the getters were chosen
 
 `GET_BAND_MODE` (DEV 53) and `GET_CURRENT_OPERATOR_INFO` (MM 32) are the reference
-targets because both have a **zero-byte request payload** — confirmed from the CI size
-tables — so neither can carry a value that changes state, and both have fully recovered
+targets because both have a **zero-byte request payload** - confirmed from the CI size
+tables - so neither can carry a value that changes state, and both have fully recovered
 confirmation layouts to check answers against.
 
 They are *not* invoked directly. They are reached only as the incidental consequence of
@@ -85,7 +85,7 @@ browser GET
 ```
 
 The static evidence for that is direct: none of the eight `GetAllStatus` component
-getters constructs a `CMobileEvent`, and the refresh model is event-driven — the modem
+getters constructs a `CMobileEvent`, and the refresh model is event-driven - the modem
 pushes, the web read does not pull.
 
 The CI getters appear on a different, *asynchronous* path that the daemon runs on its
@@ -122,15 +122,15 @@ The phase succeeds if all of the following hold:
    event-driven (signal level, registration state). Those may move; policy fields may
    not.
 3. **Enum conformance.** Preferred network type reads as one of the four UI policy
-   values; selection mode reads as automatic or manual only — consistent with record 76
+   values; selection mode reads as automatic or manual only - consistent with record 76
    being booleanised by the readback writer at `0x4a350`.
 4. **Operator plausibility.** The displayed operator is self-consistent across pages,
-   and if a numeric PLMN is shown anywhere it is a valid MCC/MNC — which, given the BCD
+   and if a numeric PLMN is shown anywhere it is a valid MCC/MNC - which, given the BCD
    encoding, means it must contain no hex digits a–f.
 5. **No latency signature.** R4 after five minutes idle returns without a visible delay
    attributable to a modem round trip, supporting the "read is a projection" prediction.
 
-## 7. Failure criteria — stop immediately
+## 7. Failure criteria - stop immediately
 
 - Any policy field differs from pre-state.
 - Selection mode reads a value other than automatic or manual.
@@ -157,7 +157,7 @@ Nothing leaves the device unsanitized. Before any capture is committed:
 - Run the repository's existing sensitive-pattern scan over any new capture before it is
   staged, and treat a hit as blocking.
 
-Captures go under `captures/` with a note stating which fields were redacted and why —
+Captures go under `captures/` with a note stating which fields were redacted and why,
 never a raw dump "to be cleaned later".
 
 ## 9. What this phase does not establish

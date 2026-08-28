@@ -2,7 +2,7 @@
 
 ## Objective and boundary
 
-The current phase diverts from—but does not abandon—live read-only RPC probing. Its milestone is execution of the exact 3.0.2 firmware path that checks and launches `/misc/m7000_debug.sh`, using only synthetic storage and intercepted destructive operations. The physical router, USB interface, Debug Log, CATStudio, and live `/misc` remain out of scope.
+The current phase diverts from - but does not abandon - live read-only RPC probing. Its milestone is execution of the exact 3.0.2 firmware path that checks and launches `/misc/m7000_debug.sh`, using only synthetic storage and intercepted destructive operations. The physical router, USB interface, Debug Log, CATStudio, and live `/misc` remain out of scope.
 
 ## Static execution model
 

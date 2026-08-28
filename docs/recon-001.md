@@ -1,4 +1,4 @@
-# Recon 001 — Physical Identification
+# Recon 001 - Physical Identification
 
 Date: 2026-08-14
 

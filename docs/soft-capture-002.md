@@ -20,7 +20,7 @@ The UI uses a proprietary module/action RPC protocol over HTTP `POST` requests:
 
 - `cgi-bin/auth_cgi` handles the `authenticator` module.
 - `cgi-bin/web_cgi` handles all other modules.
-- Calls contain a module name, numeric action, optional parameters, and—when authenticated—a token.
+- Calls contain a module name, numeric action, optional parameters, and - when authenticated - a token.
 - Public pre-authentication calls are Base64-wrapped JSON.
 - The device advertises `supportGDPR=true`. In that mode the frontend establishes RSA-derived session material and AES-wraps protected payloads. This describes the frontend structure, not a cryptographic audit.
 - `tpweb_token` is the observed session-cookie name. No value was retained.

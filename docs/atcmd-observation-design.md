@@ -1,4 +1,4 @@
-# AT Command Boundary — Passive Observation Design (Recon Result)
+# AT Command Boundary - Passive Observation Design (Recon Result)
 
 Date: 2026-08-16. Target: TP-Link M7000(EU) v3.20, firmware 3.0.2 Build 241129 Rel.3n.
 Predecessors: [hardware-validation-002.md](hardware-validation-002.md),
@@ -25,7 +25,7 @@ The AP-side translation for the two policies of interest, taken from
 | 3G Only | **1** | **`AT*BAND=1`** |
 | 4G Only | 2 | `AT*BAND=5` |
 | 4G Preferred | **3** | **`AT*BAND=11`** |
-| out of range | — | `AT*BAND=99` |
+| out of range | - | `AT*BAND=99` |
 
 So the two commands a live observer would expect are `AT*BAND=1` (forward, → 3G Only) and
 `AT*BAND=11` (restore, → 4G Preferred). This matches the mapping named in the task.
@@ -42,7 +42,7 @@ asymmetry: policy values 0, 2, 3 round-trip through `AT*BAND` (sent 0/5/11, pars
 maps to -1.** The set and get value sets overlap but are not identical. A live capture
 should therefore watch specifically for whether `AT*BAND=1` returns `OK` or an error/CME,
 and whether the frontend still reports success despite an unrecognised readback. This is a
-concrete falsifiable question — but it cannot be answered without an observer.
+concrete falsifiable question - but it cannot be answered without an observer.
 
 ## 2. `/tmp/atcmd` protocol, reverified
 
@@ -55,7 +55,7 @@ From [analysis/atcmd-ipc.json](../analysis/atcmd-ipc.json):
 - response: raw stream reads, line-oriented; confirmed final tokens `OK`, `ERROR`,
   `+CME ERROR`, `+CMS ERROR`, with numeric CME/CMS mapped to internal codes.
 - distinct from `/tmp/mobile_msg_server.sock`, which is an `AF_UNIX`/`SOCK_DGRAM` event
-  channel — must not be confused with the AT stream.
+  channel - must not be confused with the AT stream.
 
 Unresolved (static): the atcmdsrv-side per-client socket name selection; unsolicited
 result-code routing; and **which process actually serves `/tmp/atcmd` in the running
@@ -87,7 +87,7 @@ Establishing what we legitimately have, without exploiting anything:
   network login service to authorize into.
 - The stock web UI offers **no device-side command execution** and no raw log export that
   contains AT traffic (`log:2` builds `/cache/savelog.tar.gz` from system/config/network
-  logs — not the AT socket).
+  logs - not the AT socket).
 - The only paths that would *yield* execution are all out of scope for this phase and/or
   invasive: creating/enabling `/misc/m7000_debug.sh` (a persistent factory-storage hook),
   USB ADB (only present in early-boot production/ramdump modes, i.e. Fastboot-class access),
@@ -101,14 +101,14 @@ the finding, not a problem to route around by manufacturing access.
 
 | Method | Payload visible? | Needs shell? | Needs root? | Alters command path? | Persistent state change? | Timing perturbation | Sensitive-data risk | Usable now? | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Host tcpdump / Wireshark / DevTools | **No** (AF_UNIX invisible to IP) | no | no | no | no | none | low | n/a | Cannot see it — physics, not access |
+| Host tcpdump / Wireshark / DevTools | **No** (AF_UNIX invisible to IP) | no | no | no | no | none | low | n/a | Cannot see it - physics, not access |
 | `/proc/net/unix`, `ss -x` | Metadata only | yes | partial | no | no | negligible | low | **no shell** | Would give ownership, never bytes |
 | Stock `log:2` savelog export | No AT socket content | no (stock RPC) | n/a | no | writes `/cache` tarball | none | medium | yes, but useless here | Does not contain `/tmp/atcmd` |
-| `log:4` mdLog collector | CP **diag** stream, not the AT AF_UNIX socket | no (stock RPC) | n/a | no (separate diag tap) | **yes** — starts collectors | some | **high** (raw modem/SIM diag) | **No** — `start_mdlog`/`stop_mdlog`/`diag_mdlog` are **absent from the shipped SquashFS** | Wrong layer, invasive, non-functional as shipped |
-| CATStudio (`use_flash_to_save_CATStudio_log.sh`) | CP diag stream | no | n/a | no | **reboots; can `ubiformat` swap_flash MTD** | reboot | high | forbidden | Materially destructive — excluded |
+| `log:4` mdLog collector | CP **diag** stream, not the AT AF_UNIX socket | no (stock RPC) | n/a | no (separate diag tap) | **yes** - starts collectors | some | **high** (raw modem/SIM diag) | **No** - `start_mdlog`/`stop_mdlog`/`diag_mdlog` are **absent from the shipped SquashFS** | Wrong layer, invasive, non-functional as shipped |
+| CATStudio (`use_flash_to_save_CATStudio_log.sh`) | CP diag stream | no | n/a | no | **reboots; can `ubiformat` swap_flash MTD** | reboot | high | forbidden | Materially destructive - excluded |
 | tracefs / ftrace / kprobe on the unix-socket syscalls | Yes (Tier 1 ideal) | yes | yes | no | transient if done right | low–moderate | high (sees all AT) | **no shell/root** | Best *technical* fit, but unreachable without device execution |
 | `strace -p` / ptrace on `mobile` or `atcmdsrv` (Tier 2) | Yes | yes | yes | no endpoints, but **stops/resumes threads** | no | **non-trivial** (thread stop/resume, timing) | high | **no shell** | Not passive; would need design + explicit authorization even if a shell existed |
-| socat/proxy, socket replacement, LD_PRELOAD, binary patch (Tier 3) | Yes | yes | yes | **YES — becomes the path** | yes | high | high | forbidden | Interposition, not observation — excluded by definition |
+| socat/proxy, socket replacement, LD_PRELOAD, binary patch (Tier 3) | Yes | yes | yes | **YES - becomes the path** | yes | high | high | forbidden | Interposition, not observation - excluded by definition |
 
 ### Why the two "stock" facilities do not rescue this
 
@@ -122,13 +122,13 @@ axis that matters:
    `/usr/bin/stop_mdlog`, and `pgrep diag_mdlog`, but those helpers and `diag_mdlog` are
    **not present in the SquashFS** ([analysis/debug-hook.md](../analysis/debug-hook.md)).
    The toggle expects a dynamically supplied or persistent component we would have to
-   introduce — which is itself out of scope.
+   introduce - which is itself out of scope.
 3. **State-changing and coupled to disabled storage.** `log:4` starts/stops collectors;
    its useful output path is coupled to SD-card storage that the M7000 reports disabled
    ([docs/soft-capture-002.md](soft-capture-002.md)). CATStudio reboots and can format an
    MTD partition.
 4. **Sensitive-data firehose.** Even if it worked, it would produce a raw modem/SIM diag
-   stream, not an `AT*BAND`-only view — the opposite of the capture-time minimization this
+   stream, not an `AT*BAND`-only view - the opposite of the capture-time minimization this
    work requires.
 
 ## 6. Gate decision
@@ -149,14 +149,14 @@ If and only if a legitimate, authorized device-side execution channel is later e
 (the access question is separate and is **not** settled by this note), the least-invasive
 technically-sound design would be, in order:
 
-1. **Tier 1 — transient kernel tracing that watches the existing socket without touching
+1. **Tier 1 - transient kernel tracing that watches the existing socket without touching
    endpoints or bytes.** Attach a kprobe/tracepoint to the `unix_stream_sendmsg` /
    `unix_stream_recvmsg` path (or the relevant `write`/`read` for the `mobile` FD bound to
    `/tmp/atcmd`), filtered in-kernel to records whose payload begins `AT*BAND`. Emit only:
    timestamp, direction, the `AT*BAND=<mode>` verb+value, and the final result class.
    Never persist the general AT stream. Enable for the single transition window, then
    disable; nothing persistent, no endpoint modified, no byte inserted.
-2. **Tier 2 — `strace -p`/ptrace on the confirmed server (or `mobile`)** only if kernel
+2. **Tier 2 - `strace -p`/ptrace on the confirmed server (or `mobile`)** only if kernel
    tracing is unavailable. This is **not** passive: ptrace stops and resumes threads and
    perturbs timing. It would need its own explicit authorization, an exact syscall/FD
    filter (`trace=write,read` on the `/tmp/atcmd` FD), and an estimate of perturbation
@@ -190,9 +190,9 @@ derived.
 ## 10. Recommendation
 
 The `/tmp/atcmd` boundary cannot be closed on hardware with the access we have, and it
-should not be forced. The blocking question is not a capture technique — Tier 1 kernel
-tracing is a sound design — but **legitimate device-side execution**, which is a separate
+should not be forced. The blocking question is not a capture technique - Tier 1 kernel
+tracing is a sound design - but **legitimate device-side execution**, which is a separate
 authorization with its own risk profile (it necessarily involves one of the currently
 out-of-scope access paths). That decision belongs to the operator. Until it is made, the
-AT-command boundary stays static inference, and the `/dev/msocket` / CI phase — which sits
-one layer deeper still — is not reachable and must not be started.
+AT-command boundary stays static inference, and the `/dev/msocket` / CI phase - which sits
+one layer deeper still - is not reachable and must not be started.
